@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+    /* Colors */
+    --color-primary: #2C3E50;
+    --color-accent: #D4A5A5;
+    --color-background-light: #F4F1EA;
+    --color-background-dark: #1A1A1A;
+    --color-text-main: #1A1A1A;
+
+    /* Font family */
+    --font-family-display: "Inter", sans-serif;
+
+    /* Border radius */
+    --radius-DEFAULT: 0.125rem;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.5rem;
+    --radius-full: 0.75rem;
+}
+
+/* Dark mode via class strategy */
+@variant dark (&:where(.dark, .dark *));
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
