@@ -7,7 +7,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-12">
                     <div className="flex items-center gap-2 text-primary dark:text-accent">
                         <span className="material-symbols-outlined text-3xl" data-icon="auto_stories">auto_stories</span>
-                        <h1 className="text-xl font-bold tracking-tight">Lumina Books</h1>
+                        <h1 className="text-xl font-bold tracking-tight">Sunset Books</h1>
                     </div>
                     <nav className="hidden md:flex items-center gap-8">
                         <a className="text-sm font-medium hover:text-accent transition-colors" href="#">Explore</a>

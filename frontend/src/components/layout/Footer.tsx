@@ -6,7 +6,7 @@ export default function Footer() {
                     <div className="flex items-center gap-2 text-primary dark:text-accent">
                         <span className="material-symbols-outlined text-2xl"
                             data-icon="auto_stories">auto_stories</span>
-                        <h1 className="text-lg font-bold tracking-tight">Lumina Books</h1>
+                        <h1 className="text-lg font-bold tracking-tight">Sunset Books</h1>
                     </div>
                     <p className="text-sm leading-relaxed text-primary/60">
                         Bringing the world's greatest stories to your digital doorstep. Experience the premium way
@@ -55,7 +55,7 @@ export default function Footer() {
                 </div>
             </div>
             <div className="mt-16 border-t border-primary/5 pt-8 text-center text-xs text-primary/40">
-                © 2024 Lumina Books. All rights reserved. Designed for the modern reader.
+                © 2024 Sunset Books. All rights reserved. Designed for the modern reader.
             </div>
         </div>
     </footer>)
