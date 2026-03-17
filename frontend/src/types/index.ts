@@ -11,4 +11,14 @@ export interface BookResponse {
     createdAt: Date
     updatedAt: Date
 }
+export interface RegisterRequest {
+    username?: string;
+    email: string;
+    password: string;
+}
+
+export interface AuthResponse {
+    success: boolean;
+    message: string;
+}
 
