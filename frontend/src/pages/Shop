@@ -1,0 +1,247 @@
+import React from "react";
+
+const books = [
+  {
+    title: "The Silent Echo",
+    author: "Eleanor Vance",
+    price: 12.99,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f",
+  },
+  {
+    title: "Midnight in Venice",
+    author: "Julian Barnes",
+    price: 15.5,
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+  },
+  {
+    title: "Beyond the Horizon",
+    author: "Sarah Jenkins",
+    price: 10.99,
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+  },
+  {
+    title: "The Last Alchemist",
+    author: "Marcus Thorne",
+    price: 14.0,
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+  },
+];
+
+function BookCard({ book }) {
+  return (
+    <div>
+      <div className="rounded-lg overflow-hidden bg-white shadow-sm">
+        <img src={book.image} className="w-full h-64 object-cover" />
+      </div>
+
+      <h4 className="mt-3 text-sm font-semibold text-[#2C3E50]">{book.title}</h4>
+      <p className="text-xs text-gray-500">{book.author}</p>
+
+      <div className="flex justify-between items-center mt-1">
+        <span className="text-xs text-[#D4A5A5]">★ {book.rating}</span>
+        <span className="text-sm font-bold text-[#2C3E50]">${book.price}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <div className="bg-[#F5F3EF] min-h-screen text-[#1A1A1A]">
+
+      {/* HEADER */}
+      <header className="flex justify-between items-center px-8 py-4 border-b bg-[#F5F3EF]">
+        <div className="flex items-center gap-8">
+          <h1 className="font-bold text-[#2C3E50]">📚 Lumina Books</h1>
+          <nav className="flex gap-6 text-sm">
+            <a>Explore</a>
+            <a>My Library</a>
+            <a className="text-[#D4A5A5] border-b-2 border-[#D4A5A5]">Shop</a>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-3 w-[500px]">
+          <input className="flex-1 bg-gray-200 px-4 py-2 rounded" placeholder="Search titles, authors, ISBN..." />
+          <button className="border px-3 py-1 text-sm">Advanced Search</button>
+          <button>Login</button>
+          <button className="bg-[#2C3E50] text-white px-4 py-1 rounded">Sign Up</button>
+        </div>
+      </header>
+
+      <div className="max-w-[1400px] mx-auto flex gap-8 px-8 py-6">
+
+        {/* SIDEBAR */}
+        <aside className="w-64">
+          <div className="flex justify-between mb-4">
+            <h3 className="font-semibold">Filters</h3>
+            <button className="text-sm text-[#D4A5A5]">Clear all</button>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-xs text-gray-400 mb-2">GENRE</h4>
+            {[
+              ["Fiction",1240],
+              ["Non-Fiction",850],
+              ["Mystery & Thriller",430],
+              ["Sci-Fi & Fantasy",210]
+            ].map(([g,c],i)=>(
+              <div key={i} className="flex justify-between text-sm mb-2">
+                <label className="flex gap-2">
+                  <input type="checkbox" defaultChecked={i===0}/>
+                  {g}
+                </label>
+                <span className="text-gray-400 text-xs">{c}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-xs text-gray-400 mb-2">PRICE RANGE</h4>
+            <input type="range" className="w-full" />
+            <div className="flex gap-2 mt-2">
+              <input value="$ 0" readOnly className="w-1/2 border px-2 py-1 text-xs"/>
+              <input value="$ 50" readOnly className="w-1/2 border px-2 py-1 text-xs"/>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-xs text-gray-400 mb-2">AVERAGE RATING</h4>
+            <div className="flex items-center gap-2 text-sm">
+              <input type="radio"/>
+              <span className="text-[#D4A5A5]">★★★★★</span>
+              <span className="text-gray-400 text-xs">& Up</span>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-xs text-gray-400 mb-2">FORMAT</h4>
+            <div className="flex flex-wrap gap-2">
+              {['Hardcover','Paperback','E-book','Audiobook'].map((f,i)=>(
+                <span key={i} className={`px-3 py-1 rounded-full text-xs border ${i===1?'bg-[#2C3E50] text-white':''}`}>
+                  {f}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-xs text-gray-400 mb-2">PUBLICATION YEAR</h4>
+            <select className="w-full border px-2 py-2 text-sm">
+              <option>All years</option>
+            </select>
+          </div>
+
+          <div>
+            <h4 className="text-xs text-gray-400 mb-2">PUBLISHER</h4>
+            <input className="w-full border px-2 py-2 text-sm mb-2" placeholder="Search publishers..."/>
+            {['Penguin Random House','HarperCollins','Simon & Schuster','Hachette Book Group'].map((p,i)=>(
+              <label key={i} className="flex gap-2 text-sm mb-1">
+                <input type="checkbox"/> {p}
+              </label>
+            ))}
+          </div>
+        </aside>
+
+        {/* MAIN */}
+        <main className="flex-1">
+
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-[#2C3E50]">Marketplace</h2>
+              <p className="text-xs text-gray-400">Showing 1,240 titles in Fiction</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Sort by:</span>
+              <select className="border px-2 py-1 text-sm">
+                <option>Most Popular</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-5 gap-6">
+            {books.map((b,i)=>(
+              <BookCard key={i} book={b}/>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-2 mt-10">
+            <button className="w-10 h-10 border">1</button>
+            <button className="w-10 h-10 border">2</button>
+            <button className="w-10 h-10 border">3</button>
+          </div>
+
+        </main>
+      </div>
+
+      {/* FOOTER */}
+      <footer className="bg-[#F5F3EF] border-t mt-16 pt-12 pb-6 text-sm text-gray-500">
+        <div className="max-w-[1400px] mx-auto px-8 grid grid-cols-4 gap-10">
+
+          {/* BRAND */}
+          <div>
+            <div className="flex items-center gap-2 text-[#2C3E50] font-bold mb-3">
+              <span>📚</span>
+              Lumina Books
+            </div>
+            <p className="text-xs leading-5">
+              The ultimate destination for book lovers and collectors. Browse, discover, and build your perfect library.
+            </p>
+
+            <div className="flex gap-4 mt-4 text-lg">
+              <span>🌐</span>
+              <span>✉️</span>
+              <span>🔗</span>
+            </div>
+          </div>
+
+          {/* MARKETPLACE */}
+          <div>
+            <h4 className="font-semibold text-[#2C3E50] mb-3">Marketplace</h4>
+            <div className="space-y-2 text-sm">
+              <p>Best Sellers</p>
+              <p>New Releases</p>
+              <p>Gift Cards</p>
+              <p>Book Lists</p>
+            </div>
+          </div>
+
+          {/* ACCOUNT */}
+          <div>
+            <h4 className="font-semibold text-[#2C3E50] mb-3">Account</h4>
+            <div className="space-y-2 text-sm">
+              <p>My Profile</p>
+              <p>Order History</p>
+              <p>Wishlist</p>
+              <p>Settings</p>
+            </div>
+          </div>
+
+          {/* NEWSLETTER */}
+          <div>
+            <h4 className="font-semibold text-[#2C3E50] mb-3">Newsletter</h4>
+            <p className="text-xs mb-3">Get the latest on book releases and sales.</p>
+            <div className="flex">
+              <input
+                className="flex-1 border px-3 py-2 text-sm rounded-l-md"
+                placeholder="Your email"
+              />
+              <button className="bg-[#2C3E50] text-white px-4 rounded-r-md">
+                Join
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="text-center text-xs text-gray-400 mt-10">
+          © 2024 Lumina Books. Marketplace for modern readers.
+        </div>
+      </footer>
+    </div>
+  );
+}
