@@ -185,7 +185,7 @@ export default function ShopPage() {
           {/* BRAND */}
           <div>
             <div className="flex items-center gap-2 text-[#2C3E50] font-bold mb-3">
-              <span>📚</span>
+              <span>📖</span>
               Lumina Books
             </div>
             <p className="text-xs leading-5">
