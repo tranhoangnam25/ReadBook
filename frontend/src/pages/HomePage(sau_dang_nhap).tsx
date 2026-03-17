@@ -38,8 +38,6 @@ export default function HomePage() {
 
         <div className="flex items-center gap-4">
 
-          🔔
-
           <img
             src="https://i.pravatar.cc/100"
             className="w-9 h-9 rounded-full"

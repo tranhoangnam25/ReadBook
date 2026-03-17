@@ -1,4 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
+import { bookService } from "../services/bookService";
+import type { BookResponse } from "../types";
+import BookCard from "../components/common/BookCard";
+
 export default function HomePage() {
+    const {
+        data: bestRatings,
+        isLoading: loadingBestRatings
+    } = useQuery({
+        queryKey: ["bestsellers"],
+        queryFn: () => bookService.getBestRatings(4),
+    });
     return (
         <main className="mx-auto w-full max-w-7xl px-6 lg:px-20">
             <section className="py-16 lg:py-24">
@@ -67,121 +79,25 @@ export default function HomePage() {
                     </button>
                 </div>
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="group flex flex-col gap-4">
-                        <div
-                            className="relative aspect-[3/4] overflow-hidden rounded-xl bg-primary/5 shadow-md transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-                            <img alt="Book cover: The Silent Echo" className="h-full w-full object-cover"
-                                data-alt="Minimalist book cover featuring a mountain landscape"
-                                src="https://down-vn.img.susercontent.com/file/vn-11134258-81ztc-mloogytsxbew37https://down-vn.img.susercontent.com/file/sg-11134201-23020-63mhka3lmdnv03.webp" />
-                            <div
-                                className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
-                                $12.99</div>
-                        </div>
-                        <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-primary">Hạ đỏ</h4>
-                            <p className="text-sm text-primary/60">Nguyễn Nhật Ánh</p>
-                            <div className="flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star_half</span>
-                                <span className="ml-1 text-xs font-semibold text-primary/40">4.8</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="group flex flex-col gap-4">
-                        <div
-                            className="relative aspect-[3/4] overflow-hidden rounded-xl bg-primary/5 shadow-md transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-                            <img alt="Book cover: Midnight in Venice" className="h-full w-full object-cover"
-                                data-alt="Book cover with architectural sketches of Venice"
-                                src="https://nhasachbaoanh.com/wp-content/uploads/2022/06/tu-duy-nhanh-va-cham-tac-gia-daniel-kahneman-1.jpg" />
-                            <div
-                                className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
-                                $15.50</div>
-                        </div>
-                        <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-primary">Tư Duy Nhanh Và Chậm</h4>
-                            <p className="text-sm text-primary/60">Daniel Kahneman</p>
-                            <div className="flex items-center gap-1">
-
-                                
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent">star</span>
-                                <span className="ml-1 text-xs font-semibold text-primary/40">4.5</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="group flex flex-col gap-4">
-                        <div
-                            className="relative aspect-[3/4] overflow-hidden rounded-xl bg-primary/5 shadow-md transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-                            <img alt="Book cover: Beyond the Horizon" className="h-full w-full object-cover"
-                                data-alt="Abstract ocean wave book cover"
-                                src="https://m.media-amazon.com/images/I/71ajUjqd3vL._SY425_.jpg" />
-                            <div
-                                className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
-                                $10.99</div>
-                        </div>
-                        <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-primary">Java Concurrency in Practice</h4>
-                            <p className="text-sm text-primary/60"> Brian Goetz</p>
-                            <div className="flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="ml-1 text-xs font-semibold text-primary/40">4.9</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="group flex flex-col gap-4">
-                        <div
-                            className="relative aspect-[3/4] overflow-hidden rounded-xl bg-primary/5 shadow-md transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-                            <img alt="Book cover: The Last Alchemist" className="h-full w-full object-cover"
-                                data-alt="Elegant golden geometry on dark book cover"
-                                src="https://m.media-amazon.com/images/I/71stxGw9JgL._SY425_.jpg" />
-                            <div
-                                className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
-                                $14.00</div>
-                        </div>
-                        <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-primary">Clean Architecture</h4>
-                            <p className="text-sm text-primary/60">Robert Martin</p>
-                            <div className="flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="material-symbols-outlined text-sm text-accent"
-                                    style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                <span className="ml-1 text-xs font-semibold text-primary/40">4.7</span>
-                            </div>
-                        </div>
-                    </div>
+                    {loadingBestRatings ? (
+                        // Hiển thị skeleton khi đang tải
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="h-64 rounded-xl bg-primary/10 animate-pulse" />
+                        ))
+                    ) : bestRatings?.length ? (
+                        // BookCard là con TRỰC TIẾP của grid
+                        bestRatings.map((book: BookResponse) => (
+                            <BookCard key={book.id} {...book} />
+                        ))
+                    ) : (
+                        <p className="col-span-full text-center text-primary/40 py-8">
+                            Chưa có sách nào
+                        </p>
+                    )}
                 </div>
+
             </section>
         </main>
     )
 }
+
