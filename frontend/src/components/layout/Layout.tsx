@@ -2,10 +2,14 @@ import { Outlet } from 'react-router-dom'
 import Footer from './Footer'
 import Navbar from './Navbar'
 
-export default function Layout() {
+interface LayoutProps {
+    onOpenRegister: () => void;
+}
+
+export default function Layout({ onOpenRegister }: LayoutProps) {
   return (
     <div className="min-h-screen bg-parchment flex flex-col font-body">
-      <Navbar />
+      <Navbar onOpenRegister={onOpenRegister}/>
       <main className="flex-1">
         <Outlet />
       </main>

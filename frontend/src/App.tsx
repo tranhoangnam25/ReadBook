@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import HomePage from "./pages/HomePage"
 import Layout from './components/layout/Layout'
 import RegisterPage from './pages/registerPage'
+import { useState } from 'react'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,16 +16,20 @@ const queryClient = new QueryClient({
 
 function App() {
 
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Layout onOpenRegister={() => setIsRegisterOpen(true)} />}>
             <Route index element={<HomePage />} />
           </Route>
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        {isRegisterOpen && (
+            <RegisterPage onClose={() => setIsRegisterOpen(false)} />
+        )}
       </BrowserRouter>
     </QueryClientProvider>
   )
