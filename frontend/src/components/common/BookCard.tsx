@@ -4,10 +4,9 @@ import type { BookResponse } from '../../types'
 const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
-        let icon = "   ";
+        let icon = "star";
         if (rating >= i) icon = "star";
         else if (rating >= i - 0.5) icon = "star_half";
-
         stars.push(
             <span
                 key={i}
@@ -17,6 +16,7 @@ const renderStars = (rating: number) => {
                 {icon}
             </span>
         );
+
     }
     return stars;
 };

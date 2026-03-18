@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import HomePage from "./pages/HomePage"
 import Layout from './components/layout/Layout'
+import BookDetail from './pages/BookDetail'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
+            <Route path='/BookDetail' element={<BookDetail />} />
           </Route>
         </Routes>
       </BrowserRouter>
