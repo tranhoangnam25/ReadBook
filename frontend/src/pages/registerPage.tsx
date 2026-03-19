@@ -4,9 +4,10 @@ import axios from 'axios';
 
 interface RegisterProps {
     onClose: () => void;
+    onOpenLogin: () => void;
 }
 
-const RegisterPage: React.FC<RegisterProps> = ({ onClose }) => {
+const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
 
 
     // 1. Khai báo State
@@ -44,6 +45,7 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose }) => {
             });
             alert("Đăng ký thành công!");
             onClose();
+            onOpenLogin();
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Đăng ký thất bại");
@@ -145,9 +147,24 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose }) => {
                                 type="submit"
                             >
                                 <span>{loading ? 'Processing...' : 'Get Started'}</span>
+
                                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
                         </form>
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Already have an account?{' '}
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        onOpenLogin();
+                                    }}
+                                    className="text-accent font-bold hover:underline transition-all"
+                                >
+                                    Login here
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </main>

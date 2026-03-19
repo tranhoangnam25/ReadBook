@@ -1,8 +1,8 @@
-
 interface NavbarProps {
-    onOpenRegister: () => void; // Thêm props này
+    onOpenRegister: () => void;
+    onOpenLogin: () => void;// Thêm props này
 }
-export default function Navbar({ onOpenRegister }: NavbarProps)
+export default function Navbar({ onOpenRegister, onOpenLogin }: NavbarProps)
 {
 
     return (
@@ -33,6 +33,7 @@ export default function Navbar({ onOpenRegister }: NavbarProps)
                     </div>
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={onOpenLogin}
                             className="px-4 py-2 text-sm font-semibold hover:text-accent transition-colors">Login</button>
                         <button
                             onClick={onOpenRegister}

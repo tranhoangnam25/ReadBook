@@ -16,9 +16,19 @@ export interface RegisterRequest {
     email: string;
     password: string;
 }
-
+export interface LoginRequest{
+    email : string;
+    password: string;
+}
 export interface AuthResponse {
+
     success: boolean;
     message: string;
+    token?: string; // THÊM DÒNG NÀY (dấu ? nghĩa là có thể có hoặc không)
+    user?: {
+        id: number;
+        username: string;
+        email: string;
+    };
 }
 
