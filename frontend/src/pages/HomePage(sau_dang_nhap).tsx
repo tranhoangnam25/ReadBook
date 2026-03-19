@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { User, Reading, HistoryItem, Book } from "../types";
 
-// 🔥 BASE URL BACKEND
+//BASE URL BACKEND
 const BASE_URL = "http://localhost:8080";
 
 export default function HomePage() {
@@ -18,7 +18,7 @@ export default function HomePage() {
     fetchRecommend();
   }, []);
 
-  // 👤 USER
+  // USER
   const fetchUser = async () => {
     try {
       const res = await fetch(`${BASE_URL}/api/users/me`);
