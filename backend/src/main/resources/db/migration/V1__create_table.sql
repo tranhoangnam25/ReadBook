@@ -167,6 +167,27 @@ GO
     FOREIGN KEY (chapter_id) REFERENCES Chapters(chapter_id)
 );
 GO
+
+  CREATE TABLE Reader_Setting (
+ 
+    reader_setting_id INT PRIMARY KEY IDENTITY(1,1),
+    
+    user_id INT NOT NULL UNIQUE, 
+    
+    font_family VARCHAR(50) DEFAULT 'Roboto',
+    font_size INT DEFAULT 16,
+    line_height FLOAT DEFAULT 1.5,
+  
+    background_color VARCHAR(20) DEFAULT 'Light', 
+    
+   
+    updated_at DATETIME DEFAULT GETDATE(),
+
+   
+    CONSTRAINT FK_ReaderSetting_Users FOREIGN KEY (user_id) 
+    REFERENCES Users(user_id) ON DELETE CASCADE
+);
+GO
 -- ============================================================
 -- UNIQUE INDEXES
 -- ============================================================
