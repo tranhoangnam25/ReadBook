@@ -1,10 +1,13 @@
 package backend.repository;
 
 import backend.entity.Book;
+import backend.entity.User; // Hoặc Book tùy vào repository của cậu
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.List;
 
