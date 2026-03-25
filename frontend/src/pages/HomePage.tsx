@@ -86,8 +86,8 @@ export default function HomePage() {
                         ))
                     ) : bestRatings?.length ? (
                         // BookCard là con TRỰC TIẾP của grid
-                        bestRatings.map((book: BookResponse) => (
-                            <BookCard key={book.id} {...book} />
+                        bestRatings.map((book: BookResponse) => (<BookCard key={book.id} {...book} />
+                            
                         ))
                     ) : (
                         <p className="col-span-full text-center text-primary/40 py-8">
