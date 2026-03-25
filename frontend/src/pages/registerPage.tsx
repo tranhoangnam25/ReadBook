@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { register } from '../services/authService';
 import axios from 'axios';
 
-const RegisterPage: React.FC = () => {
-    const navigate = useNavigate();
+interface RegisterProps {
+    onClose: () => void;
+    onOpenLogin: () => void;
+}
+
+const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
+
 
     // 1. Khai báo State
     const [formData, setFormData] = useState({
@@ -17,13 +21,13 @@ const RegisterPage: React.FC = () => {
     const [error, setError] = useState('');
 
     // 2. Các hàm xử lý
-    const handleBack = () => navigate(-1);
+    // const handleBack = () => navigate(-1);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
 
@@ -40,7 +44,8 @@ const RegisterPage: React.FC = () => {
                 password: formData.password
             });
             alert("Đăng ký thành công!");
-            navigate('/login');
+            onClose();
+            onOpenLogin();
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Đăng ký thất bại");
@@ -55,17 +60,17 @@ const RegisterPage: React.FC = () => {
     // 3. Xử lý phím Esc để thoát
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') handleBack();
+            if (e.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [onClose]);
 
     return (
         /* Lớp nền mờ (Overlay) */
         <div
             className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
-            onClick={handleBack}
+            onClick={onClose}
         >
             <main
                 className="relative z-30 w-full max-w-md"
@@ -76,7 +81,7 @@ const RegisterPage: React.FC = () => {
                         <div className="text-center mb-8 relative">
                             {/* Nút X đóng Modal */}
                             <button
-                                onClick={handleBack}
+                                onClick={onClose}
                                 className="absolute -top-2 -right-2 text-slate-400 hover:text-primary transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
@@ -142,9 +147,24 @@ const RegisterPage: React.FC = () => {
                                 type="submit"
                             >
                                 <span>{loading ? 'Processing...' : 'Get Started'}</span>
+
                                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
                         </form>
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Already have an account?{' '}
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        onOpenLogin();
+                                    }}
+                                    className="text-accent font-bold hover:underline transition-all"
+                                >
+                                    Login here
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </main>

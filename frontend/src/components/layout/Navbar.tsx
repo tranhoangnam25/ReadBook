@@ -1,5 +1,8 @@
-import { Link } from 'react-router-dom';
-export default function Navbar()
+interface NavbarProps {
+    onOpenRegister: () => void;
+    onOpenLogin: () => void;// Thêm props này
+}
+export default function Navbar({ onOpenRegister, onOpenLogin }: NavbarProps)
 {
 
     return (
@@ -30,10 +33,14 @@ export default function Navbar()
                     </div>
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={onOpenLogin}
                             className="px-4 py-2 text-sm font-semibold hover:text-accent transition-colors">Login</button>
-                        <Link to = "/register"
-                            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-all shadow-sm">Sign
-                            Up</Link>
+                        <button
+                            onClick={onOpenRegister}
+                            className="bg-accent text-white px-4 py-2 rounded-lg"
+                        >
+                            Sign Up
+                        </button>
                     </div>
                 </div>
             </div>

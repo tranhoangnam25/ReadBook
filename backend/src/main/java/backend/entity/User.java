@@ -20,6 +20,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "username", nullable = false, unique = true, length = 100)
@@ -32,7 +33,7 @@ public class User {
     private String phone;
 
     @Column(name = "password_hash", nullable = false, length = 255)
-    private String password_hash;
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 5)
