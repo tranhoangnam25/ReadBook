@@ -2,8 +2,7 @@ interface NavbarProps {
     onOpenRegister: () => void;
     onOpenLogin: () => void;// Thêm props này
 }
-export default function Navbar({ onOpenRegister, onOpenLogin }: NavbarProps)
-{
+export default function Navbar({ onOpenRegister, onOpenLogin }: NavbarProps) {
 
     return (
         <header
@@ -15,9 +14,9 @@ export default function Navbar({ onOpenRegister, onOpenLogin }: NavbarProps)
                         <h1 className="text-xl font-bold tracking-tight">Sunset Books</h1>
                     </div>
                     <nav className="hidden md:flex items-center gap-8">
-                        <a className="text-sm font-medium hover:text-accent transition-colors" href="#">Explore</a>
+                        <a className="text-sm font-medium hover:text-accent transition-colors" href="/">Explore</a>
                         <a className="text-sm font-medium hover:text-accent transition-colors" href="#">My Library</a>
-                        <a className="text-sm font-medium hover:text-accent transition-colors" href="#">Shop</a>
+                        <a className="text-sm font-medium hover:text-accent transition-colors" href="/shop">Shop</a>
                     </nav>
                 </div>
                 <div className="flex flex-1 items-center justify-end gap-6">

@@ -28,22 +28,24 @@ public class BookController {
     public BookResponse getBook(@PathVariable Long id) {
     return bookService.getById(id);
 }
+
     @GetMapping("/bestRatings")
-    @Operation()
     public ResponseEntity<List<BookResponse>> getBestsellers(
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(bookService.getBestRating(limit));
     }
     @GetMapping("/recommends")
-public List<BookResponse> getRecommend() {
+    public List<BookResponse> getRecommend() {
     return bookService.getRecommend();
 }
+
     @GetMapping("/search")
     public List<BookResponse> search(@RequestParam String keyword) {
         return bookService.search(keyword);
     }
+
     @GetMapping
-public Page<BookResponse> searchBooks(
+    public Page<BookResponse> searchBooks(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) String category,
         @RequestParam(required = false) Double minPrice,

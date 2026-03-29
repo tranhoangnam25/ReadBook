@@ -5,7 +5,10 @@ import Layout from './components/layout/Layout'
 import RegisterPage from './pages/registerPage'
 import { useState } from 'react'
 import LoginPage from "./pages/loginPage.tsx";
-import HomePageSDN from './pages/HomePage(sau_dang_nhap).tsx';
+import BookDetail from './pages/BookDetail.tsx'
+import ShopPage from './pages/Shop.tsx'
+import HomePage2 from './pages/HomePage2.tsx'
+import HomePageUser from './pages/HomePageUser.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,24 +29,26 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/"
-                 element={<Layout
-                     onOpenRegister={() => setIsRegisterOpen(true)}
-                     onOpenLogin={() => setIsLoginOpen(true)}
-                 />}>
+            element={<Layout
+              onOpenRegister={() => setIsRegisterOpen(true)}
+              onOpenLogin={() => setIsLoginOpen(true)}
+            />}>
 
-              <Route index element={<HomePage />} />
-              <Route path="/home-member" element={<HomePageSDN />} />
-              
+            <Route index element={<HomePage />} />
+            <Route path="/home-page-user" element={<HomePageUser />} />
+            <Route path="/bookdetail" element={<BookDetail />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/hompage2" element={<HomePage2 />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         {isRegisterOpen && <RegisterPage
-            onClose={() => setIsRegisterOpen(false)}
-            onOpenLogin={()=> setIsLoginOpen(true)}
+          onClose={() => setIsRegisterOpen(false)}
+          onOpenLogin={() => setIsLoginOpen(true)}
         />}
         {isLoginOpen && <LoginPage
-            onClose={() => setIsLoginOpen(false)}
-            onOpenRegister={() => setIsRegisterOpen(true)}
+          onClose={() => setIsLoginOpen(false)}
+          onOpenRegister={() => setIsRegisterOpen(true)}
         />}
 
       </BrowserRouter>
