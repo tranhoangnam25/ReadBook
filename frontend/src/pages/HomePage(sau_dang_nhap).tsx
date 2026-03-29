@@ -90,7 +90,6 @@ export default function HomePage() {
 
         <div className="flex items-center gap-10">
           <h1 className="text-xl font-bold">📖 Lumina Books</h1>
-
           <nav className="flex gap-6 text-sm font-medium">
             <a>Feed</a>
             <a>Library</a>
