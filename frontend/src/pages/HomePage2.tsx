@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { User, Reading, HistoryItem, Book } from "../types";
-export default function HomePage() {
+export default function HomePage2() {
   const [user, setUser] = useState<User | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
