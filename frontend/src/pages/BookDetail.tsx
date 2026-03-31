@@ -1,4 +1,55 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 export default function BookDetail() {
+    const { id } = useParams();
+    const [book, setBook] = useState<any>(null);
+    const navigate = useNavigate();
+
+
+const handleBuy = async () => {
+  try {
+    if (!id || !book) {
+      alert("Thiếu dữ liệu");
+      return;
+    }
+
+    const res = await fetch(
+      `http://localhost:8080/api/orders?userId=1&bookId=${id}&price=${book.price}`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("API lỗi");
+    }
+
+    const data = await res.json();
+    console.log("ORDER RESPONSE:", data);
+
+    // 🔥 lấy đúng field backend trả
+    const orderId = data.orderId || data.id;
+
+    if (!orderId) {
+      alert("Không lấy được orderId");
+      return;
+    }
+
+    navigate(`/payment/${orderId}/${id}`);
+  } catch (err) {
+    console.error("Lỗi tạo order", err);
+    alert("Tạo order thất bại!");
+  }
+};
+    useEffect(() => {
+  if (!id) return;
+
+  fetch(`http://localhost:8080/api/books/${id}`)
+    .then(res => res.json())
+    .then(data => setBook(data));
+}, [id]);
     return (
         <main className="flex flex-1 justify-center py-8">
             <div className="layout-content-container flex flex-col max-w-[1100px] flex-1 px-6">
@@ -19,7 +70,13 @@ export default function BookDetail() {
                             <p className="text-3xl font-black text-primary">$14.99</p>
                         </div>
                         <div className="flex flex-col gap-3">
-                            <button className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined">shopping_cart</span> Buy Ebook Now</button>
+                            <button
+  onClick={handleBuy}
+  className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+>
+  <span className="material-symbols-outlined">shopping_cart</span>
+  Buy Ebook Now
+</button>
                             <div className="flex gap-2">
                                 <button className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
                                     Read Sample
