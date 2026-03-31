@@ -1,5 +1,6 @@
 package backend.controller;
 
+import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.BookResponse;
 import backend.dto.response.HistoryResponse;
 import backend.dto.response.ReadingResponse;
@@ -8,15 +9,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import backend.entity.User;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -26,12 +25,12 @@ public class UserController {
         return userService.getAllUsers();
     }
     @GetMapping("/me") // Lấy thông tin người dùng hiện tại
-    public User getMe() {
-        return userService.getUserById(1L);
+    public User getMe(@RequestParam Long id) {
+        return userService.getUserById(id);
     }
     @GetMapping("/me/reading")
-    public ReadingResponse getReading() {
-        return userService.getReading(1L); // test user id = 1
+    public ReadingResponse getReading(@RequestParam Long id) {
+        return userService.getReading(id); // test user id = 1
     }
 
     // 📜 lịch sử
@@ -39,5 +38,10 @@ public class UserController {
     public List<HistoryResponse> getHistory() {
         return userService.getHistory(1L);
     }
-
+    @PutMapping("/me/update/{userId}")
+    User updateUser(
+            @PathVariable("userId") Long userId,
+            @RequestBody UserUpdateRequest request){
+        return userService.updateUser(userId  ,request);
+    }
 }

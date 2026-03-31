@@ -19,6 +19,7 @@ import java.util.List;
 public class Collection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "collection_id")
     private Long id;
 
     @Column(name = "name", columnDefinition = "NVARCHAR(50)", nullable = false)
