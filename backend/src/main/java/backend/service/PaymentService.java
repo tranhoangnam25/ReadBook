@@ -26,7 +26,7 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepo;
 
-    // 🔥 KEY PAYOS
+    // KEY PAYOS
     private final String CLIENT_ID = "c4590c7a-47c7-4e7e-b1b6-525cb9ce71d8";
     private final String API_KEY = "8c4dbf36-6d23-47ef-ad77-35be40b4a355";
     private final String CHECKSUM_KEY = "1d68bd16504b236b9eb05182efba1eefdec1de9d701394ac613eee782a28e177";
@@ -34,7 +34,7 @@ public class PaymentService {
     private final String PAYOS_URL = "https://api-merchant.payos.vn/v2/payment-requests";
 
     // =====================================================
-    // 🔥 1. CREATE PAYMENT
+    // 1. CREATE PAYMENT
     // =====================================================
     public Map<String, Object> createPayOSPayment(Long orderId) {
 
@@ -55,10 +55,10 @@ public class PaymentService {
 
             int price = order.getPrice().intValueExact();
 
-            // ✅ tránh trùng orderCode
+            // tránh trùng orderCode
             long orderCode = orderId * 1000 + (System.currentTimeMillis() % 1000);
 
-            // ✅ URL THẬT (THAY NGROK CỦA BẠN)
+            //  URL THẬT (NGROK)
             String returnUrl = "https://abc123.ngrok-free.app/payment-success";
             String cancelUrl = "https://abc123.ngrok-free.app/payment-cancel";
 
@@ -75,7 +75,7 @@ public class PaymentService {
 
             body.put("expiredAt", (System.currentTimeMillis() / 1000L) + 3600);
 
-            // 🔥 SIGNATURE CHUẨN
+            // SIGNATURE 
             String signature = generateSignature(
                     price,
                     cancelUrl,
@@ -86,7 +86,7 @@ public class PaymentService {
 
             body.put("signature", signature);
 
-            // 🔥 ITEMS
+            // ITEMS
             Map<String, Object> item = new HashMap<>();
             item.put("name", "Book");
             item.put("quantity", 1);
@@ -94,9 +94,9 @@ public class PaymentService {
 
             body.put("items", List.of(item));
 
-            // 🔥 DEBUG
-            System.out.println("🔥 SIGNATURE: " + signature);
-            System.out.println("🔥 FINAL BODY: " + body);
+            // DEBUG
+            System.out.println("SIGNATURE: " + signature);
+            System.out.println("FINAL BODY: " + body);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("x-client-id", CLIENT_ID);
@@ -113,7 +113,7 @@ public class PaymentService {
 
             Map<String, Object> res = response.getBody();
 
-            System.out.println("🔥 PAYOS RESPONSE: " + res);
+            System.out.println("PAYOS RESPONSE: " + res);
 
             if (res == null || !"00".equals(String.valueOf(res.get("code")))) {
                 return Map.of("error", res);
@@ -130,7 +130,7 @@ public class PaymentService {
     }
 
     // =====================================================
-    // 🔥 2. GENERATE SIGNATURE (CHUẨN PAYOS)
+    // 2. GENERATE SIGNATURE (CHUẨN PAYOS)
     // =====================================================
     private String generateSignature(
             int amount,
@@ -147,13 +147,13 @@ public class PaymentService {
                 "&orderCode=" + orderCode +
                 "&returnUrl=" + returnUrl;
 
-        System.out.println("🔥 RAW SIGN DATA: " + rawData);
+        System.out.println("RAW SIGN DATA: " + rawData);
 
         return hmacSHA256(rawData, CHECKSUM_KEY);
     }
 
     // =====================================================
-    // 🔥 3. HMAC SHA256 (UTF-8)
+    // 3. HMAC SHA256 (UTF-8)
     // =====================================================
     private String hmacSHA256(String data, String key) throws Exception {
     Mac mac = Mac.getInstance("HmacSHA256");
@@ -169,7 +169,7 @@ public class PaymentService {
             data.getBytes(StandardCharsets.UTF_8)
     );
 
-    // 🔥 convert sang HEX (CHUẨN PAYOS)
+    // convert sang HEX (CHUẨN PAYOS)
     StringBuilder hex = new StringBuilder(2 * rawHmac.length);
     for (byte b : rawHmac) {
         String s = Integer.toHexString(0xff & b);
@@ -177,11 +177,11 @@ public class PaymentService {
         hex.append(s);
     }
 
-    return hex.toString(); // ✅ lowercase hex
+    return hex.toString(); // lowercase hex
 }
 
     // =====================================================
-    // 🔥 4. WEBHOOK
+    // 4. WEBHOOK
     // =====================================================
     public String handlePayOSWebhook(Map<String, Object> body) {
 
@@ -191,7 +191,7 @@ public class PaymentService {
             Long orderCode = Long.valueOf(data.get("orderCode").toString());
             String status = data.get("status").toString();
 
-            // ⚠️ vì orderCode đã custom → cần map lại orderId
+            // vì orderCode đã custom → cần map lại orderId
             Long orderId = orderCode / 1000;
 
             Payment payment = paymentRepo.findByOrder_Id(orderId)
@@ -209,7 +209,7 @@ public class PaymentService {
             paymentRepo.save(payment);
             orderRepo.save(order);
 
-            System.out.println("✅ WEBHOOK SUCCESS");
+            System.out.println("WEBHOOK SUCCESS");
 
             return "OK";
 
@@ -220,7 +220,7 @@ public class PaymentService {
     }
 
     // =====================================================
-    // 🔥 5. CHECK STATUS
+    // 5. CHECK STATUS
     // =====================================================
     public Map<String, Object> getPaymentStatus(Long orderId) {
 
