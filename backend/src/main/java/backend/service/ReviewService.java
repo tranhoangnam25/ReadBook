@@ -53,7 +53,7 @@ public class ReviewService {
     return reviewRepository.save(review);
 }
 
-    // UPDATE (chuẩn, không mất dữ liệu)
+    // UPDATE
     public Review update(Integer id, Long userId, Review newData) {
 
     Review existing = reviewRepository.findById(id)
