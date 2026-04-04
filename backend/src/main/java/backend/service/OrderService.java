@@ -36,7 +36,7 @@ public class OrderService {
     order.setUser(user);
     order.setBook(book);
     order.setPrice(BigDecimal.valueOf(price));
-    order.setStatus(StatusOrder.pending);
+    order.setStatus(StatusOrder.PENDING);
     order.setCreatedAt(LocalDateTime.now());
 
     Order saved = orderRepo.save(order);
