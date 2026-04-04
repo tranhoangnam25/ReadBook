@@ -47,7 +47,7 @@ public class ReviewService {
     }
 
     if (review.getStatus() == null) {
-        review.setStatus(StatusReview.visible);
+        review.setStatus(StatusReview.VISIBLE);
     }
 
     return reviewRepository.save(review);
