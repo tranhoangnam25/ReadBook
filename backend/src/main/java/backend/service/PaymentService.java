@@ -46,7 +46,7 @@ public class PaymentService {
                         Payment.builder()
                                 .order(order)
                                 .paymentMethod(PaymentMethod.PAYOS)
-                                .status(StatusPayment.pending)
+                                .status(StatusPayment.PENDING)
                                 .build()
                 ));
 
@@ -200,10 +200,10 @@ public class PaymentService {
             Order order = payment.getOrder();
 
             if ("PAID".equals(status)) {
-                payment.setStatus(StatusPayment.success);
-                order.setStatus(backend.enums.StatusOrder.paid);
+                payment.setStatus(StatusPayment.SUCCESS);
+                order.setStatus(backend.enums.StatusOrder.PAID);
             } else {
-                payment.setStatus(StatusPayment.failed);
+                payment.setStatus(StatusPayment.FAILED);
             }
 
             paymentRepo.save(payment);
