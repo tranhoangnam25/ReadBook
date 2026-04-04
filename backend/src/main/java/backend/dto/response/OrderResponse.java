@@ -1,23 +1,32 @@
 package backend.dto.response;
 
-import backend.entity.Book;
-import backend.entity.User;
-import backend.enums.StatusOrder;
-import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+import backend.entity.Book;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderResponse {
-    private Long id;
+
+    private Long orderId;
     private BigDecimal price;
     private String status;
 
+    private Long userId;
+    private Long bookId;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "book_id",
             nullable = false
     )
     private Book book;
+    
 }
