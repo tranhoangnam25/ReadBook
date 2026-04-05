@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { login } from '../services/authService';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 interface LoginProps {
     onClose: () => void;
     onOpenRegister: () => void;
+    onLoginSuccess: () => void;
 }
 
 // 1. Đổi tên thành LoginPage
-const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister }) => {
-    const navigate = useNavigate();
+const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -33,17 +32,29 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister }) => {
                 password: formData.password
             });
 
-            // Lưu token (Cấu trúc tùy thuộc vào backend trả về trực tiếp hay qua .data)
-            if (response && response.token) {
-                localStorage.setItem('token', response.token);
-            }
-            if (response.user) {
-                localStorage.setItem('user', JSON.stringify(response.user));
+            if (response) {
+                // 1. Lưu Token
+                if (response.token) {
+                    localStorage.setItem('token', response.token);
+                }
+
+                // 2. Lưu đối tượng user (để hiển thị tên/ảnh đại diện)
+                if (response.user) {
+                    localStorage.setItem('user', JSON.stringify(response.user));
+
+                    // 3. QUAN TRỌNG: Lưu userId riêng biệt để hàm updateProfile sử dụng
+                    // Giả sử backend trả về id trong response.user.id
+                    if (response.user.id) {
+                        localStorage.setItem('userId', response.user.id.toString());
+                    }
+                }
             }
 
             alert("Đăng nhập thành công!");
+
+            onLoginSuccess();
             onClose();
-            navigate('/home-member');
+
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Email hoặc mật khẩu không đúng");

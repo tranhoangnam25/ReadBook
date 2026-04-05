@@ -1,156 +1,240 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-// Giả sử bạn có hàm updateProfile trong authService
-import { updateProfile, getCurrentUser } from '../services/authService';
+import axios from 'axios'; // Import để sử dụng axios.isAxiosError
+import {updateProfile, getCurrentUser} from '../services/authService';
 
-interface EditProfileProps {
-    onClose: () => void;
-}
-
-const EditProfilePage: React.FC<EditProfileProps> = ({ onClose }) => {
-    // 1. Khai báo State
+const ProfileSettings: React.FC = () => {
     const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        // Có thể thêm bio, phone, avatarUrl...
+        username: '',
+        phone: '',
+        currentPassword: '',
+        password: '',
+        confirmPassword: ''
     });
-    const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(true); // Trạng thái đợi lấy dữ liệu cũ
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
 
-    // 2. Lấy dữ liệu người dùng hiện tại khi mở modal
+    const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
+    const [message, setMessage] = useState({ type: '', text: '' });
+
     useEffect(() => {
-        const fetchUserData = async () => {
+        let isMounted = true;
+        const loadData = async () => {
             try {
-                // Giả sử service này trả về thông tin user hiện tại
                 const user = await getCurrentUser();
-                setFormData({
-                    fullName: user.fullName || user.username,
-                    email: user.email,
-                });
+                if (isMounted) {
+                    setFormData(prev => ({
+                        ...prev,
+                        username: user.username || '',
+                        phone: user.phone || ''
+                    }));
+                }
             } catch (err) {
-                setError("Không thể tải thông tin người dùng");
+                console.error("Fetch error:", err);
             } finally {
-                setFetching(false);
+                if (isMounted) setFetching(false);
             }
         };
-        fetchUserData();
+        loadData().catch(err => console.error(err));
+        return () => { isMounted = false; };
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    interface UserUpdatePayload {
+        username: string;
+        phone?: string;
+        password?: string;
+    }
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError('');
-        setSuccess(false);
         setLoading(true);
+        setMessage({ type: '', text: '' });
+
+        // 1. Kiểm tra logic mật khẩu ở Client
+        if (formData.password) {
+            if (formData.password.length < 8) {
+                setMessage({ type: 'error', text: 'Mật khẩu mới phải có ít nhất 8 ký tự!' });
+                setLoading(false);
+                return;
+            }
+            if (formData.password !== formData.confirmPassword) {
+                setMessage({ type: 'error', text: 'Mật khẩu xác nhận không khớp!' });
+                setLoading(false);
+                return;
+            }
+        }
 
         try {
-            await updateProfile(formData);
-            setSuccess(true);
-            setTimeout(() => {
-                onClose(); // Đóng modal sau khi thành công 1.5s
-            }, 1500);
-        } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || "Cập nhật thất bại");
-            } else {
-                setError("Đã xảy ra lỗi không xác định");
+            // 2. Chuẩn bị payload khớp với UserUpdateRequest (Java)
+            const payload: UserUpdatePayload = {
+                username: formData.username,
+                phone: formData.phone
+            };
+
+            // Chỉ thêm field password nếu có giá trị
+            if (formData.password && formData.password.trim() !== "") {
+                payload.password = formData.password;
             }
+
+            // 3. CHỈ GỌI MỘT API DUY NHẤT (vì Controller xử lý cả 3 trong 1)
+            await updateProfile(payload);
+
+            setMessage({ type: 'success', text: 'Cập nhật Profile thành công!' });
+
+            // Reset các ô nhập mật khẩu
+            setFormData(prev => ({
+                ...prev,
+                currentPassword: '',
+                password: '',
+                confirmPassword: ''
+            }));
+        } catch (err: unknown) {
+            let errorText = 'Cập nhật thất bại';
+            if (axios.isAxiosError(err)) {
+                // Hiển thị message lỗi chính xác từ Backend (ví dụ: "Mật khẩu phải ít nhất 8 ký tự")
+                errorText = err.response?.data?.message || err.response?.data || errorText;
+            }
+            setMessage({ type: 'error', text: errorText });
         } finally {
             setLoading(false);
         }
     };
 
-    // Xử lý phím Esc
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
-
-    if (fetching) return null; // Hoặc một loading spinner
+    if (fetching) return <div className="p-20 text-center italic serif-text">Loading Atelier...</div>;
 
     return (
-        <div
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
-    onClick={onClose}
-    >
-    <main
-        className="relative z-30 w-full max-w-md"
-    onClick={(e) => e.stopPropagation()}
->
-    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800">
-    <div className="px-8 pt-8 pb-6">
-    <div className="text-center mb-8 relative">
-    <button
-        onClick={onClose}
-    className="absolute -top-2 -right-2 text-slate-400 hover:text-primary transition-colors"
-    >
-    <span className="material-symbols-outlined">close</span>
-        </button>
+        <div className="bg-[#fcf9f2] min-h-screen text-[#1c1c18] font-['Inter']">
 
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 mb-4">
-    <span className="material-symbols-outlined">person_edit</span>
-        </div>
-        <h2 className="text-2xl font-bold text-primary dark:text-slate-100">Edit Profile</h2>
 
-    {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-        {success && <p className="text-green-500 text-xs mt-2">Cập nhật thành công!</p>}
-        </div>
+            <div className="flex max-w-screen-2xl mx-auto relative">
+                <aside className="fixed left-0 top-24 h-[calc(100vh-6rem)] hidden lg:flex flex-col p-8 bg-[#f6f3ec] w-72">
+                    <div className="mb-10">
+                        <h2 className="text-lg text-[#162839] font-['Noto_Serif']">Your Curated Collection</h2>
+                        <p className="text-xs text-[#162839]/50 uppercase tracking-widest mt-1">Manage your literary sanctuary</p>
+                    </div>
+                    <nav className="flex flex-col gap-4">
+                        <a className="text-sm uppercase tracking-widest text-[#162839] font-semibold border-l-4 border-[#162839] pl-4 flex items-center gap-3" href="#profile">
+                            <span className="material-symbols-outlined text-[20px]">person</span> Profile Information
+                        </a>
+                        <a className="text-sm uppercase tracking-widest text-[#162839]/50 pl-5 hover:text-[#162839] flex items-center gap-3 py-2 rounded-r-lg" href="#security">
+                            <span className="material-symbols-outlined text-[20px]">security</span> Security
+                        </a>
+                    </nav>
+                </aside>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-        <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
-        <input
-            name="fullName"
-            value={formData.fullName}
-            className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-            type="text"
-            onChange={handleChange}
-            required
-            />
-            </div>
-            <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email Address</label>
-        <input
-            name="email"
-            value={formData.email}
-            className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-            type="email"
-            onChange={handleChange}
-            required
-            />
-            </div>
+                <main className="flex-1 lg:ml-72 p-8 lg:p-16">
+                    <div className="max-w-4xl mx-auto">
+                        <header className="mb-12">
+                            <span className="text-[#7b5455] text-sm tracking-[0.2em] uppercase mb-2 block">Personal Atelier</span>
+                            <h2 className="text-4xl lg:text-5xl font-bold text-[#162839] tracking-tight font-['Noto_Serif']">Profile Information</h2>
+                        </header>
 
-            <div className="flex gap-3 pt-2">
-        <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-3 text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:text-slate-400 rounded transition-all"
-                >
-                Cancel
-                </button>
-                <button
-            disabled={loading}
-            className="flex-[2] py-3.5 bg-accent hover:bg-opacity-90 text-white font-bold rounded shadow-lg transition-all flex items-center justify-center gap-2"
-            type="submit"
-                >
-                <span>{loading ? 'Saving...' : 'Save Changes'}</span>
-            {!loading && <span className="material-symbols-outlined text-sm">check</span>}
-                </button>
-                </div>
-                </form>
-                </div>
-                </div>
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-12">
+                            <div className="md:col-span-4">
+                                <div className="bg-[#f6f3ec] p-8 rounded-xl flex flex-col items-center text-center">
+                                    <div className="relative group cursor-pointer w-40 h-40 rounded-full overflow-hidden mb-6 bg-[#e5e2db]">
+                                        <img className="w-full h-full object-cover" src="https://via.placeholder.com/150" alt="Avatar" />
+                                        <div className="absolute inset-0 bg-[#162839]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span className="material-symbols-outlined text-white text-3xl">photo_camera</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-1 font-['Noto_Serif']">{formData.username}</h3>
+                                    <p className="text-[#43474c] text-sm mb-6">Premium Reader</p>
+                                    <button type="button" className="px-6 py-2 border border-[#c4c6cd] text-[#162839] rounded-full font-medium hover:bg-[#e5e2db] text-sm transition-colors">
+                                        Change Image
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-8 flex flex-col gap-12">
+                                <section>
+                                    <h3 className="text-2xl font-semibold mb-8 text-[#162839] font-['Noto_Serif']">Identity Details</h3>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        <div className="group">
+                                            <label className="block text-xs uppercase tracking-widest text-[#43474c] mb-2 ml-1">Full Name</label>
+                                            <input
+                                                name="username"
+                                                value={formData.username}
+                                                onChange={handleChange}
+                                                // Tối ưu: focus:ring-accent thay vì mã màu Hex
+                                                className="w-full bg-[#f6f3ec] border-none rounded-xl px-5 py-4 text-[#1c1c18] focus:ring-accent outline-none transition-all"
+                                                type="text"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                            <div className="group">
+                                                <label className="block text-xs uppercase tracking-widest text-[#43474c] mb-2 ml-1">Phone Number</label>
+                                                <input
+                                                    name="phone"
+                                                    value={formData.phone}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-[#f6f3ec] border-none rounded-xl px-5 py-4 outline-none"
+                                                    type="tel"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="p-8 bg-[#f6f3ec] rounded-xl">
+                                    <h3 className="text-2xl font-semibold mb-8 text-[#162839] font-['Noto_Serif']">Change Password</h3>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        <input
+                                            name="currentPassword"
+                                            placeholder="Current Password (Required to change password)"
+                                            value={formData.currentPassword}
+                                            onChange={handleChange}
+                                            required={!!formData.password} // Bắt buộc nhập nếu định đổi mật khẩu
+                                            className={`w-full border-none rounded-xl px-5 py-4 outline-none ${
+                                                formData.password ? 'bg-accent/5 ring-1 ring-accent/20' : 'bg-[#e5e2db]/50'
+                                            }`}
+                                            type="password"
+                                        />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <input
+                                                name="password"
+                                                placeholder="New Password"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                className="w-full bg-[#e5e2db]/50 border-none rounded-xl px-5 py-4 outline-none"
+                                                type="password"
+                                            />
+                                            <input
+                                                name="confirmPassword"
+                                                placeholder="Confirm New Password"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                className="w-full bg-[#e5e2db]/50 border-none rounded-xl px-5 py-4 outline-none"
+                                                type="password"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {message.text && (
+                                    <p className={`text-sm font-medium ${message.type === 'error' ? 'text-red-500' : 'text-green-600'}`}>
+                                        {message.text}
+                                    </p>
+                                )}
+                                <div className="flex flex-col md:flex-row items-center justify-end gap-6 pt-8 border-t border-[#f6f3ec]">
+                                    <button type="button" className="text-[#43474c] font-medium hover:text-[#162839] px-6 py-2">Discard Changes</button>
+                                    <button
+                                        disabled={loading}
+                                        type="submit"
+                                        className="bg-[#2c3e50] text-white px-10 py-4 rounded-xl font-semibold shadow-xl hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                                    >
+                                        {loading ? 'Updating...' : 'Update Curator Profile'}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </main>
-                </div>
-            );
-            };
+            </div>
+        </div>
+    );
+};
 
-            export default EditProfilePage;
+export default ProfileSettings;
