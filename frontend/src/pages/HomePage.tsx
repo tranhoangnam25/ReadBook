@@ -93,7 +93,8 @@ export default function HomePage() {
                         <p className="col-span-full text-center text-primary/40 py-8">
                             Chưa có sách nào
                         </p>
-                    )}
+                    )
+                    }
                 </div>
             </section>
         </main>

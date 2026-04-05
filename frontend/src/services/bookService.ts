@@ -9,10 +9,9 @@ export const bookService = {
         });
         return res.data;
     },
-    getBookById: async (limit = 4): Promise<BookResponse[]> => {
-        const res = await api.get<BookResponse[]>("/books/bestRatings", {
-            params: { limit },
-        });
+    getBookById: async (id: number): Promise<BookResponse> => {
+        const res = await api.get<BookResponse>(`/books/${id}`
+        );
         return res.data;
     },
 };

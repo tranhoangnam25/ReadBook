@@ -6,7 +6,7 @@ export interface BookResponse {
     price: number
     previewPercentage: number
     coverImage: string
-    categories: string
+    category: string
     publishYear: number
     createdAt: Date
     updatedAt: Date
@@ -16,8 +16,8 @@ export interface RegisterRequest {
     email: string;
     password: string;
 }
-export interface LoginRequest{
-    email : string;
+export interface LoginRequest {
+    email: string;
     password: string;
 }
 export interface AuthResponse {

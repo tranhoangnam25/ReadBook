@@ -1,130 +1,140 @@
-export default function BookDetail() {
-    return (
-        <main className="flex flex-1 justify-center py-8">
-            <div className="layout-content-container flex flex-col max-w-[1100px] flex-1 px-6">
-                <nav className="flex items-center gap-2 mb-8 text-sm text-primary/60">
-                    <a className="hover:text-primary transition-colors" href="#">Home</a>
-                    <span className="material-symbols-outlined text-xs">chevron_right</span>
-                    <a className="hover:text-primary transition-colors" href="#">Books</a>
-                    <span className="material-symbols-outlined text-xs">chevron_right</span>
-                    <span className="text-primary font-medium">Fiction</span>
-                </nav>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-                    <div className="md:col-span-4 flex flex-col gap-6">
-                        <div className="w-full aspect-[2/3] rounded-lg shadow-xl overflow-hidden bg-white">
-                            <img alt="Minimalist book cover design" className="w-full h-full object-cover" data-alt="Minimalist dark blue book cover with gold lettering" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBas64G8L85Nqthy9PqD4S2FeloOlRLZOSH586ohATGYjlTC6MGIsGjyYMydGdjcnufzNwG8ME2rXzvKDfN5nuob4vtJd9CHU2nEhEyInImYwEofdQM2N6a04HQvngVr7sdWeK3Wa2XryslGRjlMHsKcgeDIVaxCWiCjYs_QuoXN57t2qy6sH0sSIsASTiplKJ_Hc6RCjOSQBVjud0oLEXngmg2k9yd8ZTMgFAJ3Qv41UiGxYThWuBOQzwOPNSARkP_3XRH2wmLhkHn" />
-                        </div>
-                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
-                            <p className="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-1">Price</p>
-                            <p className="text-3xl font-black text-primary">$14.99</p>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <button className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined">shopping_cart</span> Buy Ebook Now</button>
-                            <div className="flex gap-2">
-                                <button className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
-                                    Read Sample
-                                </button>
-                                <button className="px-4 border border-accent bg-accent/10 text-accent rounded-lg hover:bg-accent hover:text-white transition-all">
-                                    <span className="material-symbols-outlined">favorite</span>
-                                </button>
+import { useParams } from "react-router-dom"
+import { bookService } from "../services/bookService";
+import { useQuery } from "@tanstack/react-query";
+import type { BookResponse } from "../types";
+import { useEffect } from "react";
+
+function ShowBook({ book }: { book: BookResponse }) {
+    return (<div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+        <div className="md:col-span-4 flex flex-col gap-6">
+            <div className="w-full aspect-[2/3] rounded-lg shadow-xl overflow-hidden bg-white">
+                <img alt="Minimalist book cover design" className="w-full h-full object-cover" data-alt="Minimalist dark blue book cover with gold lettering" src={book.coverImage} />
+            </div>
+            <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
+                <p className="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-1">Price</p>
+                <p className="text-3xl font-black text-primary">${book.price}</p>
+            </div>
+            <div className="flex flex-col gap-3">
+                <button className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined">shopping_cart</span> Buy Ebook Now</button>
+                <div className="flex gap-2">
+                    <button className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
+                        Read Sample
+                    </button>
+                    <button className="px-4 border border-accent bg-accent/10 text-accent rounded-lg hover:bg-accent hover:text-white transition-all">
+                        <span className="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div className="md:col-span-8">
+            <div className="flex flex-col gap-2 mb-6">
+                <h1 className="text-4xl md:text-5xl font-black text-primary leading-tight tracking-tight">{book.title}</h1>
+                <p className="text-xl text-primary/70 font-medium">by {book.authorName}</p>
+                <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-1 text-accent">
+                        <span className="material-symbols-outlined text-lg fill-1">star</span>
+                        <span className="material-symbols-outlined text-lg fill-1">star</span>
+                        <span className="material-symbols-outlined text-lg fill-1">star</span>
+                        <span className="material-symbols-outlined text-lg fill-1">star</span>
+                        <span className="material-symbols-outlined text-lg">star_half</span>
+                        <span className="text-sm font-bold text-primary ml-1">4.5</span>
+                    </div>
+                    <span className="text-primary/30">|</span>
+                    <p className="text-sm font-medium text-primary/60 uppercase tracking-widest">{book.category}</p>
+                </div>
+            </div>
+            <div className="prose prose-slate max-w-none text-primary/80 leading-relaxed mb-10">
+                <h3 className="text-lg font-bold text-primary mb-3">About the Book</h3>
+                <p className="mb-4">{book.description}</p>
+            </div>
+            <div className="border-t border-primary/10 pt-10">
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-bold text-primary">Reader Reviews</h3>
+                    <button className="text-sm font-bold text-accent border-b-2 border-accent/30 hover:border-accent pb-0.5 transition-all">View All 1.2k Reviews</button>
+                </div>
+                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm mb-8">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" data-alt="User profile circular avatar" style={
+                            { backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCS8gXqKccWYUJp95iyHb52s5SvUFi5laMAlB5IDIIyB5GE2T45NowtFZaRE9GeQ8dnhwAaQl2CJPtWPBhBFgg8JbFP_BDTokbcAmalXDduwvWHr3dXU5N9IGbiydA_AmfIH0wiyaVzEU37yqe43iyj5WXdlcP4s6bJeDbUzp0tGZtCIHZB2vsEGjCrPa7zjHN4douuLwYwPn50TAXy6AP48VdXCBv0fEKVIWHuFy17TCHXDZy8PElBo_GysWFeFief7x3xsbJsesqB')" }} ></div>
+                        <div>
+                            <p className="font-bold text-primary">Share your thoughts, Alex</p>
+                            <div className="flex items-center gap-1 text-primary/30 mt-1">
+                                <span className="material-symbols-outlined">star</span>
+                                <span className="material-symbols-outlined">star</span>
+                                <span className="material-symbols-outlined">star</span>
+                                <span className="material-symbols-outlined">star</span>
+                                <span className="material-symbols-outlined">star</span>
                             </div>
                         </div>
                     </div>
-                    <div className="md:col-span-8">
-                        <div className="flex flex-col gap-2 mb-6">
-                            <h1 className="text-4xl md:text-5xl font-black text-primary leading-tight tracking-tight">The Midnight Library</h1>
-                            <p className="text-xl text-primary/70 font-medium">by Matt Haig</p>
-                            <div className="flex items-center gap-4 mt-2">
-                                <div className="flex items-center gap-1 text-accent">
-                                    <span className="material-symbols-outlined text-lg fill-1">star</span>
-                                    <span className="material-symbols-outlined text-lg fill-1">star</span>
-                                    <span className="material-symbols-outlined text-lg fill-1">star</span>
-                                    <span className="material-symbols-outlined text-lg fill-1">star</span>
-                                    <span className="material-symbols-outlined text-lg">star_half</span>
-                                    <span className="text-sm font-bold text-primary ml-1">4.5</span>
-                                </div>
-                                <span className="text-primary/30">|</span>
-                                <p className="text-sm font-medium text-primary/60 uppercase tracking-widest">Fiction &amp; Contemporary</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 mb-8">
-                            <div className="border border-primary/10 p-4 rounded-xl text-center">
-                                <p className="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-1">Pages</p>
-                                <p className="text-lg font-bold text-primary">304</p>
-                            </div>
-                            <div className="border border-primary/10 p-4 rounded-xl text-center">
-                                <p className="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-1">Language</p>
-                                <p className="text-lg font-bold text-primary">English</p>
-                            </div>
-                            <div className="border border-primary/10 p-4 rounded-xl text-center">
-                                <p className="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-1">Format</p>
-                                <p className="text-lg font-bold text-primary">Hardcover</p>
-                            </div>
-                        </div>
-                        <div className="prose prose-slate max-w-none text-primary/80 leading-relaxed mb-10">
-                            <h3 className="text-lg font-bold text-primary mb-3">About the Book</h3>
-                            <p className="mb-4">Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived. To see how things would be if you had made other choices... Would you have done anything different, if you had the chance to undo your regrets?</p>
-                            <p>A dazzling novel about all the choices that go into a life well lived, from the acclaimed author of <i>How To Stop Time</i> and <i>Reasons to Stay Alive</i>.</p>
-                        </div>
-                        <div className="border-t border-primary/10 pt-10">
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-2xl font-bold text-primary">Reader Reviews</h3>
-                                <button className="text-sm font-bold text-accent border-b-2 border-accent/30 hover:border-accent pb-0.5 transition-all">View All 1.2k Reviews</button>
-                            </div>
-                            <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm mb-8">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" data-alt="User profile circular avatar" style={
-                                        { backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCS8gXqKccWYUJp95iyHb52s5SvUFi5laMAlB5IDIIyB5GE2T45NowtFZaRE9GeQ8dnhwAaQl2CJPtWPBhBFgg8JbFP_BDTokbcAmalXDduwvWHr3dXU5N9IGbiydA_AmfIH0wiyaVzEU37yqe43iyj5WXdlcP4s6bJeDbUzp0tGZtCIHZB2vsEGjCrPa7zjHN4douuLwYwPn50TAXy6AP48VdXCBv0fEKVIWHuFy17TCHXDZy8PElBo_GysWFeFief7x3xsbJsesqB')" }} ></div>
-                                    <div>
-                                        <p className="font-bold text-primary">Share your thoughts, Alex</p>
-                                        <div className="flex items-center gap-1 text-primary/30 mt-1">
-                                            <span className="material-symbols-outlined">star</span>
-                                            <span className="material-symbols-outlined">star</span>
-                                            <span className="material-symbols-outlined">star</span>
-                                            <span className="material-symbols-outlined">star</span>
-                                            <span className="material-symbols-outlined">star</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-primary/60 text-xl">info</span>
-                                    <p className="text-sm font-medium text-primary">You must purchase this ebook to write a review.</p>
-                                </div>
-                            </div>
-                            <div className="space-y-6">
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Female profile picture" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAsSAydCZZfLf2YtKp4VEkHhw2v32NvVElHrzsvjWJNk6W7aENSaZYrHeqKOAd8neSuhOD7kTBNnYvBSd3tD8qIMp4Nor15SxG9Ki7WQhpPuRi361RELHUKn1l6vD1O0qppl2pczm64n373r6aKTAeMqHYOaWF9MnWAEyYp3QDHhwCxzvA-HBqvO9E_IILXpu3iRpT-1aSgJoOV-cufPIbqde-EyjNZJkMhS6ompk3TG7XA0W4djztlKvBL3BdhMs40A-VWYMZYElmo')" }}></div>
-                                            <div>
-                                                <p className="text-sm font-bold text-primary">Sarah Jenkins</p>
-                                                <div className="flex text-accent">
-                                                    <span className="material-symbols-outlined text-xs fill-1">star</span>
-                                                    <span className="material-symbols-outlined text-xs fill-1">star</span>
-                                                    <span className="material-symbols-outlined text-xs fill-1">star</span>
-                                                    <span className="material-symbols-outlined text-xs fill-1">star</span>
-                                                    <span className="material-symbols-outlined text-xs fill-1">star</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span className="text-xs text-primary/40">2 days ago</span>
-                                    </div>
-                                    <p className="text-sm text-primary/80 italic leading-relaxed">"This book completely changed how I view my own 'what-ifs'. A poignant and beautiful journey through life's infinite possibilities."</p>
-                                    <div className="flex items-center gap-4">
-                                        <button className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors">
-                                            <span className="material-symbols-outlined text-sm">thumb_up</span>
-                                            <span className="text-xs font-bold">24</span>
-                                        </button>
-                                        <button className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors">
-                                            <span className="material-symbols-outlined text-sm">reply</span>
-                                            <span className="text-xs font-bold">Reply</span>
-                                        </button>
+                    <div className="bg-primary/5 border border-primary/10 rounded-lg p-4 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-primary/60 text-xl">info</span>
+                        <p className="text-sm font-medium text-primary">You must purchase this ebook to write a review.</p>
+                    </div>
+                </div>
+                <div className="space-y-6">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Female profile picture" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAsSAydCZZfLf2YtKp4VEkHhw2v32NvVElHrzsvjWJNk6W7aENSaZYrHeqKOAd8neSuhOD7kTBNnYvBSd3tD8qIMp4Nor15SxG9Ki7WQhpPuRi361RELHUKn1l6vD1O0qppl2pczm64n373r6aKTAeMqHYOaWF9MnWAEyYp3QDHhwCxzvA-HBqvO9E_IILXpu3iRpT-1aSgJoOV-cufPIbqde-EyjNZJkMhS6ompk3TG7XA0W4djztlKvBL3BdhMs40A-VWYMZYElmo')" }}></div>
+                                <div>
+                                    <p className="text-sm font-bold text-primary">Sarah Jenkins</p>
+                                    <div className="flex text-accent">
+                                        <span className="material-symbols-outlined text-xs fill-1">star</span>
+                                        <span className="material-symbols-outlined text-xs fill-1">star</span>
+                                        <span className="material-symbols-outlined text-xs fill-1">star</span>
+                                        <span className="material-symbols-outlined text-xs fill-1">star</span>
+                                        <span className="material-symbols-outlined text-xs fill-1">star</span>
                                     </div>
                                 </div>
                             </div>
+                            <span className="text-xs text-primary/40">2 days ago</span>
+                        </div>
+                        <p className="text-sm text-primary/80 italic leading-relaxed">"This book completely changed how I view my own 'what-ifs'. A poignant and beautiful journey through life's infinite possibilities."</p>
+                        <div className="flex items-center gap-4">
+                            <button className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-sm">thumb_up</span>
+                                <span className="text-xs font-bold">24</span>
+                            </button>
+                            <button className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-sm">reply</span>
+                                <span className="text-xs font-bold">Reply</span>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    )
+}
+export default function BookDetail() {
+    const { id } = useParams();
+    const {
+        data: book,
+        isLoading: loadingBook
+    } = useQuery({
+        queryKey: ["book", id],
+        queryFn: () => bookService.getBookById(Number(id)),
+        enabled: !!id && !isNaN(Number(id)),
+    });
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+    return (
+        <main className="flex flex-1 justify-center py-8">
+            <div className="layout-content-container flex flex-col max-w-[1100px] flex-1 px-6">
+                {
+                    loadingBook ? (
+                        <div className="h-64 rounded-xl bg-primary/10 animate-pulse" />
+                    ) : book ? (
+                        <ShowBook book={book} />
+                    ) : (
+                        <p className="col-span-full text-center text-primary/40 py-8"> Chưa có sách nào </p>
+                    )
+                }
+
+
                 <div className="mt-20">
                     <h3 className="text-2xl font-bold text-primary mb-8">Readers also enjoyed</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-6">

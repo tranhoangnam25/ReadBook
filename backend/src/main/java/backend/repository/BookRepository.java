@@ -14,7 +14,6 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    //find best seller
     @Query("""
         SELECT b FROM Book b
         ORDER BY b.previewPercentage DESC

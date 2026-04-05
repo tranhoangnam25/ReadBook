@@ -1,6 +1,6 @@
 package backend.exception;
 
-import com.devteria.identity_service.dto.response.ApiResponse;
+import backend.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalException {
 
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception){
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        //apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -30,7 +30,7 @@ public class GlobalException {
 
         }
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(errorCode.getCode());
+        //apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -38,7 +38,7 @@ public class GlobalException {
     ResponseEntity<ApiResponse> handlingAppException(AppException exception){
         ApiResponse apiResponse = new ApiResponse();
         ErrorCode errorCode = exception.getErrorCode();
-        apiResponse.setCode(errorCode.getCode());
+        //apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }

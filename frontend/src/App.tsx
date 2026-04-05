@@ -36,7 +36,7 @@ function App() {
 
             <Route index element={<HomePage />} />
             <Route path="/home-page-user" element={<HomePageUser />} />
-            <Route path="/bookdetail" element={<BookDetail />} />
+            <Route path="/book-detail/:id" element={<BookDetail />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/hompage2" element={<HomePage2 />} />
           </Route>
