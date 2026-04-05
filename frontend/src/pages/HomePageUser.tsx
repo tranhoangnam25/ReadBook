@@ -21,6 +21,7 @@ export default function HomePageUser() {
   // USER
   const fetchUser = async () => {
     try {
+      const token = localStorage.getItem("token"); // Lấy token đã lưu khi login
       const res = await fetch(`${BASE_URL}/api/users/me`);
       if (!res.ok) throw new Error("User API lỗi");
       const data = await res.json();

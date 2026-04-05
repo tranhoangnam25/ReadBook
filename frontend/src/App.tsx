@@ -9,6 +9,7 @@ import BookDetail from './pages/BookDetail.tsx'
 import ShopPage from './pages/Shop.tsx'
 import HomePage2 from './pages/HomePage2.tsx'
 import HomePageUser from './pages/HomePageUser.tsx'
+import PaymentPage from './pages/PaymentPage.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ function App() {
             <Route path="/book-detail/:id" element={<BookDetail />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/hompage2" element={<HomePage2 />} />
+            <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

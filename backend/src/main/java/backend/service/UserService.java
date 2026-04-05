@@ -1,5 +1,6 @@
 package backend.service;
 
+import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.HistoryResponse;
 import backend.dto.response.ReadingResponse;
 import backend.entity.Book;
@@ -8,6 +9,7 @@ import backend.entity.User;
 import backend.repository.ReadingProgressRepository;
 import backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 
 public class UserService {
-
+    @Autowired
     private final UserRepository userRepository;
     private final ReadingProgressRepository repo;
 
@@ -80,5 +82,24 @@ public class UserService {
                         .finishedAt(p.getUpdatedAt().toString())
                         .build())
                 .toList();
+    }
+
+    public User updateUser(Long userId, UserUpdateRequest request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+        if(request.getPassword() != null){
+            user.setPassword(request.getPassword());
+        }
+        if(request.getUsername() != null){
+            user.setUsername(request.getUsername());
+        }
+        if(request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+        if(request.getPhone()!=null) {
+            user.setPhone(request.getPhone());
+        }
+
+        return userRepository.save(user);
     }
 }
