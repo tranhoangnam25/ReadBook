@@ -4,6 +4,31 @@ import { useQuery } from "@tanstack/react-query";
 import type { BookResponse } from "../types";
 import { useEffect } from "react";
 
+const renderStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+        let icon = "star";
+        let fill = 0;
+        if (rating >= i) {
+            icon = "star";
+            fill = 1;
+        } else if (rating >= i - 0.5) {
+            icon = "star_half";
+            fill = 0;
+        }
+        stars.push(
+            <span
+                key={i}
+                className="material-symbols-outlined text-sm text-accent"
+                style={{ fontVariationSettings: `'FILL' ${fill}` }}
+            >
+                {icon}
+            </span>
+        );
+    }
+    return stars;
+};
+
 function ShowBook({ book }: { book: BookResponse }) {
     return (<div className="grid grid-cols-1 md:grid-cols-12 gap-12">
         <div className="md:col-span-4 flex flex-col gap-6">
@@ -32,12 +57,8 @@ function ShowBook({ book }: { book: BookResponse }) {
                 <p className="text-xl text-primary/70 font-medium">by {book.authorName}</p>
                 <div className="flex items-center gap-4 mt-2">
                     <div className="flex items-center gap-1 text-accent">
-                        <span className="material-symbols-outlined text-lg fill-1">star</span>
-                        <span className="material-symbols-outlined text-lg fill-1">star</span>
-                        <span className="material-symbols-outlined text-lg fill-1">star</span>
-                        <span className="material-symbols-outlined text-lg fill-1">star</span>
-                        <span className="material-symbols-outlined text-lg">star_half</span>
-                        <span className="text-sm font-bold text-primary ml-1">4.5</span>
+                        {renderStars(book.previewPercentage / 20)}
+                        <span className="text-sm font-bold text-primary ml-1">{book.previewPercentage / 20}</span>
                     </div>
                     <span className="text-primary/30">|</span>
                     <p className="text-sm font-medium text-primary/60 uppercase tracking-widest">{book.category}</p>

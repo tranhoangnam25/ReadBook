@@ -6,18 +6,23 @@ const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
         let icon = "star";
-        if (rating >= i) icon = "star";
-        else if (rating >= i - 0.5) icon = "star_half";
+        let fill = 0;
+        if (rating >= i) {
+            icon = "star";
+            fill = 1;
+        } else if (rating >= i - 0.5) {
+            icon = "star_half";
+            fill = 0;
+        }
         stars.push(
             <span
                 key={i}
                 className="material-symbols-outlined text-sm text-accent"
-                style={{ fontVariationSettings: "'FILL' 1" }}
+                style={{ fontVariationSettings: `'FILL' ${fill}` }}
             >
                 {icon}
             </span>
         );
-
     }
     return stars;
 };
