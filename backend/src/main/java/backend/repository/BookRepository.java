@@ -26,19 +26,24 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @EntityGraph(attributePaths = {"author", "category"})
     List<Book> findByTitleContaining(String keyword);
 
-    // 🔍 SEARCH + FILTER + PAGINATION (QUAN TRỌNG NHẤT)
+    // 🔍 SEARCH + FILTER + PAGINATION 
     @EntityGraph(attributePaths = {"author", "category"})
     @Query("""
-        SELECT b FROM Book b
-        WHERE (LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(b.author.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
-        AND (:category IS NULL OR b.category.name = :category)
-        AND (:minPrice IS NULL OR b.price >= :minPrice)
-        AND (:maxPrice IS NULL OR b.price <= :maxPrice)
-    """)
-    Page<Book> searchBooks(String keyword,
-                           String category,
-                           Double minPrice,
-                           Double maxPrice,
-                           Pageable pageable);
+SELECT b FROM Book b
+WHERE
+(:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')))
+AND
+(:category IS NULL OR b.category.name = :category)
+AND
+(:minPrice IS NULL OR b.price >= :minPrice)
+AND
+(:maxPrice IS NULL OR b.price <= :maxPrice)
+""")
+Page<Book> searchBooks(
+        String keyword,
+        String category,
+        Double minPrice,
+        Double maxPrice,
+        Pageable pageable
+);
 }
