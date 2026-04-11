@@ -31,4 +31,34 @@ export interface AuthResponse {
         email: string;
     };
 }
+/* cspell:disable */
+export interface User {
+    id: number;
+    username: string;
+    email?: string;
+    phone?: string;
+}
+
+export interface Book {
+    id: number;
+    title: string;
+    author: string;
+    coverUrl: string;
+}
+
+export interface Reading {
+    id: number;
+    title: string;     // Thêm trường này
+    author: string;    // Thêm trường này
+    coverUrl: string;  // Thêm trường này
+    currentPage: number; // Thêm trường này
+    totalPages: number;
+    progress: number;
+}
+
+export interface HistoryItem {
+    id: number;
+    title: string;      // Thêm trường này
+    finishedAt: string;
+}
 

@@ -87,16 +87,15 @@ public class UserService {
     public User updateUser(Long userId, UserUpdateRequest request){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
-        if(request.getPassword() != null){
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            // Lưu ý: Trong thực tế hãy dùng PasswordEncoder để mã hóa trước khi save
+            // user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setPassword(request.getPassword());
         }
-        if(request.getUsername() != null){
+        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
             user.setUsername(request.getUsername());
         }
-        if(request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-        }
-        if(request.getPhone()!=null) {
+        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
             user.setPhone(request.getPhone());
         }
 
