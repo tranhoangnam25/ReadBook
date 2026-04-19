@@ -20,16 +20,17 @@ function ShowBook({ book }: { book: BookResponse }) {
   const navigate = useNavigate();
 
   // ===== GET REVIEWS =====
-  const { data: reviews = [] } = useQuery({
+  const { data: reviewPage } = useQuery({
     queryKey: ["reviews", book.id],
     queryFn: async () => {
-      const res = await fetch(
-        `http://localhost:8080/api/reviews/book/${book.id}`
-      );
+      const res = await fetch(`http://localhost:8080/api/reviews/book/${book.id}`);
       if (!res.ok) throw new Error();
       return res.json();
     },
   });
+
+const reviews = reviewPage?.content || [];
+
 
   // ===== RELATED BOOKS =====
   const { data: relatedBooks = [] } = useQuery({
@@ -93,7 +94,7 @@ function ShowBook({ book }: { book: BookResponse }) {
             <img
               src={book.coverImage}
               className="w-full h-full object-cover"
-            />
+            />  
           </div>
 
           <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
@@ -164,7 +165,9 @@ function ShowBook({ book }: { book: BookResponse }) {
                 Reader Reviews
               </h3>
 
-              <button className="text-sm font-bold text-accent border-b-2 border-accent/30 hover:border-accent pb-0.5 transition-all">View All Reviews</button>
+              <button
+              onClick={() => navigate(`/book-detail/all-comments/${book.id}`)}
+              className="text-sm font-bold text-accent border-b-2 border-accent/30 hover:border-accent pb-0.5 transition-all">View All Reviews</button>
             </div>
 
             {/* write review box */}
@@ -196,7 +199,8 @@ function ShowBook({ book }: { book: BookResponse }) {
 
                       <div>
                         <p className="font-bold text-sm">
-                          {r.userName || "User"}
+                          {/* Kiểm tra r.user.fullName hoặc r.user.username tùy theo Backend của bạn */}
+                          {r.user?.fullName || r.user?.username || "Guest Reader"}
                         </p>
 
                         <Stars rating={r.rating || 5} />

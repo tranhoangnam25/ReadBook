@@ -2,6 +2,7 @@ package backend.entity;
 
 import backend.enums.Role;
 import backend.enums.StatusUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -54,6 +55,7 @@ public class User {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Collection> collections = new ArrayList<>();
 
 }

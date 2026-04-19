@@ -15,6 +15,7 @@ import HomePageUser from './pages/HomePageUser';
 import PaymentPage from './pages/PaymentPage';
 import UserUpdatePage from "./pages/UserUpdatePage";
 import ChangePassword from "./pages/ChangePassword";
+import AllComments from "./pages/AllComments";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ function App() {
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/hompage2" element={<HomePage2 />} />
               <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
+              <Route path="/book-detail/all-comments/:id" element = {<AllComments/>} />
             </Route>
 
             {/* Chuyển hướng mọi đường dẫn lạ về trang chủ */}

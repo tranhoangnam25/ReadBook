@@ -2,6 +2,7 @@ package backend.entity;
 
 import backend.enums.StatusReview;
 import backend.enums.StatusUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -51,6 +52,7 @@ public class Review {
             name = "book_id",
             nullable = false
     )
+    @JsonIgnore
     private Book book;
 
 
