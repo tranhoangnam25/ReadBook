@@ -45,8 +45,7 @@ public class BookController {
     }
 
     @GetMapping
-    public Page<BookResponse> searchBooks(
-        @RequestParam(required = false) String keyword,
+    public Page<BookResponse> searchBooks(@RequestParam(required = false) String keyword,
         @RequestParam(required = false) String category,
         @RequestParam(required = false) Double minPrice,
         @RequestParam(required = false) Double maxPrice,

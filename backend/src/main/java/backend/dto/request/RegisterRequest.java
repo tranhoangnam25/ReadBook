@@ -1,19 +1,15 @@
 package backend.dto.request;
 
-import backend.entity.Collection;
-import backend.enums.Role;
-import backend.enums.StatusUser;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 @Getter
 @Setter
 public class RegisterRequest {
     private String username;
     private String email;
+
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự!")
     private String password;
 }
 

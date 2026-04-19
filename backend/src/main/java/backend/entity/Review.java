@@ -20,6 +20,7 @@ import java.util.Stack;
 @Table(name = "reviews")
 public class Review {
     @Id
+    @Column(name = "review_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -1,5 +1,6 @@
 package backend.service;
 
+import backend.dto.request.ChangePasswordRequest;
 import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.HistoryResponse;
 import backend.dto.response.ReadingResponse;
@@ -21,6 +22,7 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
     private final ReadingProgressRepository repo;
+
 
     // ================= USER CRUD =================
     public List<User> getAllUsers() {
@@ -84,21 +86,40 @@ public class UserService {
                 .toList();
     }
 
-    public User updateUser(Long userId, UserUpdateRequest request){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
-        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
-            // Lưu ý: Trong thực tế hãy dùng PasswordEncoder để mã hóa trước khi save
-            // user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setPassword(request.getPassword());
-        }
+    public User updateUser(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID:" + userId));
+
         if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
             user.setUsername(request.getUsername());
         }
+
         if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
             user.setPhone(request.getPhone());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            user.setEmail(request.getEmail());
         }
 
         return userRepository.save(user);
     }
+
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID:" + userId));
+
+        if (request.getCurrentPassword() == null) {
+            throw new RuntimeException("Phải nhập mật khẩu hiện tại!");
+        }
+        if (!request.getCurrentPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Mật khẩu hiện tại không đúng!");
+        }
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            throw new RuntimeException("Mật khẩu mới phải >= 6 ký tự");
+        }
+        if (request.getPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng mật khẩu cũ");
+        }
+        user.setPassword(request.getPassword());
+        userRepository.save(user);
+    }
 }
+

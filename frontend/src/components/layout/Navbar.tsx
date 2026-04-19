@@ -102,12 +102,17 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                                 {isDropdownOpen && (
                                     <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg py-2">
                                         <button
-                                            onClick={() => navigate(`/users/me/update/${user.id}`)}
+                                            onClick={() => navigate(`/users/me/profile`)}
                                             className="w-full text-left px-4 py-2 text-sm"
                                         >
                                             Sửa hồ sơ
                                         </button>
-
+                                        <button
+                                            onClick={() => navigate(`/users/me/change-password`)}
+                                             className="w-full text-left px-4 py-2 text-sm"
+                                        >
+                                            Đổi mật khẩu
+                                        </button>
                                         <button
                                             onClick={handleLogout}
                                             className="w-full text-left px-4 py-2 text-sm text-red-500"
