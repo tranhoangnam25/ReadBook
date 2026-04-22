@@ -14,6 +14,8 @@ import HomePage2 from './pages/HomePage2';
 import HomePageUser from './pages/HomePageUser';
 import PaymentPage from './pages/PaymentPage';
 import UserUpdatePage from "./pages/UserUpdatePage";
+import ChangePassword from "./pages/ChangePassword";
+import AllComments from "./pages/AllComments";
 import ReadingViewer from './pages/ReadingView';
 
 const queryClient = new QueryClient({
@@ -57,6 +59,14 @@ function App() {
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
             />
 
+              <Route path="/users/me/profile" element={<UserUpdatePage />} />
+              <Route path="/users/me/change-password" element={<ChangePassword />} />
+              <Route path="/book-detail/:id" element={<BookDetail />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/hompage2" element={<HomePage2 />} />
+              <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
+              <Route path="/book-detail/all-comments/:id" element = {<AllComments/>} />
+            </Route>
             <Route path="/users/me/update/:id" element={<UserUpdatePage />} />
             <Route path="/book-detail/:id" element={<BookDetail />} />
             <Route path="/shop" element={<ShopPage />} />

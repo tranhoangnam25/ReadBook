@@ -2,6 +2,7 @@ package backend.entity;
 
 import backend.enums.StatusReview;
 import backend.enums.StatusUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ import java.util.Stack;
 @Table(name = "reviews")
 public class Review {
     @Id
+    @Column(name = "review_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -50,6 +52,7 @@ public class Review {
             name = "book_id",
             nullable = false
     )
+    @JsonIgnore
     private Book book;
 
 

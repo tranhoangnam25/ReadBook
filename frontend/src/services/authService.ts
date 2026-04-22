@@ -1,8 +1,18 @@
-import api from './api';
-import type { RegisterRequest,LoginRequest, AuthResponse } from '../types';
+import api from './api'; // Đảm bảo import biến api từ file config axios
+import type { RegisterRequest, LoginRequest, AuthResponse } from '../types';
 
-import axios from 'axios';
-const API_URL = '/api';
+// Hàm lấy ID từ localStorage (giả định bạn lưu trong object 'user')
+const getStoredUserId = () => {
+    const userJson = localStorage.getItem('user');
+    if (!userJson) return null;
+    try {
+        const userObj = JSON.parse(userJson);
+        return userObj.id; // Backend dùng Long id, nên ở đây lấy .id
+    } catch {
+        return null;
+    }
+};
+
 
 export const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
     // Dùng api.post thay cho axios.post
@@ -14,62 +24,41 @@ export const login = async (userData: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>('/auth/login', userData);
     return response.data;
 };
-
-export const getStoredUserId = () => {
-    const userJson = localStorage.getItem('user');
-    if (!userJson) return null;
-    try {
-        const userObj = JSON.parse(userJson);
-        return userObj.id || userObj.userId; // Tùy vào backend trả về field nào
-    } catch (e) {
-        return null;
-    }
-};
-
+// 1. Lấy thông tin User
 export const getCurrentUser = async () => {
-    const token = localStorage.getItem('token');
     const userId = getStoredUserId();
+    if (!userId) throw new Error("No userId found");
 
-    if (!token || !userId) {
-        throw new Error("No token or userId found");
-    }
-
-    const response = await axios.get(`${API_URL}/users/me?id=${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-
-    return response.data; // Thường trả về { id, username, email, ... }
-};
-
-interface UpdateUserData {
-    username: string;
-    phone?: string;
-    password?: string;
-}
-
-export const updateProfile = async (userData: UpdateUserData) => {
-    const token = localStorage.getItem('token');
-
-    const userId = getStoredUserId();
-
-    if (!token || !userId) throw new Error("Missing Auth info");
-
-    const response = await axios.put(
-        `${API_URL}/users/me/update/${userId}`,
-        userData,
-        {
-            headers: { Authorization: `Bearer ${token}` }
-        }
-    );
-
-    return response.data;
-};
-
-export const changePassword = async (data: any) => {
-    // API này sẽ nhận: currentPassword, newPassword
-    const response = await axios.post('/api/users/me/change-password', data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    // Backend đang dùng @RequestParam nên phải truyền query string (?id=...)
+    const response = await api.get(`/users/${userId}`, {
+        params: { id: userId }
     });
     return response.data;
 };
 
+// 2. Cập nhật Profile
+export const updateProfile = async (data: any) => {
+    const userId = getStoredUserId();
+    if (!userId) throw new Error("No userId found");
+
+    // Gửi request PUT đến /api/users/{id}
+    const response = await api.put(`/users/${userId}`, data);
+
+    // CẬP NHẬT LOCALSTORAGE: Để giao diện đồng bộ ngay lập tức
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const updatedUser = { ...currentUser, ...response.data };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    return response.data;
+};
+
+// 3. Đổi mật khẩu
+export const changePassword = async (data: { currentPassword: string; password: string }) => {
+    const userId = getStoredUserId();
+    if (!userId) throw new Error("No userId found");
+
+    // Khớp với Backend: /api/users/{id}/change-password?id={id}
+    return api.put(`/users/${userId}/change-password`, data, {
+        params: { id: userId }
+    });
+};

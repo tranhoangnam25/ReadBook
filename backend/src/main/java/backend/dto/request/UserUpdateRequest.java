@@ -8,11 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserUpdateRequest {
-    @Size(min = 8, message = "Mật khẩu phải ít nhất 8 ký tự")
-    private String password;
 
     private String username;
 
     private String phone;
 
+    private String email;
 }

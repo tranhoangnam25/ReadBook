@@ -6,11 +6,12 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Reading_Progress")
+@Table(name = "reading_progress")
 @Data
 public class ReadingProgress {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "progress_id")
     private Long id;
 

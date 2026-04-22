@@ -1,5 +1,6 @@
 package backend.controller;
 
+import backend.dto.request.ChangePasswordRequest;
 import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.BookResponse;
 import backend.dto.response.HistoryResponse;
@@ -11,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import backend.entity.User;
+
 import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -24,10 +27,12 @@ public class UserController {
     public List<User> getAll() {
         return userService.getAllUsers();
     }
-    @GetMapping("/me") // Lấy thông tin người dùng hiện tại
+
+    @GetMapping("/{id}") // Lấy thông tin người dùng hiện tại
     public User getMe(@RequestParam Long id) {
         return userService.getUserById(id);
     }
+
     @GetMapping("/me/reading")
     public ReadingResponse getReading(@RequestParam Long id) {
         return userService.getReading(id); // Returns latest reading
@@ -53,10 +58,24 @@ public class UserController {
     public List<HistoryResponse> getHistory() {
         return userService.getHistory(1L);
     }
-    @PutMapping("/me/update/{userId}")
+
+    @PutMapping("/{id}")
     User updateUser(
-            @PathVariable("userId") Long userId,
-            @RequestBody UserUpdateRequest request){
-        return userService.updateUser(userId  ,request);
+            @PathVariable Long id,
+            @RequestBody UserUpdateRequest request) {
+        return userService.updateUser(id, request);
+    }
+
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestParam Long id,
+            @RequestBody ChangePasswordRequest request
+    ) {
+        try {
+            userService.changePassword(id, request);
+            return ResponseEntity.ok("Đổi mật khẩu thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
