@@ -21,6 +21,7 @@ public class BookResponse {
     private BigDecimal previewPercentage;
     private String description;
     private String coverImage;
+    private String fileUrl;
     private Integer publishYear;
     private String authorName;
     private String category;

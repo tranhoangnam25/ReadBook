@@ -6,6 +6,7 @@ export interface BookResponse {
     price: number
     previewPercentage: number
     coverImage: string
+    fileUrl: string
     category: string
     publishYear: number
     createdAt: Date

@@ -86,6 +86,7 @@ public class BookService {
                 .previewPercentage(b.getPreviewPercentage())
                 .description(b.getDescription())
                 .coverImage(b.getCoverImage())
+                .fileUrl(b.getFileUrl())
                 .publishYear(b.getPublishYear())
 
                

@@ -30,7 +30,22 @@ public class UserController {
     }
     @GetMapping("/me/reading")
     public ReadingResponse getReading(@RequestParam Long id) {
-        return userService.getReading(id); // test user id = 1
+        return userService.getReading(id); // Returns latest reading
+    }
+
+    @GetMapping("/me/reading/progress")
+    public ReadingResponse getReadingProgress(@RequestParam Long userId, @RequestParam Long bookId) {
+        return userService.getReadingProgress(userId, bookId);
+    }
+
+    @PostMapping("/me/reading/progress")
+    public ResponseEntity<Void> saveReadingProgress(
+            @RequestParam Long userId, 
+            @RequestParam Long bookId, 
+            @RequestParam String cfiLocation, 
+            @RequestParam java.math.BigDecimal progressPercentage) {
+        userService.saveReadingProgress(userId, bookId, cfiLocation, progressPercentage);
+        return ResponseEntity.ok().build();
     }
 
     // 📜 lịch sử

@@ -15,7 +15,6 @@ public class ReadingResponse {
     private String title;
     private String author;
     private String coverUrl;
-    private int progress;
-    private int currentPage;
-    private int totalPages;
+    private java.math.BigDecimal progressPercentage;
+    private String cfiLocation;
 }

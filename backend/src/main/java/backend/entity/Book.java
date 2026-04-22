@@ -39,6 +39,9 @@ public class Book {
     @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
+    @Column(name = "file_url", length = 255)
+    private String fileUrl;
+
     @Column(name = "cover_image", length = 500)
     private String coverImage;
 

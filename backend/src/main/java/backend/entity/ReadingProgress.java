@@ -22,11 +22,11 @@ public class ReadingProgress {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @Column(name = "current_page")
-    private Integer currentPage;
+    @Column(name = "fi_location", length = 255, nullable = false)
+    private String fiLocation;
 
-    @Column(name = "total_pages")
-    private Integer totalPages;
+    @Column(name = "progress_percentage")
+    private java.math.BigDecimal progressPercentage;
 
     private String status; // reading | completed
 

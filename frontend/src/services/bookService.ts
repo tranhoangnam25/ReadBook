@@ -14,4 +14,15 @@ export const bookService = {
         );
         return res.data;
     },
+    getReadingProgress: async (userId: number, bookId: number): Promise<any> => {
+        const res = await api.get(`/users/me/reading/progress`, {
+            params: { userId, bookId }
+        });
+        return res.data;
+    },
+    saveReadingProgress: async (userId: number, bookId: number, cfiLocation: string, progressPercentage: number): Promise<void> => {
+        await api.post(`/users/me/reading/progress`, null, {
+            params: { userId, bookId, cfiLocation, progressPercentage }
+        });
+    }
 };

@@ -10,4 +10,6 @@ public interface ReadingProgressRepository extends JpaRepository<ReadingProgress
     ReadingProgress findByUser_IdAndStatus(Long userId, String status);
 
     List<ReadingProgress> findByUser_IdAndStatusOrderByUpdatedAtDesc(Long userId, String status);
+
+    java.util.Optional<ReadingProgress> findByUser_IdAndBook_Id(Long userId, Long bookId);
 }

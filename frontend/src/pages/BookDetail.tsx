@@ -42,8 +42,10 @@ function ShowBook({ book }: { book: BookResponse }) {
             <div className="flex flex-col gap-3">
                 <button className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined">shopping_cart</span> Buy Ebook Now</button>
                 <div className="flex gap-2">
-                    <button className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
-                        Read Sample
+                    <button 
+                        onClick={() => window.location.href = `/reading/${book.id}`}
+                        className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
+                        Read Book
                     </button>
                     <button className="px-4 border border-accent bg-accent/10 text-accent rounded-lg hover:bg-accent hover:text-white transition-all">
                         <span className="material-symbols-outlined">favorite</span>

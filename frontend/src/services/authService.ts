@@ -15,7 +15,7 @@ export const login = async (userData: LoginRequest): Promise<AuthResponse> => {
     return response.data;
 };
 
-const getStoredUserId = () => {
+export const getStoredUserId = () => {
     const userJson = localStorage.getItem('user');
     if (!userJson) return null;
     try {
