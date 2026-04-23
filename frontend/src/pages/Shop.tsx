@@ -2,14 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { BookResponse } from "../types";
 import BookCard from "../components/common/BookCard";
-import Navbar from "../components/layout/Navbar";
-
 export default function ShopPage() {
     const [books, setBooks] = useState<BookResponse[]>([]);
     const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [genres, setGenres] = useState<string[]>([]);
 
     // FILTER STATE
     const [category, setCategory] = useState<string>("");
@@ -55,21 +52,6 @@ export default function ShopPage() {
         }
     };
 
-    // load categories
-    useEffect(() => {
-        const fetchGenres = async () => {
-            try {
-                const res = await fetch('http://localhost:8080/api/categories');
-                const data = await res.json();
-                setGenres(data || []);
-            } catch (err) {
-                console.error("Lỗi load genres:", err);
-            }
-        };
-
-        fetchGenres();
-    }, []);
-
     // load books
     useEffect(() => {
         fetchBooks();
@@ -91,10 +73,6 @@ export default function ShopPage() {
         setPage(0);
     };
 
-    const handlePublisherChange = (p: string) => {
-        setPublisher(p);
-        setPage(0);
-    };
     const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") setPage(0);
     };

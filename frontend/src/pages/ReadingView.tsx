@@ -14,8 +14,6 @@ const FONT_FAMILIES = [
     { label: "Times New Roman", value: "'Times New Roman', serif" },
 ];
 
-const FONT_SIZES = [14, 16, 18, 20, 22, 24, 28];
-
 const BG_COLORS = [
     { label: "Trắng", value: "#ffffff", text: "#1a1a1a" },
     { label: "Kem", value: "#f5f0e8", text: "#2c2416" },

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { bookService } from '../services/bookService';
-import { ChevronLeft, ChevronRight, ThumbsUp, MessageSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Stars({ rating }: { rating: number }) {
   return (

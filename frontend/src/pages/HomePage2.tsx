@@ -80,7 +80,7 @@ export default function HomePage2() {
         {/* USER */}
         <div className="flex items-center gap-4">
           <img
-            src={user?.avatar || "https://i.pravatar.cc/100"}
+            src="https://i.pravatar.cc/100"
             className="w-9 h-9 rounded-full"
           />
         </div>

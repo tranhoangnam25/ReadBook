@@ -37,7 +37,7 @@ export default function BookCard(book: BookResponse) {
                         src={book.coverImage}
                         className="h-full w-full object-cover" />
                     <div className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
-                        {book.price.toFixed(2)}
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
                     </div>
                 </div>
                 <div className="space-y-1">

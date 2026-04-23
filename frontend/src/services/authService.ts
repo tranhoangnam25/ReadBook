@@ -2,7 +2,7 @@ import api from './api'; // Đảm bảo import biến api từ file config axio
 import type { RegisterRequest, LoginRequest, AuthResponse } from '../types';
 
 // Hàm lấy ID từ localStorage (giả định bạn lưu trong object 'user')
-const getStoredUserId = () => {
+export const getStoredUserId = () => {
     const userJson = localStorage.getItem('user');
     if (!userJson) return null;
     try {
