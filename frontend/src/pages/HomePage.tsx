@@ -5,11 +5,11 @@ import BookCard from "../components/common/BookCard";
 
 export default function HomePage() {
     const {
-        data: bestRatings,
-        isLoading: loadingBestRatings
+        data: bestSellers,
+        isLoading: loadingBestSellers
     } = useQuery({
         queryKey: ["bestsellers"],
-        queryFn: () => bookService.getBestRatings(4),
+        queryFn: () => bookService.getBestSellers(4),
     });
     return (
         <main className="mx-auto w-full max-w-7xl px-6 lg:px-20">
@@ -79,15 +79,15 @@ export default function HomePage() {
                     </button>
                 </div>
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                    {loadingBestRatings ? (
+                    {loadingBestSellers ? (
                         // Hiển thị skeleton khi đang tải
                         Array.from({ length: 4 }).map((_, i) => (
                             <div key={i} className="h-64 rounded-xl bg-primary/10 animate-pulse" />
                         ))
-                    ) : bestRatings?.length ? (
+                    ) : bestSellers?.length ? (
                         // BookCard là con TRỰC TIẾP của grid
-                        bestRatings.map((book: BookResponse) => (<BookCard key={book.id} {...book} />
-                            
+                        bestSellers.map((book: BookResponse) => (
+                            <BookCard key={book.id} {...book} />
                         ))
                     ) : (
                         <p className="col-span-full text-center text-primary/40 py-8">

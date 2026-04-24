@@ -9,6 +9,12 @@ export const bookService = {
         });
         return res.data;
     },
+    getBestSellers: async (limit = 4): Promise<BookResponse[]> => {
+        const res = await api.get<BookResponse[]>("/books/bestSellers", {
+            params: { limit },
+        });
+        return res.data;
+    },
     getBookById: async (id: number): Promise<BookResponse> => {
         const res = await api.get<BookResponse>(`/books/${id}`
         );

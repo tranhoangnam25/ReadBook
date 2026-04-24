@@ -85,7 +85,7 @@ export default function PaymentPage() {
             <p className="font-bold text-sm">{book.title}</p>
             <p className="text-xs text-gray-500">{book.author}</p>
             <p className="font-bold mt-1">
-              ${(book.price / 1000).toFixed(2)}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
             </p>
           </div>
 

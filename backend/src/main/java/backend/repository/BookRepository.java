@@ -20,6 +20,14 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         """)
     List<Book> findBestRatings(Pageable pageable);
 
+    @Query("""
+        SELECT b FROM Book b
+        LEFT JOIN b.orders o
+        GROUP BY b
+        ORDER BY COUNT(o) DESC
+        """)
+    List<Book> findBestSellers(Pageable pageable);
+
 
 
     // 🔍 SEARCH TITLE

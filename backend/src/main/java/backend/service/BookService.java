@@ -32,6 +32,16 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<BookResponse> getBestSellers(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+
+        return bookRepository.findBestSellers(pageable)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     // RECOMMEND
     @Transactional(readOnly = true)
     public List<BookResponse> getRecommend() {
@@ -79,6 +89,15 @@ public class BookService {
 
     // MAP ENTITY → DTO 
     private BookResponse mapToResponse(Book b) {
+        double avg = 0.0;
+        if (b.getReviews() != null && !b.getReviews().isEmpty()) {
+            avg = b.getReviews().stream()
+                    .mapToDouble(r -> r.getRating().doubleValue())
+                    .average()
+                    .orElse(0.0);
+        }
+        avg = Math.round(avg * 10.0) / 10.0;
+
         return BookResponse.builder()
                 .id(b.getId())
                 .title(b.getTitle())
@@ -88,14 +107,13 @@ public class BookService {
                 .coverImage(b.getCoverImage())
                 .fileUrl(b.getFileUrl())
                 .publishYear(b.getPublishYear())
-
-               
                 .authorName(
                         b.getAuthor() != null ? b.getAuthor().getName() : null
                 )
                 .category(
                         b.getCategory() != null ? b.getCategory().getName() : null
                 )
+                .averageRating(avg)
                 .build();
     }
 }

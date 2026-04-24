@@ -1,19 +1,32 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { bookService } from "../services/bookService";
 import { useQuery } from "@tanstack/react-query";
 import type { BookResponse } from "../types";
 import { useEffect } from "react";
 
 function Stars({ rating }: { rating: number }) {
-  return (
-    <div className="flex text-accent">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className="material-symbols-outlined text-sm">
-          {i <= rating ? "star" : "star_border"}
-        </span>
-      ))}
-    </div>
-  );
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    let icon = "star";
+    let fill = 0;
+    if (rating >= i) {
+      icon = "star";
+      fill = 1;
+    } else if (rating >= i - 0.5) {
+      icon = "star_half";
+      fill = 1;
+    }
+    stars.push(
+      <span
+        key={i}
+        className="material-symbols-outlined text-sm"
+        style={{ fontVariationSettings: `'FILL' ${fill}` }}
+      >
+        {icon}
+      </span>
+    );
+  }
+  return <div className="flex text-accent">{stars}</div>;
 }
 
 function ShowBook({ book }: { book: BookResponse }) {
@@ -44,13 +57,15 @@ const reviews = reviewPage?.content || [];
     },
   });
 
+  const { onOpenLogin } = useOutletContext<{ onOpenLogin: () => void }>();
+
   const handleBuy = async () => {
   try {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
 
     if (!user?.id) {
-      alert("Bạn chưa đăng nhập!");
+      onOpenLogin();
       return;
     }
 
@@ -102,7 +117,7 @@ const reviews = reviewPage?.content || [];
               Price
             </p>
             <p className="text-3xl font-black text-primary">
-              ${book.price}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
             </p>
           </div>
 
@@ -135,9 +150,9 @@ const reviews = reviewPage?.content || [];
           </p>
 
           <div className="flex items-center gap-3 mt-2 mb-6">
-            <Stars rating={4} />
+            <Stars rating={book.averageRating || 0} />
             <span className="font-bold text-primary">
-              4.5
+              {book.averageRating || 0}
             </span>
 
             <span className="text-primary/30">|</span>

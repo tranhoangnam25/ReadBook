@@ -11,6 +11,7 @@ export interface BookResponse {
     publishYear: number
     createdAt: Date
     updatedAt: Date
+    averageRating?: number
 }
 export interface RegisterRequest {
     username?: string;

@@ -2,5 +2,7 @@ package backend.enums;
 
 public enum StatusReview {
     HIDE,
-    VISIBLE
+    VISIBLE,
+    hide,
+    visible
 }

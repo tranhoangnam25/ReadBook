@@ -34,6 +34,12 @@ public class BookController {
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(bookService.getBestRating(limit));
     }
+
+    @GetMapping("/bestSellers")
+    public ResponseEntity<List<BookResponse>> getBestSellingBooks(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(bookService.getBestSellers(limit));
+    }
     @GetMapping("/recommends")
     public List<BookResponse> getRecommend() {
     return bookService.getRecommend();

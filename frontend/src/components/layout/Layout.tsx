@@ -17,7 +17,7 @@ export function Layout({onOpenRegister, onOpenLogin, isLoggedIn}: LayoutProps) {
                 isLoggedIn={isLoggedIn}
             />
             <main className="flex-1">
-                <Outlet/>
+                <Outlet context={{ onOpenLogin, onOpenRegister }} />
             </main>
             <Footer/>
         </div>

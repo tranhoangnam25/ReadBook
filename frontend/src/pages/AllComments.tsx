@@ -5,19 +5,28 @@ import { bookService } from '../services/bookService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Stars({ rating }: { rating: number }) {
-  return (
-    <div className="flex text-accent">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span
-          key={i}
-          className="material-symbols-outlined text-sm"
-          style={{ fontVariationSettings: i <= rating ? "'FILL' 1" : "'FILL' 0" }}
-        >
-          star
-        </span>
-      ))}
-    </div>
-  );
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    let icon = "star";
+    let fill = 0;
+    if (rating >= i) {
+      icon = "star";
+      fill = 1;
+    } else if (rating >= i - 0.5) {
+      icon = "star_half";
+      fill = 1;
+    }
+    stars.push(
+      <span
+        key={i}
+        className="material-symbols-outlined text-sm"
+        style={{ fontVariationSettings: `'FILL' ${fill}` }}
+      >
+        {icon}
+      </span>
+    );
+  }
+  return <div className="flex text-accent">{stars}</div>;
 }
 
 export default function AllCommentsPage() {
@@ -93,7 +102,7 @@ export default function AllCommentsPage() {
 
             <div className="bg-white/50 p-6 rounded-3xl border border-white shadow-sm">
               <p className="text-[10px] uppercase tracking-[0.25em] text-primary/30 font-black mb-2">Investment</p>
-              <p className="text-5xl font-black text-primary tracking-tighter">${book.price}</p>
+              <p className="text-5xl font-black text-primary tracking-tighter">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}</p>
             </div>
 
             <div className="bg-primary p-6 rounded-3xl shadow-xl shadow-primary/20">

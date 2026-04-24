@@ -25,4 +25,5 @@ public class BookResponse {
     private Integer publishYear;
     private String authorName;
     private String category;
+    private Double averageRating;
 }

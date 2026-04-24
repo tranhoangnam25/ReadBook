@@ -44,8 +44,8 @@ export default function BookCard(book: BookResponse) {
                     <h4 className="text-lg font-bold text-primary">{book.title}</h4>
                     <p className="text-sm text-primary/60">{book.authorName}</p>
                     <div className="flex items-center gap-1">
-                        {renderStars(book.previewPercentage / 20)}
-                        <span className="ml-1 text-xs font-semibold text-primary/40">{book.previewPercentage / 20}</span>
+                        {renderStars(book.averageRating || 0)}
+                        <span className="ml-1 text-xs font-semibold text-primary/40">{book.averageRating || 0}</span>
                     </div>
                 </div>
             </div>
