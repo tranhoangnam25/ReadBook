@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ReactReader, ReactReaderStyle } from "react-reader";
 import type { Rendition } from "epubjs";
 import { bookService } from "../services/bookService";
@@ -45,6 +45,12 @@ export default function ReadingViewer() {
     const [toc, setToc] = useState<any[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
     const saveProgressTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    // ===== READ SAMPLE =====
+    const [searchParams] = useSearchParams();
+    const isSample = searchParams.get("isSample") === "true";
+    const [isLimitReached, setIsLimitReached] = useState(false);
+    const pageFlipsRef = useRef(0); // Đếm số lần lật trang (fallback)
 
     const getReaderStyles = useCallback((bg: (typeof BG_COLORS)[0]) => {
         // We override ReactReaderStyle to hide default Header and TOC
@@ -173,28 +179,65 @@ export default function ReadingViewer() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showPanel]);
 
+    /**
+     * Tính % vị trí hiện tại trong sách — kết hợp 3 chiến lược:
+     * 1. Multi-spine: dùng spine index (chính xác, không cần generate)
+     * 2. Single-spine: dùng displayed.page/total (không cần generate, không bị sandbox)
+     * 3. Fallback: đếm page flips so với ước lượng tổng
+     */
+    const calculatePositionPercent = (rend: Rendition): number => {
+        const loc = rend.location?.start;
+        if (!loc) return 0;
+
+        const spineItems = (rend.book as any)?.spine?.items ?? [];
+        const spineTotal: number = spineItems.length;
+        const currentIndex: number = loc.index ?? 0;
+
+        // Chiến lược 1: Multi-spine EPUB
+        if (spineTotal > 1) {
+            return Math.round((currentIndex / spineTotal) * 100 * 10) / 10;
+        }
+
+        // Chiến lược 2: Single-spine — dùng displayed page
+        const displayed = loc.displayed;
+        if (displayed && displayed.total > 1) {
+            return Math.round((displayed.page / displayed.total) * 100 * 10) / 10;
+        }
+
+        // Chiến lược 3: Fallback bằng page-flip counter
+        // Ước tính 1 cuốn sách ~300 trang trung bình
+        const estimatedTotalPages = 300;
+        return Math.min(Math.round((pageFlipsRef.current / estimatedTotalPages) * 100 * 10) / 10, 100);
+    };
+
     const handleLocationChanged = (epubcfi: string) => {
         setLocation(epubcfi);
-        
-        if (!userId || !bookId) return;
+        pageFlipsRef.current += 1;
+
+        const rend = renditionRef.current;
+        const percentValue = rend ? calculatePositionPercent(rend) : 0;
+
+        // ===== PAYWALL CHECK (isSample mode) =====
+        if (isSample && book && book.previewPercentage != null) {
+            // Normalize: previewPercentage < 1 → dạng 0.15 (BigDecimal), >= 1 → dạng 15
+            const limit = book.previewPercentage < 1 ? book.previewPercentage * 100 : book.previewPercentage;
+
+            if (percentValue > limit) {
+                setIsLimitReached(true);
+                return;
+            }
+        }
+
+        if (!userId || !bookId || isSample) return;
 
         if (saveProgressTimeout.current) {
             clearTimeout(saveProgressTimeout.current);
         }
 
         saveProgressTimeout.current = setTimeout(() => {
-            const rend = renditionRef.current;
-            let percentValue = 0;
-            if (rend && rend.location && rend.location.start) {
-                // Lấy phần trăm nếu có (cần generate locations trước, tuỳ thuộc file epub)
-                const percentage = rend.location.start.percentage;
-                if (percentage) {
-                    percentValue = Math.round(percentage * 100 * 100) / 100;
-                }
-            }
             bookService.saveReadingProgress(userId, Number(bookId), epubcfi, percentValue)
                 .catch(e => console.error("Lỗi khi lưu tiến độ:", e));
-        }, 1500); // Lưu sau 1.5s để tránh call API quá nhiều
+        }, 1500);
     };
 
     if (loading) {
@@ -225,9 +268,7 @@ export default function ReadingViewer() {
         );
     }
 
-    // Default to a test EPUB if file_url from DB is just a dummy path without an actual file server yet
-    const defaultTestUrl = "https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/Doi-Dich-Edited.epub";
-    const finalEpubUrl = book.fileUrl?.startsWith("http") ? book.fileUrl : defaultTestUrl;
+    const finalEpubUrl = book.fileUrl;
 
     return (
         <div className="flex flex-col h-screen relative overflow-hidden transition-colors duration-300" style={{ background: bgColor.value, color: bgColor.text }}>
@@ -364,20 +405,36 @@ export default function ReadingViewer() {
                         </div>
                     ) : (
                         <ul className="space-y-0.5">
-                            {toc.map((item, index) => (
-                                <li key={index}>
-                                    <button 
-                                        onClick={() => {
-                                            setLocation(item.href);
-                                            setShowTocSidebar(false);
-                                        }}
-                                        className="w-full text-left py-2.5 px-3 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-[13px] truncate"
-                                        style={{ color: isDark ? "#ddd" : "#444" }}
-                                    >
-                                        {item.label}
-                                    </button>
-                                </li>
-                            ))}
+                            {(() => {
+                                const renderTocItems = (items: any[], level = 0) => {
+                                    return items.map((item, index) => (
+                                        <li key={`${level}-${index}`}>
+                                            <button 
+                                                onClick={() => {
+                                                    setLocation(item.href);
+                                                    setShowTocSidebar(false);
+                                                }}
+                                                className="w-full text-left py-2.5 px-3 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-[13px] truncate flex items-center gap-2"
+                                                style={{ 
+                                                    color: isDark ? "#ddd" : "#444",
+                                                    paddingLeft: `${level * 16 + 12}px` 
+                                                }}
+                                            >
+                                                {level > 0 && (
+                                                    <span className="w-1 h-1 rounded-full bg-current opacity-30 shrink-0" />
+                                                )}
+                                                <span className="truncate">{item.label}</span>
+                                            </button>
+                                            {item.subitems && item.subitems.length > 0 && (
+                                                <ul className="space-y-0.5">
+                                                    {renderTocItems(item.subitems, level + 1)}
+                                                </ul>
+                                            )}
+                                        </li>
+                                    ));
+                                };
+                                return renderTocItems(toc);
+                            })()}
                         </ul>
                     )}
                 </div>
@@ -400,6 +457,7 @@ export default function ReadingViewer() {
                     readerStyles={getReaderStyles(bgColor)}
                     getRendition={(rend: Rendition) => {
                         renditionRef.current = rend;
+
                         rend.themes.default({
                             body: {
                                 "font-family": `${fontFamily} !important`,
@@ -407,7 +465,7 @@ export default function ReadingViewer() {
                                 "background": `${bgColor.value} !important`,
                                 "color": `${bgColor.text} !important`,
                                 "line-height": "1.8 !important",
-                                "padding-top": "40px !important", // Khoảng trống cho Header
+                                "padding-top": "40px !important",
                                 "padding-bottom": "60px !important",
                             },
                             p: {
@@ -425,6 +483,51 @@ export default function ReadingViewer() {
                     }}
                 />
             </div>
+
+            {/* ===== PAYWALL OVERLAY ===== */}
+            {isLimitReached && (
+                <div
+                    className="fixed inset-0 z-[200] flex flex-col items-center justify-end"
+                    style={{
+                        background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.97) 100%)",
+                        backdropFilter: "blur(2px)",
+                    }}
+                >
+                    <div
+                        className="w-full max-w-md mx-auto px-8 pb-16 pt-10 text-center"
+                    >
+                        <span
+                            className="material-symbols-outlined text-5xl mb-4 block"
+                            style={{ color: "#e8c98a" }}
+                        >
+                            lock
+                        </span>
+                        <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
+                            Bạn đã đọc hết phần thử miễn phí
+                        </h2>
+                        <p className="text-white/60 text-sm mb-8 leading-relaxed">
+                            Mua sách để tiếp tục đọc và mở khoá toàn bộ nội dung.
+                        </p>
+                        <button
+                            onClick={() => navigate(`/book-detail/${book?.id}`)}
+                            className="w-full py-4 rounded-2xl font-black text-base tracking-wide transition-all hover:scale-105 active:scale-95"
+                            style={{
+                                background: "linear-gradient(135deg, #e8c98a 0%, #c9a84c 100%)",
+                                color: "#1a1200",
+                                boxShadow: "0 8px 32px rgba(232,201,138,0.4)",
+                            }}
+                        >
+                            Mua sách ngay →
+                        </button>
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="w-full py-3 mt-3 rounded-2xl font-bold text-sm text-white/50 hover:text-white/80 transition-colors"
+                        >
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

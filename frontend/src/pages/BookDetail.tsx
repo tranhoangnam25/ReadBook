@@ -129,9 +129,12 @@ const reviews = reviewPage?.content || [];
           </button>
 
           <div className="flex gap-2">
-            <button className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all">
-                        Read Sample
-                    </button>
+            <button
+              onClick={() => navigate(`/reading/${book.id}?isSample=true`)}
+              className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all"
+            >
+              Read Sample
+            </button>
 
            <button className="px-4 border border-accent bg-accent/10 text-accent rounded-lg hover:bg-accent hover:text-white transition-all">
                         <span className="material-symbols-outlined">favorite</span>
