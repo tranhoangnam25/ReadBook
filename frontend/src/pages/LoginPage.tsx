@@ -31,21 +31,21 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                 email: formData.email,
                 password: formData.password
             });
-
+            console.log(response);
             if (response) {
                 // 1. Lưu Token
-                if (response.token) {
-                    localStorage.setItem('token', response.token);
+                if (response.data?.token) {
+                    localStorage.setItem('token', response.data.token);
                 }
 
                 // 2. Lưu đối tượng user (để hiển thị tên/ảnh đại diện)
-                if (response.user) {
-                    localStorage.setItem('user', JSON.stringify(response.user));
+                if (response.data?.user) {
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
 
                     // 3. QUAN TRỌNG: Lưu userId riêng biệt để hàm updateProfile sử dụng
                     // Giả sử backend trả về id trong response.user.id
-                    if (response.user.id) {
-                        localStorage.setItem('userId', response.user.id.toString());
+                    if (response.data.user.id) {
+                        localStorage.setItem('userId', response.data.user.id.toString());
                     }
                 }
             }

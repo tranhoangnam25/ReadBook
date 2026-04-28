@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "../services/api";
 import type { BookResponse } from "../types";
 import BookCard from "../components/common/BookCard";
 export default function ShopPage() {
@@ -26,30 +27,29 @@ export default function ShopPage() {
 
     // ===== FETCH BOOKS =====
     const fetchBooks = async (overridePage?: number) => {
-        try {
-            const p = overridePage !== undefined ? overridePage : page;
+      try {
+        const p = overridePage !== undefined ? overridePage : page;
 
-            let url = `http://localhost:8080/api/books?page=${p}&size=10`;
+        const res = await api.get("/books", {
+          params: {
+            page: p,
+            size: 10,
+            ...(keyword.trim() !== "" && { keyword }),
+            ...(category && { category }),
+            // ...(year && { year }),
+            // ...(format && { format }),
+            // ...(publisher && { publisher }),
+          }
+        });
 
-            if (keyword.trim() !== "")
-                url += `&keyword=${encodeURIComponent(keyword)}`;
+        const data = res.data;
 
-            if (category)
-                url += `&category=${encodeURIComponent(category)}`;
+        setBooks(data.content || []);
+        setTotalPages(data.totalPages || 1);
 
-            // nếu backend chưa có thì comment
-            // if (year) url += `&year=${year}`;
-            // if (format) url += `&format=${format}`;
-            // if (publisher) url += `&publisher=${publisher}`;
-
-            const res = await fetch(url);
-            const data = await res.json();
-
-            setBooks(data.content || []);
-            setTotalPages(data.totalPages || 1);
-        } catch (err) {
-            console.error("Lỗi load books:", err);
-        }
+      } catch (err) {
+        console.error("Lỗi load books:", err);
+      }
     };
 
     // load books

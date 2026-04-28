@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 type Review = {
   id: number;
@@ -37,25 +38,25 @@ export default function ReviewPage() {
     if (!id) return;
 
     // Book detail
-    fetch(`http://localhost:8080/api/books/${id}`)
-      .then(res => res.json())
-      .then(setBook);
+    api.get(`/books/${id}`)
+      .then(res => setBook(res.data));
 
     // Reviews
-    fetch(`http://localhost:8080/api/reviews/book/${id}`)
-      .then(res => res.json())
-      .then(setReviews);
+    api.get(`/reviews/book/${id}`)
+      .then(res => setReviews(res.data));
 
-    // Related books (pagination FIX)
-    fetch(`http://localhost:8080/api/books`)
-      .then(res => res.json())
-      .then(data => {
-        const books = data.content || [];
+    // Related books
+    api.get(`/books`, {
+      params: { page: 0, size: 10 }
+    })
+      .then(res => {
+        const books = res.data.content || [];
         const filtered = books.filter(
           (b: Book) => b.id != Number(id)
         );
         setRelatedBooks(filtered.slice(0, 5));
       });
+
   }, [id]);
 
   // ================= ORDER =================
@@ -66,10 +67,13 @@ export default function ReviewPage() {
       return;
     }
 
-    const res = await fetch(
-      `http://localhost:8080/api/orders?userId=${user.id}&bookId=${id}&price=${book?.price}`,
-      { method: "POST" }
-    );
+    const res = await api.post("/orders", null, {
+        params: {
+          userId: user.id,
+          bookId: id,
+          price: book?.price
+        }
+      });
 
     const data = await res.json();
     const orderId = data.orderId || data.id;
@@ -83,31 +87,30 @@ export default function ReviewPage() {
 
     const myReview = reviews.find(r => r.userId === user.id);
 
-    // ❌ đã review rồi
+
     if (myReview && !editingId) {
       return alert("Bạn đã đánh giá rồi!");
     }
 
     if (editingId) {
       // UPDATE
-      await fetch(
-        `http://localhost:8080/api/reviews/${editingId}?userId=${user.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rating, comment }),
-        }
-      );
+      await api.put(`/reviews/${editingId}`, {
+            rating,
+            comment
+          }, {
+            params: { userId: user.id }
+          });
     } else {
       // CREATE
-      await fetch(
-        `http://localhost:8080/api/reviews?userId=${user.id}&bookId=${id}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rating, comment }),
-        }
-      );
+      await api.post(`/reviews`, {
+            rating,
+            comment
+          }, {
+            params: {
+              userId: user.id,
+              bookId: id
+            }
+          });
     }
 
     setRating(5);
@@ -115,18 +118,16 @@ export default function ReviewPage() {
     setEditingId(null);
 
     // reload reviews
-    fetch(`http://localhost:8080/api/reviews/book/${id}`)
-      .then(res => res.json())
-      .then(setReviews);
+    const res = await api.get(`/reviews/book/${id}`);
+      setReviews(res.data);
   };
 
   const handleDelete = async (reviewId: number) => {
     if (!user) return;
 
-    await fetch(
-      `http://localhost:8080/api/reviews/${reviewId}?userId=${user.id}`,
-      { method: "DELETE" }
-    );
+    await api.delete(`/reviews/${reviewId}`, {
+       params: { userId: user.id }
+     });
 
     setReviews(reviews.filter(r => r.id !== reviewId));
   };

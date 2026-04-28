@@ -2,16 +2,20 @@ package backend.controller;
 
 import backend.dto.request.RegisterRequest;
 import backend.dto.request.LoginRequest;
+import backend.dto.response.ApiResponse;
 import backend.dto.response.AuthResponse;
 import backend.dto.response.UserResponseDTO;
 import backend.entity.User;
 import backend.enums.Role;
 import backend.enums.StatusUser;
 import backend.repository.UserRepository;
+import backend.service.AuthService;
 import backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,7 +27,14 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
@@ -36,7 +47,7 @@ public class AuthController {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(request.getPassword()) // Nhớ mã hóa BCrypt sau này nhé
+                .password(passwordEncoder.encode(request.getPassword()))
                 .phone("N/A")
                 .role(Role.USR)
                 .status(StatusUser.ACTIVE)
@@ -47,21 +58,11 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Đăng ký thành công!"));
     }
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        // Tìm user theo email
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
-
-        // So sánh mật khẩu
-        if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
-
-            // Tạo thông tin user an toàn để trả về
-            UserResponseDTO userDto = new UserResponseDTO(user.getId(), user.getUsername(), user.getEmail());
-
-            // Token ảo (Sau này thay bằng JWT thực tế)
-            String token = "dummy-jwt-token-123";
-
-            return ResponseEntity.ok(new AuthResponse(true, "Đăng nhập thành công", token, userDto));
-        }
-        return ResponseEntity.status(401).body(new AuthResponse(false, "Sai tài khoản hoặc mật khẩu", null, null));
+    ApiResponse<AuthResponse> authenticate(@RequestBody LoginRequest request){
+        var result = authService.authenticate(request);
+        return ApiResponse.<AuthResponse>builder()
+                .data(result)
+                .success(true)
+                .build();
     }
 }

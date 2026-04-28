@@ -4,6 +4,10 @@ server:
   tomcat:
     uri-encoding: UTF-8
 
+jwt:
+  secret: "9f3c7a1e5b8d2c4f6a9e0b7d1c3f8a2e4b6c9d0f1a2b3c4d5e6f7a8b9c0d1e2"
+  expiration: 900
+
 spring:
 
   application:
@@ -12,7 +16,7 @@ spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=ebook_store;encrypt=false;trustServerCertificate=true
     username: sa
-    password: 1
+    password: 123456
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
     hikari:

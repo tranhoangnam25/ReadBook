@@ -12,7 +12,7 @@ import org.hibernate.internal.build.AllowNonPortable;
 @NoArgsConstructor
 @Builder
 public class AuthResponse {
-    private boolean success;
+    private boolean authenticated;
     private String message;
     private String token;
     private UserResponseDTO user;

@@ -3,6 +3,7 @@ import { bookService } from "../services/bookService";
 import { useQuery } from "@tanstack/react-query";
 import type { BookResponse } from "../types";
 import { useEffect } from "react";
+import api from "../services/api";
 
 function Stars({ rating }: { rating: number }) {
   const stars = [];
@@ -36,9 +37,8 @@ function ShowBook({ book }: { book: BookResponse }) {
   const { data: reviewPage } = useQuery({
     queryKey: ["reviews", book.id],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:8080/api/reviews/book/${book.id}`);
-      if (!res.ok) throw new Error();
-      return res.json();
+      const res = await api.get(`/reviews/book/${book.id}`);
+      return res.data;
     },
   });
 
@@ -49,56 +49,56 @@ const reviews = reviewPage?.content || [];
   const { data: relatedBooks = [] } = useQuery({
     queryKey: ["related"],
     queryFn: async () => {
-      const res = await fetch(
-        "http://localhost:8080/api/books/recommends"
-      );
-      if (!res.ok) throw new Error();
-      return res.json();
+      const res = await api.get("/books/recommends");
+      return res.data;
     },
   });
 
   const { onOpenLogin } = useOutletContext<{ onOpenLogin: () => void }>();
 
   const handleBuy = async () => {
-  try {
-    const userStr = localStorage.getItem("user");
-    const user = userStr ? JSON.parse(userStr) : null;
+    try {
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
 
-    if (!user?.id) {
-      onOpenLogin();
-      return;
+      if (!user?.id) {
+        onOpenLogin();
+        return;
+      }
+
+      if (!book?.id) {
+        alert("Không có book id");
+        return;
+      }
+
+      const res = await api.post("/orders", null, {
+        params: {
+          userId: user.id,
+          bookId: book.id,
+          price: book.price
+        }
+      });
+
+      const data = res.data;
+
+      console.log("ORDER RESPONSE =", data);
+
+      const orderId =
+        data.orderId ||
+        data.id ||
+        data.order?.id;
+
+      if (!orderId) {
+        alert("orderId undefined");
+        return;
+      }
+
+      navigate(`/payment/${orderId}/${book.id}`);
+    } catch (e) {
+      console.error(e);
+      alert("Tạo order lỗi");
     }
-
-    if (!book?.id) {
-      alert("Không có book id");
-      return;
-    }
-
-    const res = await fetch(
-      `http://localhost:8080/api/orders?userId=${user.id}&bookId=${book.id}&price=${book.price}`,
-      { method: "POST" }
-    );
-
-    const data = await res.json();
-
-    console.log("ORDER RESPONSE =", data);
-
-    const orderId =
-      data.orderId ||
-      data.id ||
-      data.order?.id;
-
-    if (!orderId) {
-      alert("orderId undefined");
-      return;
-    }
-
-    navigate(`/payment/${orderId}/${book.id}`);
-  } catch (e) {
-    console.error(e);
-    alert("Tạo order lỗi");
-  }
-};
+  };
 
   return (
     <>

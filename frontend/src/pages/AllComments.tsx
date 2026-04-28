@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { bookService } from '../services/bookService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import api from "../services/api";
 
 function Stars({ rating }: { rating: number }) {
   const stars = [];
@@ -51,9 +52,13 @@ export default function AllCommentsPage() {
   const { data: reviewPage, isLoading: isReviewsLoading } = useQuery({
     queryKey: ["reviews", "all", id, page],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:8080/api/reviews/book/${id}?page=${page}&size=${size}`);
-      if (!res.ok) throw new Error("Backend Error");
-      return res.json();
+      const res = await api.get(`/reviews/book/${id}`, {
+        params: {
+          page,
+          size
+        }
+      });
+      return res.data;
     },
     enabled: !!id,
   });

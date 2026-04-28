@@ -26,7 +26,7 @@ export interface AuthResponse {
 
     success: boolean;
     message: string;
-    token?: string; // THÊM DÒNG NÀY (dấu ? nghĩa là có thể có hoặc không)
+    token?: string;
     user?: {
         id: number;
         username: string;

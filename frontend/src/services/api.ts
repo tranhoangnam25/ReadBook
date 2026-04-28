@@ -8,4 +8,31 @@ const api: AxiosInstance = axios.create({
         "Content-Type": "application/json",
     },
 });
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Token hết hạn → logout");
+
+      // 🔥 Xóa toàn bộ session
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userId");
+
+      window.dispatchEvent(new Event("logout"));
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api;

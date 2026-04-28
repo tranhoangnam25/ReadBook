@@ -1,8 +1,7 @@
 /* cspell:disable */
 import React, { useEffect, useState } from "react";
 import type { User, Reading, HistoryItem, Book } from "../types";
-
-const BASE_URL = "http://localhost:8080";
+import api from "../services/api";
 
 export default function HomePageUser() {
   // State chính
@@ -31,10 +30,10 @@ export default function HomePageUser() {
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) return;
-      const res = await fetch(`${BASE_URL}/api/users/me?id=${userId}`);
-      if (!res.ok) throw new Error("User API lỗi");
-      const data = await res.json();
-      setUser(data);
+      const res = await api.get("/users/me", {
+        params: { id: userId },
+      });
+      setUser(res.data);
     } catch (err) {
       console.error("fetchUser:", err);
     }
@@ -43,10 +42,12 @@ export default function HomePageUser() {
   const fetchReading = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const res = await fetch(`${BASE_URL}/api/users/me/reading?id=${userId || 1}`);
-      if (!res.ok) throw new Error("Reading API lỗi");
-      const data = await res.json();
-      setReading(data);
+
+      const res = await api.get("/users/me/reading", {
+        params: { id: userId },
+      });
+
+      setReading(res.data);
     } catch (err) {
       console.error("fetchReading:", err);
     }
@@ -54,10 +55,8 @@ export default function HomePageUser() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/users/me/history`);
-      if (!res.ok) throw new Error("History API lỗi");
-      const data = await res.json();
-      setHistory(data || []);
+      const res = await api.get("/users/me/history");
+      setHistory(res.data || []);
     } catch (err) {
       console.error("fetchHistory:", err);
     }
@@ -65,10 +64,8 @@ export default function HomePageUser() {
 
   const fetchRecommend = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/books/recommends`);
-      if (!res.ok) throw new Error("Recommend API lỗi");
-      const data = await res.json();
-      setBooks(data || []);
+      const res = await api.get("/books/recommends");
+      setBooks(res.data || []);
     } catch (err) {
       console.error("fetchRecommend:", err);
     }
@@ -77,10 +74,10 @@ export default function HomePageUser() {
   const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       try {
-        const res = await fetch(`${BASE_URL}/api/books/search?keyword=${keyword}`);
-        if (!res.ok) throw new Error("Search API lỗi");
-        const data = await res.json();
-        setBooks(data || []);
+        const res = await api.get("/books/search", {
+          params: { keyword },
+        });
+        setBooks(res.data || []);
       } catch (err) {
         console.error("search:", err);
       }

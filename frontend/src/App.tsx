@@ -1,7 +1,7 @@
 /* cspell:disable */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Chú ý kiểm tra chính xác tên file hoa/thường (LoginPage vs loginPage)
 import HomePage from "./pages/HomePage";
@@ -38,6 +38,16 @@ function App() {
     setIsLoggedIn(true);
     setIsLoginOpen(false); // Đóng modal khi thành công
   };
+    useEffect(() => {
+      const handleLogout = () => {
+        setIsLoggedIn(false);
+        setIsLoginOpen(true); // 🔥 mở modal login luôn
+      };
+
+      window.addEventListener("logout", handleLogout);
+
+      return () => window.removeEventListener("logout", handleLogout);
+    }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

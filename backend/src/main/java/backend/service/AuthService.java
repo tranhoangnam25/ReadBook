@@ -1,45 +1,51 @@
 package backend.service;
 
-import backend.dto.request.RegisterRequest;
-import backend.entity.User;
-import backend.enums.Role;
-import backend.enums.StatusUser;
+import backend.dto.request.LoginRequest;
+import backend.dto.response.AuthResponse;
+import backend.dto.response.UserResponseDTO;
+import backend.exception.AppException;
+import backend.exception.ErrorCode;
 import backend.repository.UserRepository;
+import com.nimbusds.jose.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
-@RestController
+@Slf4j
 @Service
 @RequiredArgsConstructor
 
 public class AuthService {
-//    private final UserRepository userRepository;
-//
-//    public void register(@RequestBody RegisterRequest request) {
-//        if (userRepository.existsByUsername(request.getUsername())) {
-//            return ResponseEntity.badRequest().body(Map.of("message", "Tên đăng nhập đã tồn tại"));
-//        }
-//        if (userRepository.existsByEmail(request.getEmail())) {
-//            return ResponseEntity.badRequest().body(Map.of("message", "Email đã được sử dụng"));
-//        }
-//        User user = User.builder()
-//                .username(request.getUsername())
-//                .email(request.getEmail())
-//                .password(request.getPassword()) // Nhớ mã hóa BCrypt sau này nhé
-//                .phone("N/A")
-//                .role(Role.USR)
-//                .status(StatusUser.ACTIVE)
-//                .createdAt(LocalDateTime.now())
-//                .updatedAt(LocalDateTime.now())
-//                .build();
-//        userRepository.save(user);
-//        return ResponseEntity.ok(Map.of("success", true, "message", "Đăng ký thành công!"));
-//    }
+
+
+
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    public AuthResponse authenticate(LoginRequest request){
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
+
+        boolean authenticated =  passwordEncoder.matches( request.getPassword(), user.getPassword());
+        if(!authenticated){
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        String token = jwtService.generateToken(request.getEmail());
+
+
+        UserResponseDTO userDTO = UserResponseDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+
+        return AuthResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .user(userDTO)
+                .build();
+    }
+
 }

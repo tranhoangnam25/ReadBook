@@ -11,6 +11,7 @@ import backend.repository.ReadingProgressRepository;
 import backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +25,8 @@ public class UserService {
     private final backend.repository.BookRepository bookRepository;
     private final ReadingProgressRepository repo;
 
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     // ================= USER CRUD =================
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -131,16 +133,16 @@ public class UserService {
         if (request.getCurrentPassword() == null) {
             throw new RuntimeException("Phải nhập mật khẩu hiện tại!");
         }
-        if (!request.getCurrentPassword().equals(user.getPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu hiện tại không đúng!");
         }
         if (request.getPassword() == null || request.getPassword().length() < 6) {
             throw new RuntimeException("Mật khẩu mới phải >= 6 ký tự");
         }
-        if (request.getPassword().equals(user.getPassword())) {
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu mới không được trùng mật khẩu cũ");
         }
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
     }
 }

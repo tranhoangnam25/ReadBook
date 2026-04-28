@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import api from "../services/api";
 
 type Book = {
   id: number;
@@ -19,10 +20,10 @@ export default function PaymentPage() {
   useEffect(() => {
     if (!bookId) return;
 
-    fetch(`http://localhost:8080/api/books/${bookId}`)
-      .then((res) => res.json())
-      .then(setBook)
+    api.get(`/books/${bookId}`)
+      .then(res => setBook(res.data))
       .catch(console.error);
+
   }, [bookId]);
 
   // 🔥 HANDLE PAYOS
@@ -32,18 +33,15 @@ export default function PaymentPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        `http://localhost:8080/api/payments/create-payos?orderId=${orderId}`,
-        { method: "POST" }
-      );
+      const res = await api.post(`/payments/create-payos`, null, {
+        params: { orderId }
+      });
 
-      if (!res.ok) throw new Error("API lỗi");
-
-      const data = await res.json();
+      const data = res.data;
 
       console.log("PAYOS:", data);
 
-      // 🔥 redirect sang PayOS
+      // redirect
       window.location.href = data.checkoutUrl;
 
     } catch (err) {
