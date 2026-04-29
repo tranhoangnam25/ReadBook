@@ -55,7 +55,11 @@ public class SecurityConfig {
                                 "/api/books/bestRatings",
                                 "/api/books/recommends",
                                 "/v3/api-docs/**",
-                                "/v3/api-docs.yaml"
+                                "/v3/api-docs.yaml",
+                                "/payment-success/**",
+                                "/payment-cancel/**",
+
+                                "/api/payments/payos/webhook"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -64,6 +68,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
                             response.getWriter().write("Unauthorized : token expired or missing");
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("text/plain; charset=UTF-8");
                         })
                 );
 
