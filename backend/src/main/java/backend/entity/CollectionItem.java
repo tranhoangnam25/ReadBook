@@ -1,5 +1,6 @@
 package backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class CollectionItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "collection_item_id", nullable = false, updatable = false)
     private Long id;
 
     @Column(name = "added_at", nullable = false, updatable = false)
@@ -27,7 +29,8 @@ public class CollectionItem {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "collection_id", nullable = false)
+    @JsonIgnore
     private Collection collection;
 }

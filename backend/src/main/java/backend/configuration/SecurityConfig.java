@@ -44,7 +44,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .cors(cors -> {})
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -56,8 +55,7 @@ public class SecurityConfig {
                                 "/api/books/bestRatings",
                                 "/api/books/recommends",
                                 "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
-                                "/api/library/**"
+                                "/v3/api-docs.yaml"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

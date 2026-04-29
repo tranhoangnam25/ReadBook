@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 public class ChangePasswordRequest {
     private String currentPassword;
-
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 kí tự!")
     private String password;
 }
