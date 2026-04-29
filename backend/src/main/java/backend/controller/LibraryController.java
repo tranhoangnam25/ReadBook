@@ -1,8 +1,9 @@
 package backend.controller;
 
 import backend.dto.response.LibraryResponse;
-import backend.entity.ReadingProgress;
-import backend.repository.ReadingProgressRepository;
+import backend.service.ReadingProgressService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,29 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/library")
+@Tag(name = "Library", description = "Quản lý thư viện sách của người dùng") // Thêm tag cho Swagger
 public class LibraryController {
     @Autowired
-    private ReadingProgressRepository readingProgressRepository;
+    private ReadingProgressService readingProgressService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<LibraryResponse>> getMyLibrary(@PathVariable Long userId) {
-        List<ReadingProgress> progressList = readingProgressRepository.findLibraryByUserId(userId);
-
-        List<LibraryResponse> response = progressList.stream().map(rp -> LibraryResponse.builder()
-                .progressId(rp.getId())
-                .bookId(rp.getBook().getId())
-                .title(rp.getBook().getTitle())
-                .coverImage(rp.getBook().getCoverImage())
-                .status(rp.getStatus())
-                .progress(rp.getProgressPercentage())
-                .lastLocation(rp.getFiLocation())
-                .build()
-        ).toList();
-
-        return ResponseEntity.ok(response);
+    @Operation(summary = "Lấy danh sách sách trong thư viện theo userId")
+    @GetMapping(value = "/{userId}", produces = "application/json") // Chỉ định rõ trả về JSON
+    public ResponseEntity<List<LibraryResponse>> getLibrary(@PathVariable Long userId){
+        return ResponseEntity.ok(readingProgressService.getLibrary(userId));
     }
 }

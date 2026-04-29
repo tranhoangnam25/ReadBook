@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/api/books/bestRatings",
                                 "/api/books/recommends",
                                 "/v3/api-docs/**",
-                                "/v3/api-docs.yaml"
+                                "/v3/api-docs.yaml",
+                                "/api/library/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

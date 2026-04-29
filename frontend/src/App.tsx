@@ -17,6 +17,7 @@ import UserUpdatePage from "./pages/UserUpdatePage";
 import ChangePassword from "./pages/ChangePassword";
 import AllComments from "./pages/AllComments";
 import ReadingViewer from './pages/ReadingView';
+import LibraryPage from './pages/LibraryPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,7 @@ function App() {
             <Route path="/hompage2" element={<HomePage2 />} />
             <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
             <Route path="/book-detail/all-comments/:id" element={<AllComments />} />
+            <Route path="/library" element={<LibraryPage />} />
           </Route>
 
           <Route path="/reading/:bookId" element={<ReadingViewer />} />

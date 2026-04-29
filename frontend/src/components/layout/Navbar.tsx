@@ -31,6 +31,8 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
         window.location.href = "/";
     };
 
+    const isActive = (path: string) => location.pathname === path;
+
     return (
         <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 backdrop-blur-md px-6 lg:px-20 py-4">
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-8">
@@ -47,7 +49,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
 
                     <nav className="hidden md:flex items-center gap-8">
                         <a onClick={() => navigate("/")} className="text-sm font-medium hover:text-accent cursor-pointer">Explore</a>
-                        <a className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>
+                        <a onClick={() => navigate("/library")} className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>
                         <a onClick={() => navigate("/shop")} className="text-sm font-medium hover:text-accent cursor-pointer">Shop</a>
                     </nav>
                 </div>

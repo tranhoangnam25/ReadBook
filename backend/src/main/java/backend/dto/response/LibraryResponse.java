@@ -18,5 +18,5 @@ public class LibraryResponse {
     private String coverImage;
     private String status;        // "reading" | "completed" | "to_read"
     private BigDecimal progress;  // % tiến độ
-    private String lastLocation;  // Vị trí đọc cuối cùng (fiLocation)
+    private String fiLocation;  // Vị trí đọc cuối cùng (fiLocation)
 }

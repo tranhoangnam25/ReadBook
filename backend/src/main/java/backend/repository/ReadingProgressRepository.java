@@ -16,8 +16,11 @@ public interface ReadingProgressRepository extends JpaRepository<ReadingProgress
 
     java.util.Optional<ReadingProgress> findByUser_IdAndBook_Id(Long userId, Long bookId);
 
-    @Query("SELECT rp FROM ReadingProgress rp JOIN FETCH rp.book WHERE rp.user.id = :userId")
-    List<ReadingProgress> findLibraryByUserId(@Param("userId") Long userId);
+    @Query("SELECT rp FROM ReadingProgress rp " +
+            "JOIN FETCH rp.book b " +
+            "LEFT JOIN FETCH b.author " +
+            "WHERE rp.user.id = :userId")
+    List<ReadingProgress> findAllByUserIdWithBook(@Param("userId") Long userId);
 
     Optional<ReadingProgress> findByUserIdAndBookId(Long userId, Long bookId);
 }
