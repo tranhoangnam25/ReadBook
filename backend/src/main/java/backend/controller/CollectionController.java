@@ -46,4 +46,9 @@ public class CollectionController {
         );
         return ResponseEntity.ok().build();
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id){
+        collectionService.deleteCollection(id);
+        return ResponseEntity.ok().build();
+    }
 }

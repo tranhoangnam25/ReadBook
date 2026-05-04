@@ -6,6 +6,7 @@ import backend.repository.ReadingProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +25,15 @@ public class ReadingProgressService {
                 .authorName(rp.getBook().getAuthor().getName())
                 .coverImage(rp.getBook().getCoverImage())
                 .status(rp.getStatus())
-                .progress(rp.getProgressPercentage())
+                .progress(
+                        rp.getProgressPercentage() != null
+                                ? rp.getProgressPercentage().multiply(new BigDecimal(100)).intValue()
+                                : 0
+                )
                 .fiLocation(rp.getFiLocation())
                 .build()
         ).collect(Collectors.toList());
     }
+
 
 }

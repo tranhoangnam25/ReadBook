@@ -14,4 +14,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.book.id = :bookId")
     Page<Review> findByBookId(@Param("bookId") Long bookId, Pageable pageable);
+
+
 }

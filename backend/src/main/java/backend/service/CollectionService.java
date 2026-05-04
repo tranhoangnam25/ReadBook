@@ -1,21 +1,16 @@
 package backend.service;
 
 import backend.dto.response.LibraryResponse;
-import backend.entity.Book;
-import backend.entity.Collection;
-import backend.entity.CollectionItem;
-import backend.entity.User;
+import backend.entity.*;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
-import backend.repository.BookRepository;
-import backend.repository.CollectionItemRepository;
-import backend.repository.CollectionRepository;
-import backend.repository.UserRepository;
+import backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +25,8 @@ public class CollectionService {
     private final UserRepository userRepository;
 
     private final BookRepository bookRepository;
+
+    private final ReadingProgressRepository readingProgressRepository;
 
     // tao collection trống
     @Transactional
@@ -46,17 +43,48 @@ public class CollectionService {
 
     //lay danh sach 1 col cu the
     public List<LibraryResponse> getBooksInCollection(Long collectionId){
+        Collection collection = collectionRepository.findById(collectionId).orElseThrow(()-> new AppException(ErrorCode.COLLECTION_NOT_FOUND));
+
+        Long userId = collection.getUser().getId();
         List<CollectionItem> items = itemRepository.findAllByCollectionId(collectionId);
 
         return items.stream().map(item -> {
             Book book = item.getBook();
+
+            ReadingProgress rp = readingProgressRepository
+                    .findByUserIdAndBookId(userId, book.getId())
+                    .orElse(null);
+
             return LibraryResponse.builder()
                     .bookId(book.getId())
                     .title(book.getTitle())
                     .authorName(book.getAuthor() != null ? book.getAuthor().getName() : "Unknown")
                     .coverImage(book.getCoverImage())
+                    .status(rp != null ? rp.getStatus() : "to_read")
+                    .progress(
+                            rp != null && rp.getProgressPercentage() != null
+                                    ? rp.getProgressPercentage().multiply(new BigDecimal(100)).intValue()
+                                    : 0
+                    )
+                    .fiLocation(rp != null ? rp.getFiLocation() : null)
                     .build();
-        }).collect(Collectors.toList());
+        }).toList();
+    }
+    private LibraryResponse toLibraryResponse(ReadingProgress rp) {
+        return LibraryResponse.builder()
+                .progressId(rp.getId())
+                .bookId(rp.getBook().getId())
+                .title(rp.getBook().getTitle())
+                .authorName(rp.getBook().getAuthor().getName())
+                .coverImage(rp.getBook().getCoverImage())
+                .status(rp.getStatus())
+                .progress(
+                        rp.getProgressPercentage() != null
+                                ? rp.getProgressPercentage().multiply(new BigDecimal(100)).intValue()
+                                : 0
+                )
+                .fiLocation(rp.getFiLocation())
+                .build();
     }
 
     // them sach vao bo suu tap
@@ -80,5 +108,18 @@ public class CollectionService {
 
     public List<Collection> getCollectionsByUserId(Long userId){
         return collectionRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Transactional
+    public void deleteCollection(Long id) {
+        if (!collectionRepository.existsById(id)) {
+            throw new RuntimeException("Collection not found");
+        }
+
+        // 🔥 xoá toàn bộ item trước
+        itemRepository.deleteByCollectionId(id);
+
+        // 🔥 sau đó xoá collection
+        collectionRepository.deleteById(id);
     }
 }

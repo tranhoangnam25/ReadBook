@@ -18,6 +18,7 @@ import ChangePassword from "./pages/ChangePassword";
 import AllComments from "./pages/AllComments";
 import ReadingViewer from './pages/ReadingView';
 import LibraryPage from './pages/LibraryPage';
+import CollectionPage from './pages/CollectionPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,7 +70,7 @@ function App() {
               index
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
             />
-
+            <Route path="/collection/:id" element={<CollectionPage />} />
             <Route path="/users/me/profile" element={<UserUpdatePage />} />
             <Route path="/users/me/change-password" element={<ChangePassword />} />
             <Route path="/users/me/update/:id" element={<UserUpdatePage />} />

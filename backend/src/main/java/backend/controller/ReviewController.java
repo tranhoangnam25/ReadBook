@@ -26,7 +26,7 @@ public class ReviewController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "4") int size
     ) {
-        // Trả về đối tượng Page chứa: content, totalPages, totalElements...
+
         Page<Review> reviews = reviewService.getByBookId(bookId, page, size);
         return ResponseEntity.ok(reviews);
     }

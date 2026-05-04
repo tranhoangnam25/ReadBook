@@ -15,5 +15,6 @@ public interface CollectionItemRepository extends JpaRepository<CollectionItem, 
             "JOIN FETCH b.author a " +
             "WHERE ci.collection.id = :collectionId")
     List<CollectionItem> findAllByCollectionId(@Param("collectionId") Long collectionId);
+    void deleteByCollectionId(Long collectionId);
 
 }
