@@ -34,18 +34,15 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
             console.log(response);
             if (response) {
                 
-                if (response.data?.token) {
-                    localStorage.setItem('token', response.data.token);
+                if (response.token) {
+                    localStorage.setItem('token', response.token);
                 }
 
-                
-                if (response.data?.user) {
-                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                if (response.user) {
+                    localStorage.setItem('user', JSON.stringify(response.user));
 
-                    
-                    
-                    if (response.data.user.id) {
-                        localStorage.setItem('userId', response.data.user.id.toString());
+                    if (response.user.id) {
+                        localStorage.setItem('userId', response.user.id.toString());
                     }
                 }
             }

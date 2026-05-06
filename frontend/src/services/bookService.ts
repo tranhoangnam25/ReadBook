@@ -27,8 +27,8 @@ export const bookService = {
         return res.data;
     },
     saveReadingProgress: async (userId: number, bookId: number, cfiLocation: string, progressPercentage: number): Promise<void> => {
-        await api.post(`/users/me/reading/progress`, null, {
-            params: { userId, bookId, cfiLocation, progressPercentage }
+        await api.post(`/users/me/reading/progress`, {
+            userId, bookId, cfiLocation, progressPercentage
         });
     }
 };

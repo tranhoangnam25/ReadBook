@@ -105,7 +105,7 @@ CREATE TABLE [Reading_Progress] (
   [progress_id] INT PRIMARY KEY IDENTITY(1, 1),
   [user_id] INT NOT NULL,
   [book_id] INT NOT NULL,
-  [fi_location] VARCHAR(255) NOT NULL,
+  [fi_location] VARCHAR(500) NOT NULL,
   [progress_percentage] DECIMAL(5,2),
   [status] NVARCHAR(20) DEFAULT 'reading',
   [updated_at] DATETIME DEFAULT (GETDATE())

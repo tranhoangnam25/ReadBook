@@ -55,7 +55,10 @@ export default function HomePageUser() {
 
   const fetchHistory = async () => {
     try {
-      const res = await api.get("/users/me/history");
+      const userId = localStorage.getItem("userId");
+      const res = await api.get("/users/me/history", {
+        params: { userId },
+      });
       setHistory(res.data || []);
     } catch (err) {
       console.error("fetchHistory:", err);

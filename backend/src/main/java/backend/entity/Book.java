@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"author", "reviews", "category", "orders", "chapters"})
+@ToString(exclude = {"author", "reviews", "category", "orders"})
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "books")
@@ -77,7 +77,4 @@ public class Book {
             fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Chapter> chapters = new ArrayList<>();
 }

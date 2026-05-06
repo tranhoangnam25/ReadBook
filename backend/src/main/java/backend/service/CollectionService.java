@@ -52,7 +52,7 @@ public class CollectionService {
             Book book = item.getBook();
 
             ReadingProgress rp = readingProgressRepository
-                    .findByUserIdAndBookId(userId, book.getId())
+                    .findByUser_IdAndBook_Id(userId, book.getId())
                     .orElse(null);
 
             return LibraryResponse.builder()

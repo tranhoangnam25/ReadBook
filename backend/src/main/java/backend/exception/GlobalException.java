@@ -11,10 +11,10 @@ public class GlobalException {
 
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception){
+        exception.printStackTrace(); // Log the error!
         ApiResponse apiResponse = new ApiResponse();
-        
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.status(500).body(apiResponse);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)

@@ -21,8 +21,8 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 };
 export const login = async (userData: LoginRequest): Promise<AuthResponse> => {
     
-    const response = await api.post<AuthResponse>('/auth/login', userData);
-    return response.data;
+    const response = await api.post<any>('/auth/login', userData);
+    return response.data.data;
 };
 
 export const getCurrentUser = async () => {

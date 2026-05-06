@@ -16,7 +16,7 @@ import PaymentPage from './pages/PaymentPage';
 import UserUpdatePage from "./pages/UserUpdatePage";
 import ChangePassword from "./pages/ChangePassword";
 import AllComments from "./pages/AllComments";
-import ReadingViewer from './pages/ReadingView';
+import ReadingView from './pages/ReadingView';
 import LibraryPage from './pages/LibraryPage';
 import CollectionPage from './pages/CollectionPage';
 
@@ -82,7 +82,7 @@ function App() {
             <Route path="/library" element={<LibraryPage />} />
           </Route>
 
-          <Route path="/reading/:bookId" element={<ReadingViewer />} />
+          <Route path="/reading/:bookId" element={<ReadingView />} />
 
           {}
           <Route path="*" element={<Navigate to="/" replace />} />

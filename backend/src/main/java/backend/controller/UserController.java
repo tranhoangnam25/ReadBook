@@ -44,19 +44,19 @@ public class UserController {
     }
 
     @PostMapping("/me/reading/progress")
-    public ResponseEntity<Void> saveReadingProgress(
-            @RequestParam Long userId, 
-            @RequestParam Long bookId, 
-            @RequestParam String cfiLocation, 
-            @RequestParam java.math.BigDecimal progressPercentage) {
-        userService.saveReadingProgress(userId, bookId, cfiLocation, progressPercentage);
+    public ResponseEntity<Void> saveReadingProgress(@RequestBody backend.dto.request.ReadingProgressRequest request) {
+        userService.saveReadingProgress(
+                request.getUserId(), 
+                request.getBookId(), 
+                request.getCfiLocation(), 
+                request.getProgressPercentage());
         return ResponseEntity.ok().build();
     }
 
     
     @GetMapping("/me/history")
-    public List<HistoryResponse> getHistory() {
-        return userService.getHistory(1L);
+    public List<HistoryResponse> getHistory(@RequestParam Long userId) {
+        return userService.getHistory(userId);
     }
 
     @PutMapping("/{id}")

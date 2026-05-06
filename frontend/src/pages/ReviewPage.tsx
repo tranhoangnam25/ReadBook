@@ -75,7 +75,7 @@ export default function ReviewPage() {
         }
       });
 
-    const data = await res.json();
+    const data = res.data;
     const orderId = data.orderId || data.id;
 
     navigate(`/payment/${orderId}/${id}`);

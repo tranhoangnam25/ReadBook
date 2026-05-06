@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-
+@org.springframework.transaction.annotation.Transactional
 public class UserService {
     @Autowired
     private final UserRepository userRepository;
@@ -64,17 +64,29 @@ public class UserService {
     }
 
     public ReadingResponse getReadingProgress(Long userId, Long bookId) {
-        return repo.findByUser_IdAndBook_Id(userId, bookId).map(p -> {
-            Book b = p.getBook();
-            return ReadingResponse.builder()
-                .id(b.getId())
-                .title(b.getTitle())
-                .author(b.getAuthor() != null ? b.getAuthor().getName() : "Unknown")
-                .coverUrl(b.getCoverImage() != null ? b.getCoverImage() : "https://picsum.photos/200/300")
-                .progressPercentage(p.getProgressPercentage())
-                .cfiLocation(p.getFiLocation())
-                .build();
-        }).orElse(null);
+        ReadingProgress p = repo.findByUser_IdAndBook_Id(userId, bookId)
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId).orElseThrow(() -> new backend.exception.AppException(backend.exception.ErrorCode.USERNAME_NOT_EXISTED));
+                    Book book = bookRepository.findById(bookId).orElseThrow(() -> new backend.exception.AppException(backend.exception.ErrorCode.BOOK_NOT_FOUND));
+                    ReadingProgress newProgress = new ReadingProgress();
+                    newProgress.setUser(user);
+                    newProgress.setBook(book);
+                    newProgress.setFiLocation("0"); // Vị trí mặc định
+                    newProgress.setProgressPercentage(java.math.BigDecimal.ZERO);
+                    newProgress.setStatus("reading");
+                    newProgress.setUpdatedAt(java.time.LocalDateTime.now());
+                    return repo.save(newProgress);
+                });
+
+        Book b = p.getBook();
+        return ReadingResponse.builder()
+            .id(b.getId())
+            .title(b.getTitle())
+            .author(b.getAuthor() != null ? b.getAuthor().getName() : "Unknown")
+            .coverUrl(b.getCoverImage() != null ? b.getCoverImage() : "https://picsum.photos/200/300")
+            .progressPercentage(p.getProgressPercentage())
+            .cfiLocation(p.getFiLocation())
+            .build();
     }
 
     public void saveReadingProgress(Long userId, Long bookId, String cfiLocation, java.math.BigDecimal progressPercentage) {

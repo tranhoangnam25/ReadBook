@@ -64,3 +64,28 @@ export interface HistoryItem {
     finishedAt: string;
 }
 
+
+export interface TocItem {
+    label: string;
+    href: string;
+    subitems?: TocItem[];
+}
+
+// Enum IDs matching Java backend BackgroundColor and FontFamily enums
+export type FontFamilyId = "DEFAULT" | "SERIF" | "SANS_SERIF" | "MONO" | "TIMES_NEW_ROMAN";
+export type BackgroundColorId = "WHITE" | "CREAM" | "LIGHT_BLUE" | "LIGHT_YELLOW" | "LIGHT_GRAY" | "DARK" | "BLACK";
+
+export interface ReaderSettingResponse {
+    fontFamily: FontFamilyId;
+    fontSize: number;
+    lineHeight: number;
+    backgroundColor: BackgroundColorId;
+}
+
+export interface ReaderSettingRequest {
+    userId: number;
+    fontFamily: FontFamilyId;
+    fontSize: number;
+    lineHeight: number;
+    backgroundColor: BackgroundColorId;
+}

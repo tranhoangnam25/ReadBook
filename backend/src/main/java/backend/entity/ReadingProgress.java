@@ -23,7 +23,7 @@ public class ReadingProgress {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @Column(name = "fi_location", length = 255, nullable = false)
+    @Column(name = "fi_location", length = 500, nullable = false)
     private String fiLocation;
 
     @Column(name = "progress_percentage")

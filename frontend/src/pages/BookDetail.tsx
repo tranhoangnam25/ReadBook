@@ -284,6 +284,7 @@ const reviews = reviewPage?.content || [];
 
 export default function BookDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", id],
