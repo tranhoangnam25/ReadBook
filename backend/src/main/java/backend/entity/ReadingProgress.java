@@ -29,7 +29,7 @@ public class ReadingProgress {
     @Column(name = "progress_percentage")
     private java.math.BigDecimal progressPercentage;
 
-    private String status; // reading | completed
+    private String status; 
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

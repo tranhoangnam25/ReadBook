@@ -29,13 +29,13 @@ public class ReviewService {
     @Autowired
     private UserRepository userRepository;
 
-    // Lấy review theo book
+    
     public Page<Review> getByBookId(Long bookId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return reviewRepository.findByBookId(bookId, pageable);
     }
 
-    // CREATE
+    
     public Review create(Long bookId, Long userId, Review review) {
 
         Book book = bookRepository.findById(bookId)
@@ -47,7 +47,7 @@ public class ReviewService {
         review.setBook(book);
         review.setUser(user);
 
-        // FIX NULL
+        
         if (review.getCreatedAt() == null) {
             review.setCreatedAt(LocalDateTime.now());
         }
@@ -59,13 +59,13 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    // UPDATE
+    
     public Review update(Integer id, Long userId, Review newData) {
 
         Review existing = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
-        // CHECK OWNER
+        
         if (!existing.getUser().getId().equals(userId)) {
             throw new RuntimeException("You can only edit your own review");
         }
@@ -81,7 +81,7 @@ public class ReviewService {
         return reviewRepository.save(existing);
     }
 
-    //DELETE
+    
     public void delete(Integer id, Long userId) {
 
         Review review = reviewRepository.findById(id)

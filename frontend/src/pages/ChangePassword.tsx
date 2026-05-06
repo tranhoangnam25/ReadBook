@@ -11,7 +11,7 @@ const ChangePasswordPage: React.FC = () => {
     });
 
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState({ message: '', type: '' }); // type: 'success' | 'error'
+    const [status, setStatus] = useState({ message: '', type: '' }); 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setData({ ...data, [e.target.name]: e.target.value });
@@ -21,7 +21,7 @@ const ChangePasswordPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 1. Validate Frontend
+        
         if (!data.currentPassword) {
             setStatus({ message: 'Vui lòng nhập mật khẩu hiện tại', type: 'error' });
             return;
@@ -36,7 +36,7 @@ const ChangePasswordPage: React.FC = () => {
         }
 
         setLoading(true);
-        setStatus({ message: '', type: '' }); // Clear thông báo cũ
+        setStatus({ message: '', type: '' }); 
 
         try {
             await changePassword({
@@ -52,21 +52,21 @@ const ChangePasswordPage: React.FC = () => {
         } catch (err: any) {
             console.error("Full Error:", err);
 
-            // 2. Xử lý lỗi 400 và RuntimeException từ Backend
+            
             const serverError = err.response?.data;
             let finalMessage = "Mật khẩu hiện tại không chính xác!";
 
-            // Nếu backend trả về chuỗi (do e.getMessage() ở Service)
+            
             if (typeof serverError === 'string') {
                 finalMessage = serverError;
             }
-            // Nếu backend trả về object (do Validation @Size hoặc lỗi hệ thống)
+            
             else if (serverError && typeof serverError === 'object') {
-                // Spring Boot Validation lỗi thường nằm trong serverError.errors hoặc serverError.message
+                
                 finalMessage = serverError.message || serverError.password || "Dữ liệu không hợp lệ!";
             }
 
-            // 3. Cập nhật vào STATUS (Không dùng setMessage nữa)
+            
             setStatus({
                 message: finalMessage,
                 type: 'error'
@@ -81,7 +81,7 @@ const ChangePasswordPage: React.FC = () => {
         <div className="min-h-screen bg-[#fcf9f2] flex items-center justify-center px-4 py-10">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
 
-                {/* Nút quay lại */}
+                {}
                 <button
                     onClick={() => navigate('/profile')}
                     className="mb-6 flex items-center text-sm text-gray-500 hover:text-[#2c3e50] transition-colors"
@@ -98,7 +98,7 @@ const ChangePasswordPage: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Current Password */}
+                    {}
                     <div>
                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
                             Mật khẩu hiện tại
@@ -115,7 +115,7 @@ const ChangePasswordPage: React.FC = () => {
 
                     <hr className="border-gray-50" />
 
-                    {/* New Password */}
+                    {}
                     <div>
                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
                             Mật khẩu mới
@@ -130,7 +130,7 @@ const ChangePasswordPage: React.FC = () => {
                         />
                     </div>
 
-                    {/* Confirm Password */}
+                    {}
                     <div>
                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
                             Xác nhận mật khẩu mới
@@ -154,7 +154,7 @@ const ChangePasswordPage: React.FC = () => {
                     </button>
                 </form>
 
-                {/* Message Display */}
+                {}
                 {status.message && (
                     <div className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-pulse ${
                         status.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'

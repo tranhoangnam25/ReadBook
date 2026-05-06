@@ -8,7 +8,7 @@ interface LoginProps {
     onLoginSuccess: () => void;
 }
 
-// 1. Đổi tên thành LoginPage
+
 const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
@@ -33,17 +33,17 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
             });
             console.log(response);
             if (response) {
-                // 1. Lưu Token
+                
                 if (response.data?.token) {
                     localStorage.setItem('token', response.data.token);
                 }
 
-                // 2. Lưu đối tượng user (để hiển thị tên/ảnh đại diện)
+                
                 if (response.data?.user) {
                     localStorage.setItem('user', JSON.stringify(response.data.user));
 
-                    // 3. QUAN TRỌNG: Lưu userId riêng biệt để hàm updateProfile sử dụng
-                    // Giả sử backend trả về id trong response.user.id
+                    
+                    
                     if (response.data.user.id) {
                         localStorage.setItem('userId', response.data.user.id.toString());
                     }
@@ -75,7 +75,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
     }, [onClose]);
 
     return (
-        /* Dùng z-[100] để chắc chắn đè lên mọi thứ */
+        
         <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
             onClick={onClose}
@@ -95,7 +95,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                             </button>
 
                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
-                                {/* Đổi icon thành lock cho đúng chất Login */}
+                                {}
                                 <span className="material-symbols-outlined">lock</span>
                             </div>
                             <h2 className="text-2xl font-bold text-primary dark:text-slate-100">Welcome Back!</h2>
@@ -158,4 +158,4 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
     );
 };
 
-export default LoginPage; // Export đúng tên
+export default LoginPage; 

@@ -10,7 +10,7 @@ interface RegisterProps {
 const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
 
 
-    // 1. Khai báo State
+    
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -20,8 +20,8 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // 2. Các hàm xử lý
-    // const handleBack = () => navigate(-1);
+    
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -57,7 +57,7 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
         }
     };
 
-    // 3. Xử lý phím Esc để thoát
+    
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -67,7 +67,7 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
     }, [onClose]);
 
     return (
-        /* Lớp nền mờ (Overlay) */
+        
         <div
             className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
             onClick={onClose}
@@ -79,7 +79,7 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
                 <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800">
                     <div className="px-8 pt-8 pb-6">
                         <div className="text-center mb-8 relative">
-                            {/* Nút X đóng Modal */}
+                            {}
                             <button
                                 onClick={onClose}
                                 className="absolute -top-2 -right-2 text-slate-400 hover:text-primary transition-colors"

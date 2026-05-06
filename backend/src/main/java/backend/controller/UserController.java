@@ -28,14 +28,14 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}") // Lấy thông tin người dùng hiện tại
+    @GetMapping("/{id}") 
     public User getMe(@RequestParam Long id) {
         return userService.getUserById(id);
     }
 
     @GetMapping("/me/reading")
     public ReadingResponse getReading(@RequestParam Long id) {
-        return userService.getReading(id); // Returns latest reading
+        return userService.getReading(id); 
     }
 
     @GetMapping("/me/reading/progress")
@@ -53,7 +53,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // 📜 lịch sử
+    
     @GetMapping("/me/history")
     public List<HistoryResponse> getHistory() {
         return userService.getHistory(1L);

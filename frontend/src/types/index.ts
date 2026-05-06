@@ -33,7 +33,7 @@ export interface AuthResponse {
         email: string;
     };
 }
-/* cspell:disable */
+
 export interface User {
     id: number;
     username: string;
@@ -50,17 +50,17 @@ export interface Book {
 
 export interface Reading {
     id: number;
-    title: string;     // Thêm trường này
-    author: string;    // Thêm trường này
-    coverUrl: string;  // Thêm trường này
-    currentPage: number; // Thêm trường này
+    title: string;     
+    author: string;    
+    coverUrl: string;  
+    currentPage: number; 
     totalPages: number;
     progress: number;
 }
 
 export interface HistoryItem {
     id: number;
-    title: string;      // Thêm trường này
+    title: string;      
     finishedAt: string;
 }
 

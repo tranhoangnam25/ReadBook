@@ -33,7 +33,7 @@ function Stars({ rating }: { rating: number }) {
 function ShowBook({ book }: { book: BookResponse }) {
   const navigate = useNavigate();
 
-  // ===== GET REVIEWS =====
+  
   const { data: reviewPage } = useQuery({
     queryKey: ["reviews", book.id],
     queryFn: async () => {
@@ -45,7 +45,7 @@ function ShowBook({ book }: { book: BookResponse }) {
 const reviews = reviewPage?.content || [];
 
 
-  // ===== RELATED BOOKS =====
+  
   const { data: relatedBooks = [] } = useQuery({
     queryKey: ["related"],
     queryFn: async () => {
@@ -103,7 +103,7 @@ const reviews = reviewPage?.content || [];
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-        {/* LEFT */}
+        {}
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="w-full aspect-[2/3] rounded-lg shadow-xl overflow-hidden bg-white">
             <img
@@ -142,7 +142,7 @@ const reviews = reviewPage?.content || [];
           </div>
         </div>
 
-        {/* RIGHT */}
+        {}
         <div className="md:col-span-8">
           <h1 className="text-4xl md:text-5xl font-black text-primary">
             {book.title}
@@ -165,7 +165,7 @@ const reviews = reviewPage?.content || [];
             </span>
           </div>
 
-          {/* DESCRIPTION */}
+          {}
           <div className="mb-10">
             <h3 className="font-bold mb-2">
               About the Book
@@ -176,7 +176,7 @@ const reviews = reviewPage?.content || [];
             </p>
           </div>
 
-          {/* REVIEWS */}
+          {}
           <div className="border-t pt-10">
             <div className="flex justify-between mb-6">
               <h3 className="text-xl font-bold">
@@ -188,7 +188,7 @@ const reviews = reviewPage?.content || [];
               className="text-sm font-bold text-accent border-b-2 border-accent/30 hover:border-accent pb-0.5 transition-all">View All Reviews</button>
             </div>
 
-            {/* write review box */}
+            {}
             <div className="bg-white p-5 rounded-xl border mb-6">
               <div className="flex gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-gray-200" />
@@ -207,7 +207,7 @@ const reviews = reviewPage?.content || [];
               </div>
             </div>
 
-            {/* reviews list */}
+            {}
             <div className="space-y-6">
               {reviews.map((r: any) => (
                 <div key={r.id}>
@@ -217,7 +217,7 @@ const reviews = reviewPage?.content || [];
 
                       <div>
                         <p className="font-bold text-sm">
-                          {/* Kiểm tra r.user.fullName hoặc r.user.username tùy theo Backend của bạn */}
+                          {}
                           {r.user?.fullName || r.user?.username || "Guest Reader"}
                         </p>
 
@@ -245,7 +245,7 @@ const reviews = reviewPage?.content || [];
         </div>
       </div>
 
-      {/* RELATED */}
+      {}
       <div className="mt-20">
         <h3 className="text-xl font-bold mb-6">
           Readers also enjoyed
@@ -295,10 +295,30 @@ export default function BookDetail() {
     window.scrollTo(0, 0);
   }, []);
 
-  if (isLoading || !book)
+  if (isLoading)
     return (
-      <main className="flex justify-center py-8">
-        Loading...
+      <main className="flex justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-primary/60 font-medium">Đang tải thông tin sách...</p>
+        </div>
+      </main>
+    );
+
+  if (!book)
+    return (
+      <main className="flex justify-center py-20">
+        <div className="text-center px-6">
+          <span className="material-symbols-outlined text-5xl text-primary/20 mb-4">book_off</span>
+          <h2 className="text-2xl font-bold text-primary mb-2">Không tìm thấy sách</h2>
+          <p className="text-primary/60 mb-8">Cuốn sách bạn đang tìm kiếm không tồn tại hoặc đã bị gỡ bỏ.</p>
+          <button 
+            onClick={() => navigate('/')}
+            className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary/90 transition-all"
+          >
+            Quay lại trang chủ
+          </button>
+        </div>
       </main>
     );
 

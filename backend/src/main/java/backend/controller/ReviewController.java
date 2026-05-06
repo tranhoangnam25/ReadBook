@@ -19,7 +19,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    // GET reviews by book
+    
     @GetMapping("/book/{bookId}")
     public ResponseEntity<Page<Review>> getAllReviewsByBook(
             @PathVariable Long bookId,
@@ -31,7 +31,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    // CREATE
+    
     @PostMapping
     public Review create(
             @RequestParam Long bookId,

@@ -14,7 +14,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    // SEARCH REALTIME
+    
     useEffect(() => {
         const delay = setTimeout(() => {
             if (window.location.pathname.startsWith("/shop")) {
@@ -37,7 +37,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
         <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 backdrop-blur-md px-6 lg:px-20 py-4">
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-8">
 
-                {/* LOGO */}
+                {}
                 <div className="flex items-center gap-12">
                     <div
                         onClick={() => navigate("/")}
@@ -54,7 +54,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                     </nav>
                 </div>
 
-                {/* SEARCH */}
+                {}
                 <div className="flex flex-1 items-center justify-end gap-6">
                     <div className="relative hidden lg:flex items-center gap-2 w-full max-w-md">
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40 text-xl">
@@ -69,7 +69,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                         />
                     </div>
 
-                    {/* ACTION */}
+                    {}
                     <div className="flex items-center gap-3">
                         {!isLoggedIn ? (
                             <>

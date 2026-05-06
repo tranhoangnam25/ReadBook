@@ -16,7 +16,7 @@ export default function PaymentPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 LOAD BOOK
+  
   useEffect(() => {
     if (!bookId) return;
 
@@ -26,7 +26,7 @@ export default function PaymentPage() {
 
   }, [bookId]);
 
-  // 🔥 HANDLE PAYOS
+  
   const handlePay = async () => {
     if (!orderId) return;
 
@@ -41,7 +41,7 @@ export default function PaymentPage() {
 
       console.log("PAYOS:", data);
 
-      // redirect
+      
       window.location.href = data.checkoutUrl;
 
     } catch (err) {
@@ -64,13 +64,13 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-[#dfe6ee] flex items-center justify-center p-4">
       <div className="w-full max-w-[420px] bg-[#f6f1ea] rounded-xl shadow-xl p-6">
 
-        {/* HEADER */}
+        {}
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-lg">📚 LUMINA BOOKS</h2>
           <span className="cursor-pointer text-xl">×</span>
         </div>
 
-        {/* ORDER */}
+        {}
         <p className="text-xs text-gray-500 mb-2">ORDER SUMMARY</p>
 
         <div className="bg-white rounded-lg p-3 flex gap-3 items-center mb-4">
@@ -92,7 +92,7 @@ export default function PaymentPage() {
           </span>
         </div>
 
-        {/* PAYMENT INFO */}
+        {}
         <div className="bg-white p-3 rounded mb-4 text-sm">
           <p className="mb-2">Thanh toán qua PayOS</p>
           <p className="text-gray-500 text-xs">
@@ -100,7 +100,7 @@ export default function PaymentPage() {
           </p>
         </div>
 
-        {/* BUTTON */}
+        {}
         <button
           onClick={handlePay}
           disabled={loading}

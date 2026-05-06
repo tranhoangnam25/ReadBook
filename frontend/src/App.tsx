@@ -1,9 +1,9 @@
-/* cspell:disable */
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 
-// Chú ý kiểm tra chính xác tên file hoa/thường (LoginPage vs loginPage)
+
 import HomePage from "./pages/HomePage";
 import { Layout } from './components/layout/Layout';
 import RegisterPage from './pages/RegisterPage';
@@ -33,17 +33,17 @@ function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  // Khởi tạo state đăng nhập từ localStorage
+  
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('token'));
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setIsLoginOpen(false); // Đóng modal khi thành công
+    setIsLoginOpen(false); 
   };
     useEffect(() => {
       const handleLogout = () => {
         setIsLoggedIn(false);
-        setIsLoginOpen(true); // 🔥 mở modal login luôn
+        setIsLoginOpen(true); 
       };
 
       window.addEventListener("logout", handleLogout);
@@ -59,13 +59,13 @@ function App() {
             path="/"
             element={
               <Layout
-                isLoggedIn={isLoggedIn} // Truyền vào để Layout ẩn/hiện nút Login
+                isLoggedIn={isLoggedIn} 
                 onOpenRegister={() => setIsRegisterOpen(true)}
                 onOpenLogin={() => setIsLoginOpen(true)}
               />
             }
           >
-            {/* GỘP CHUNG VÀO ĐÂY: Index route duy nhất cho trang chủ */}
+            {}
             <Route
               index
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
@@ -84,11 +84,11 @@ function App() {
 
           <Route path="/reading/:bookId" element={<ReadingViewer />} />
 
-          {/* Chuyển hướng mọi đường dẫn lạ về trang chủ */}
+          {}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
-        {/* Portals / Modals */}
+        {}
         {isRegisterOpen && (
           <RegisterPage
             onClose={() => setIsRegisterOpen(false)}

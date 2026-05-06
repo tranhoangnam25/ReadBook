@@ -9,7 +9,7 @@ export default function ShopPage() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
 
-    // FILTER STATE
+    
     const [category, setCategory] = useState<string>("");
     const [year, setYear] = useState<number | "">("");
     const [format, setFormat] = useState<string>("");
@@ -18,14 +18,14 @@ export default function ShopPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    // nhận keyword từ navbar
+    
     useEffect(() => {
         const kw = searchParams.get("keyword") || "";
         setKeyword(kw);
         setPage(0);
     }, [searchParams]);
 
-    // ===== FETCH BOOKS =====
+    
     const fetchBooks = async (overridePage?: number) => {
       try {
         const p = overridePage !== undefined ? overridePage : page;
@@ -36,9 +36,9 @@ export default function ShopPage() {
             size: 10,
             ...(keyword.trim() !== "" && { keyword }),
             ...(category && { category }),
-            // ...(year && { year }),
-            // ...(format && { format }),
-            // ...(publisher && { publisher }),
+            
+            
+            
           }
         });
 
@@ -52,12 +52,12 @@ export default function ShopPage() {
       }
     };
 
-    // load books
+    
     useEffect(() => {
         fetchBooks();
     }, [page, category, year, format, publisher, keyword]);
 
-    // ===== FILTER HANDLERS =====
+    
     const handleCategoryChange = (g: string) => {
         setCategory(category === g ? "" : g);
         setPage(0);
@@ -95,7 +95,7 @@ export default function ShopPage() {
 
             <div className="max-w-[1400px] mx-auto flex gap-8 px-8 py-6">
 
-                {/* SIDEBAR */}
+                {}
                 <aside className="w-64 text-sm">
                     <div className="flex justify-between mb-4">
                         <h3 className="font-semibold text-[#2C3E50]">Filters</h3>
@@ -104,7 +104,7 @@ export default function ShopPage() {
                         </button>
                     </div>
 
-                    {/* GENRE */}
+                    {}
                     <div className="mb-6">
                         <h4 className="text-xs text-gray-400 mb-2 tracking-wide">GENRE</h4>
                         {["Thiếu Nhi","Văn học Việt Nam","Văn học nước ngoài","Kỹ năng sống","Lịch sử - Địa lý"].map((g) => (
@@ -121,7 +121,7 @@ export default function ShopPage() {
                         ))}
                     </div>
 
-                    {/* FORMAT */}
+                    {}
                     <div className="mb-6">
                         <h4 className="text-xs text-gray-400 mb-2">FORMAT</h4>
                         <div className="flex flex-wrap gap-2">
@@ -141,7 +141,7 @@ export default function ShopPage() {
                         </div>
                     </div>
 
-                    {/* YEAR */}
+                    {}
                     <div className="mb-6">
                         <h4 className="text-xs text-gray-400 mb-2">
                             PUBLICATION YEAR
@@ -158,7 +158,7 @@ export default function ShopPage() {
                         </select>
                     </div>
 
-                    {/* PUBLISHER */}
+                    {}
                     <div className="mb-6">
                         <h4 className="text-xs text-gray-400 mb-2">PUBLISHER</h4>
                         <input
@@ -171,7 +171,7 @@ export default function ShopPage() {
                     </div>
                 </aside>
 
-                {/* MAIN */}
+                {}
                 <main className="flex-1">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-[#2C3E50]">
@@ -179,7 +179,7 @@ export default function ShopPage() {
                         </h2>
                     </div>
 
-                    {/* GRID */}
+                    {}
                     {books.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                             {books.map((b) => (
@@ -198,7 +198,7 @@ export default function ShopPage() {
                         </div>
                     )}
 
-                    {/* PAGINATION */}
+                    {}
                     <div className="flex justify-center gap-2 mt-12">
                         <button
                             onClick={()=>setPage(p=>Math.max(p-1,0))}

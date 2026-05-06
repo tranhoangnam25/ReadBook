@@ -26,16 +26,16 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepo;
 
-    // KEY PAYOS
+    
     private final String CLIENT_ID = "c4590c7a-47c7-4e7e-b1b6-525cb9ce71d8";
     private final String API_KEY = "8c4dbf36-6d23-47ef-ad77-35be40b4a355";
     private final String CHECKSUM_KEY = "1d68bd16504b236b9eb05182efba1eefdec1de9d701394ac613eee782a28e177";
 
     private final String PAYOS_URL = "https://api-merchant.payos.vn/v2/payment-requests";
 
-    // =====================================================
-    // 1. CREATE PAYMENT
-    // =====================================================
+    
+    
+    
     public Map<String, Object> createPayOSPayment(Long orderId) {
 
         Order order = orderRepo.findById(orderId)
@@ -55,10 +55,10 @@ public class PaymentService {
 
             int price = order.getPrice().intValueExact();
 
-            // tránh trùng orderCode
+            
             long orderCode = orderId * 1000 + (System.currentTimeMillis() % 1000);
 
-            //  URL THẬT (NGROK)
+            
             String returnUrl = "https://abc123.ngrok-free.app/payment-success";
             String cancelUrl = "https://abc123.ngrok-free.app/payment-cancel";
 
@@ -75,7 +75,7 @@ public class PaymentService {
 
             body.put("expiredAt", (System.currentTimeMillis() / 1000L) + 3600);
 
-            // SIGNATURE 
+            
             String signature = generateSignature(
                     price,
                     cancelUrl,
@@ -86,7 +86,7 @@ public class PaymentService {
 
             body.put("signature", signature);
 
-            // ITEMS
+            
             Map<String, Object> item = new HashMap<>();
             item.put("name", "Book");
             item.put("quantity", 1);
@@ -94,7 +94,7 @@ public class PaymentService {
 
             body.put("items", List.of(item));
 
-            // DEBUG
+            
             System.out.println("SIGNATURE: " + signature);
             System.out.println("FINAL BODY: " + body);
 
@@ -129,9 +129,9 @@ public class PaymentService {
         }
     }
 
-    // =====================================================
-    // 2. GENERATE SIGNATURE (CHUẨN PAYOS)
-    // =====================================================
+    
+    
+    
     private String generateSignature(
             int amount,
             String cancelUrl,
@@ -152,9 +152,9 @@ public class PaymentService {
         return hmacSHA256(rawData, CHECKSUM_KEY);
     }
 
-    // =====================================================
-    // 3. HMAC SHA256 (UTF-8)
-    // =====================================================
+    
+    
+    
     private String hmacSHA256(String data, String key) throws Exception {
     Mac mac = Mac.getInstance("HmacSHA256");
 
@@ -169,7 +169,7 @@ public class PaymentService {
             data.getBytes(StandardCharsets.UTF_8)
     );
 
-    // convert sang HEX (CHUẨN PAYOS)
+    
     StringBuilder hex = new StringBuilder(2 * rawHmac.length);
     for (byte b : rawHmac) {
         String s = Integer.toHexString(0xff & b);
@@ -177,12 +177,12 @@ public class PaymentService {
         hex.append(s);
     }
 
-    return hex.toString(); // lowercase hex
+    return hex.toString(); 
 }
 
-    // =====================================================
-    // 4. WEBHOOK
-    // =====================================================
+    
+    
+    
     public String handlePayOSWebhook(Map<String, Object> body) {
 
         try {
@@ -191,7 +191,7 @@ public class PaymentService {
             Long orderCode = Long.valueOf(data.get("orderCode").toString());
             String status = data.get("status").toString();
 
-            // vì orderCode đã custom → cần map lại orderId
+            
             Long orderId = orderCode / 1000;
 
             Payment payment = paymentRepo.findByOrder_Id(orderId)
@@ -219,9 +219,9 @@ public class PaymentService {
         }
     }
 
-    // =====================================================
-    // 5. CHECK STATUS
-    // =====================================================
+    
+    
+    
     public Map<String, Object> getPaymentStatus(Long orderId) {
 
         Payment payment = paymentRepo.findByOrder_Id(orderId)

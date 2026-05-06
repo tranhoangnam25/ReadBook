@@ -7,7 +7,7 @@ export default function HomePage2() {
   const [books, setBooks] = useState<Book[]>([]);
   const [keyword, setKeyword] = useState("");
 
-  // 🚀 LOAD DATA
+  
   useEffect(() => {
     fetchUser();
     fetchReading();
@@ -50,7 +50,7 @@ export default function HomePage2() {
   return (
     <div className="min-h-screen bg-[#f5f2eb] text-[#243447]">
 
-      {/* HEADER */}
+      {}
       <header className="flex items-center justify-between px-10 py-4 bg-white border-b">
 
         <div className="flex items-center gap-10">
@@ -63,7 +63,7 @@ export default function HomePage2() {
           </nav>
         </div>
 
-        {/* SEARCH */}
+        {}
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-gray-100 px-4 py-2 rounded-lg w-[300px]">
             🔍
@@ -77,7 +77,7 @@ export default function HomePage2() {
           </div>
         </div>
 
-        {/* USER */}
+        {}
         <div className="flex items-center gap-4">
           <img
             src="https://i.pravatar.cc/100"
@@ -87,10 +87,10 @@ export default function HomePage2() {
 
       </header>
 
-      {/* MAIN */}
+      {}
       <main className="max-w-7xl mx-auto px-10 py-10">
 
-        {/* TITLE */}
+        {}
         <div className="mb-10">
           <h1 className="text-4xl font-bold">
             Welcome back,{" "}
@@ -102,10 +102,10 @@ export default function HomePage2() {
 
         <div className="grid grid-cols-12 gap-10">
 
-          {/* LEFT */}
+          {}
           <div className="col-span-5 space-y-8">
 
-            {/* CURRENTLY READING */}
+            {}
             {reading && (
               <div className="bg-white p-6 rounded-2xl shadow">
 
@@ -143,7 +143,7 @@ export default function HomePage2() {
               </div>
             )}
 
-            {/* HISTORY */}
+            {}
             <div className="bg-gray-100 p-6 rounded-2xl">
               <h3 className="text-xs text-gray-400 font-bold mb-4">
                 READING HISTORY
@@ -167,7 +167,7 @@ export default function HomePage2() {
 
           </div>
 
-          {/* RIGHT */}
+          {}
           <div className="col-span-7">
 
             <h2 className="text-2xl font-bold mb-6">

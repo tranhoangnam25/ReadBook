@@ -27,7 +27,7 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    // ================= USER CRUD =================
+    
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -44,7 +44,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    // ================= 📖 READING =================
+    
     public ReadingResponse getReading(Long userId) {
 
         ReadingProgress p = repo.findByUser_IdAndStatus(userId, "reading");
@@ -95,7 +95,7 @@ public class UserService {
         repo.save(p);
     }
 
-    // ================= 📜 HISTORY =================
+    
     public List<HistoryResponse> getHistory(Long userId) {
 
         List<ReadingProgress> list =

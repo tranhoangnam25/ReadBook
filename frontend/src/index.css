@@ -4,7 +4,7 @@
 @import "tailwindcss";
 
 @theme {
-    /* Colors */
+    
     --color-primary: #2C3E50;
     --color-accent: #D4A5A5;
     --color-background-light: #F4F1EA;
@@ -12,17 +12,17 @@
     --color-text-main: #1A1A1A;
     --color-scholar-bg: #F4F1EA;
 
-    /* Font family */
+    
     --font-family-display: "Inter", sans-serif;
 
-    /* Border radius */
+    
     --radius-DEFAULT: 0.125rem;
     --radius-lg: 0.25rem;
     --radius-xl: 0.5rem;
     --radius-full: 0.75rem;
 }
 
-/* Dark mode via class strategy */
+
 @variant dark (&:where(.dark, .dark *));
 
 .material-symbols-outlined {

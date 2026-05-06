@@ -1,7 +1,7 @@
 package backend.repository;
 
 import backend.entity.Book;
-import backend.entity.User; // Hoặc Book tùy vào repository của cậu
+import backend.entity.User; 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,11 +30,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
 
 
-    // 🔍 SEARCH TITLE
+    
     @EntityGraph(attributePaths = {"author", "category"})
     List<Book> findByTitleContaining(String keyword);
 
-    // 🔍 SEARCH + FILTER + PAGINATION (QUAN TRỌNG NHẤT)
+    
     @EntityGraph(attributePaths = {"author", "category"})
     @Query("""
 SELECT b FROM Book b

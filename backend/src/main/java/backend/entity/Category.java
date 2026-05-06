@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@ToString(exclude = {"cart", "book"})
+
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "categories")

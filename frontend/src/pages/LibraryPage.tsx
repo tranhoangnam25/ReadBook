@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LibrarySidebar from '../components/common/LibrarySidebar';
 import { PlayCircle, CheckCircle, Clock, Plus } from 'lucide-react';
 
-// ===== TYPES =====
+
 interface LibraryResponse {
   progressId: number;
   bookId: number;
@@ -30,7 +30,7 @@ const LibraryPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [collectionName, setCollectionName] = useState("");
 
-  // ===== FETCH LIBRARY =====
+  
   const { data: libraryBooks, isLoading } = useQuery<LibraryResponse[]>({
     queryKey: ["my-library", user?.id],
     queryFn: async () => {
@@ -43,7 +43,7 @@ const LibraryPage: React.FC = () => {
     enabled: !!user?.id,
   });
 
-  // ===== FETCH COLLECTIONS =====
+  
   const { data: collections } = useQuery<Collection[]>({
     queryKey: ["collections", user?.id],
     queryFn: async () => {
@@ -56,7 +56,7 @@ const LibraryPage: React.FC = () => {
     enabled: !!user?.id,
   });
 
-  // ===== CREATE COLLECTION =====
+  
   const handleCreateCollection = async () => {
     if (!collectionName.trim()) return;
 
@@ -78,7 +78,7 @@ const LibraryPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["collections", user?.id] });
   };
 
-  // ===== DELETE COLLECTION =====
+  
   const handleDeleteCollection = async (collectionId: number) => {
     if (!confirm("Xoá collection này?")) return;
 
@@ -90,7 +90,7 @@ const LibraryPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["collections", user?.id] });
   };
 
-  // ===== LOADING =====
+  
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F4F1EA]">
@@ -104,17 +104,17 @@ const LibraryPage: React.FC = () => {
   return (
     <div className="mx-auto flex max-w-7xl gap-12 px-6 py-12 lg:px-20 bg-[#F4F1EA] min-h-screen">
 
-      {/* SIDEBAR */}
+      {}
       <LibrarySidebar
         collections={collections}
         onCreateCollection={() => setIsModalOpen(true)}
         onDeleteCollection={handleDeleteCollection}
       />
 
-      {/* MAIN */}
+      {}
       <main className="flex-1">
 
-        {/* HEADER */}
+        {}
         <div className="mb-10">
           <h2 className="text-4xl font-black text-primary">
             Virtual Bookshelf
@@ -124,7 +124,7 @@ const LibraryPage: React.FC = () => {
           </p>
         </div>
 
-        {/* GRID */}
+        {}
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 xl:grid-cols-4">
 
           {libraryBooks?.map((book) => (
@@ -140,7 +140,7 @@ const LibraryPage: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
 
-                {/* STATUS */}
+                {}
                 <div className="absolute top-3 right-3">
                   <span className={`flex items-center gap-1 px-2 py-1 text-xs rounded text-white ${
                     book.status === 'reading'
@@ -156,7 +156,7 @@ const LibraryPage: React.FC = () => {
                   </span>
                 </div>
 
-                {/* PROGRESS */}
+                {}
                 {book.status === 'reading' && (
                   <div className="absolute bottom-0 w-full h-1 bg-black/10">
                     <div
@@ -174,7 +174,7 @@ const LibraryPage: React.FC = () => {
             </div>
           ))}
 
-          {/* ADD BOOK */}
+          {}
           <div onClick={() => navigate('/shop')} className="cursor-pointer">
             <div className="aspect-[3/4.5] flex items-center justify-center border-2 border-dashed rounded-2xl hover:border-primary/30 transition">
               <Plus size={32} className="text-primary/30" />
@@ -183,7 +183,7 @@ const LibraryPage: React.FC = () => {
         </div>
       </main>
 
-      {/* MODAL CREATE COLLECTION */}
+      {}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white w-[400px] rounded-2xl p-6 shadow-xl">

@@ -3,7 +3,7 @@ import type { AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
     baseURL: "/api",
-    timeout: 15000, // 15 giây timeout
+    timeout: 15000, 
     headers: {
         "Content-Type": "application/json",
     },
@@ -23,7 +23,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       console.warn("Token hết hạn → logout");
 
-      // 🔥 Xóa toàn bộ session
+      
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("userId");

@@ -28,7 +28,7 @@ public class CollectionService {
 
     private final ReadingProgressRepository readingProgressRepository;
 
-    // tao collection trống
+    
     @Transactional
     public Collection createCollection(Long userId, String name){
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
@@ -41,7 +41,7 @@ public class CollectionService {
         return collectionRepository.save(collection);
     }
 
-    //lay danh sach 1 col cu the
+    
     public List<LibraryResponse> getBooksInCollection(Long collectionId){
         Collection collection = collectionRepository.findById(collectionId).orElseThrow(()-> new AppException(ErrorCode.COLLECTION_NOT_FOUND));
 
@@ -87,7 +87,7 @@ public class CollectionService {
                 .build();
     }
 
-    // them sach vao bo suu tap
+    
     public void addBookToCollection(Long collectionId, Long bookId){
         if(itemRepository.existsByCollectionIdAndBookId(collectionId, bookId)){
             return;
@@ -116,10 +116,10 @@ public class CollectionService {
             throw new RuntimeException("Collection not found");
         }
 
-        // 🔥 xoá toàn bộ item trước
+        
         itemRepository.deleteByCollectionId(id);
 
-        // 🔥 sau đó xoá collection
+        
         collectionRepository.deleteById(id);
     }
 }

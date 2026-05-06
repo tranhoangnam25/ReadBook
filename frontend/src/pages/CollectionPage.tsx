@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, PlayCircle, CheckCircle, Clock } from 'lucide-react';
 import LibrarySidebar from '../components/common/LibrarySidebar';
 
-// ===== TYPES =====
+
 interface LibraryResponse {
   progressId: number;
   bookId: number;
@@ -32,7 +32,7 @@ const CollectionPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedBooks, setSelectedBooks] = React.useState<number[]>([]);
 
-  // ===== FETCH COLLECTIONS =====
+  
   const { data: collections } = useQuery<Collection[]>({
     queryKey: ["collections", user?.id],
     queryFn: async () => {
@@ -45,7 +45,7 @@ const CollectionPage: React.FC = () => {
     enabled: !!user?.id,
   });
 
-  // ===== FETCH BOOKS IN COLLECTION =====
+  
   const { data: books, isLoading } = useQuery<LibraryResponse[]>({
     queryKey: ["collection-books", collectionId],
     queryFn: async () => {
@@ -58,7 +58,7 @@ const CollectionPage: React.FC = () => {
     enabled: !!collectionId,
   });
 
-  // ===== FETCH ALL BOOKS (FOR MODAL) =====
+  
   const { data: allBooks } = useQuery<LibraryResponse[]>({
     queryKey: ["my-library", user?.id],
     queryFn: async () => {
@@ -71,12 +71,12 @@ const CollectionPage: React.FC = () => {
     enabled: isModalOpen,
   });
 
-  // ===== FILTER BOOKS NOT IN COLLECTION =====
+  
   const availableBooks = (allBooks || []).filter(
     (b) => !books?.some((c) => c.bookId === b.bookId)
   );
 
-  // ===== ACTIONS =====
+  
   const toggleSelect = (bookId: number) => {
     setSelectedBooks((prev) =>
       prev.includes(bookId)
@@ -144,7 +144,7 @@ const CollectionPage: React.FC = () => {
     setSelectedBooks([]);
   };
 
-  // ===== LOADING =====
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F4F1EA]">
@@ -158,7 +158,7 @@ const CollectionPage: React.FC = () => {
   return (
     <div className="mx-auto flex max-w-7xl gap-12 px-6 py-12 lg:px-20 bg-[#F4F1EA] min-h-screen">
 
-      {/* SIDEBAR */}
+      {}
       <LibrarySidebar
         collections={collections}
         activeCollectionId={collectionId}
@@ -166,7 +166,7 @@ const CollectionPage: React.FC = () => {
         onDeleteCollection={handleDeleteCollection}
       />
 
-      {/* MAIN */}
+      {}
       <main className="flex-1">
         <div className="mb-10">
           <h2 className="text-4xl font-black text-primary">Collection</h2>
@@ -175,14 +175,14 @@ const CollectionPage: React.FC = () => {
           </p>
         </div>
 
-        {/* EMPTY */}
+        {}
         {books?.length === 0 && (
           <div className="text-center py-20 text-primary/30 font-bold">
             This collection is empty.
           </div>
         )}
 
-        {/* GRID */}
+        {}
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 xl:grid-cols-4">
           {books?.map((book) => (
             <div
@@ -197,7 +197,7 @@ const CollectionPage: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
 
-                {/* STATUS */}
+                {}
                 <div className="absolute top-3 right-3">
                   <span className="flex items-center gap-1 text-xs text-white bg-black/70 px-2 py-1 rounded">
                     {book.status === 'reading' && <PlayCircle size={10} />}
@@ -207,7 +207,7 @@ const CollectionPage: React.FC = () => {
                   </span>
                 </div>
 
-                {/* PROGRESS */}
+                {}
                 {book.status === 'reading' && (
                   <div className="absolute bottom-0 w-full h-1 bg-black/10">
                     <div
@@ -225,7 +225,7 @@ const CollectionPage: React.FC = () => {
             </div>
           ))}
 
-          {/* ADD */}
+          {}
           <div onClick={() => setIsModalOpen(true)} className="cursor-pointer">
             <div className="aspect-[3/4.5] flex items-center justify-center border-2 border-dashed rounded-2xl hover:border-primary/30 transition">
               <Plus size={32} className="text-primary/30" />
@@ -234,7 +234,7 @@ const CollectionPage: React.FC = () => {
         </div>
       </main>
 
-      {/* MODAL */}
+      {}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
           <div className="bg-white w-[800px] max-h-[80vh] p-6 rounded-2xl overflow-y-auto">

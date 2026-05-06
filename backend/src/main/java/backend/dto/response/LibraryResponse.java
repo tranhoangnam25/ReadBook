@@ -11,12 +11,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LibraryResponse {
-    private Long progressId;      // ID của bảng ReadingProgress
-    private Long bookId;          // ID của sách để điều hướng sang trang chi tiết
+    private Long progressId;      
+    private Long bookId;          
     private String title;
     private String authorName;
     private String coverImage;
-    private String status;        // "reading" | "completed" | "to_read"
-    private Integer progress;  // % tiến độ
-    private String fiLocation;  // Vị trí đọc cuối cùng (fiLocation)
+    private String status;        
+    private Integer progress;  
+    private String fiLocation;  
 }

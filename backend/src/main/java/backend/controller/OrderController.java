@@ -30,5 +30,4 @@ public String updateStatus(
     return "Update success";
 }
 }
-// POST http://localhost:8080/api/orders?userId=1&bookId=1&price=100
-// PUT http://localhost:8080/api/orders/{orderId}?status=paid update status
+

@@ -5,18 +5,18 @@ import { getCurrentUser, updateProfile } from '../services/authService';
 const ProfilePage: React.FC = () => {
     const navigate = useNavigate();
 
-    // State quản lý dữ liệu form
+    
     const [formData, setFormData] = useState({
         username: '',
         phone: '',
         email: ''
     });
 
-    const [loading, setLoading] = useState(false); // Trạng thái khi đang nhấn Save
-    const [fetching, setFetching] = useState(true); // Trạng thái khi load dữ liệu lần đầu
+    const [loading, setLoading] = useState(false); 
+    const [fetching, setFetching] = useState(true); 
     const [message, setMessage] = useState({ content: '', type: '' });
 
-    // ================= 1. LOAD THÔNG TIN USER =================
+    
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -36,20 +36,20 @@ const ProfilePage: React.FC = () => {
         loadData();
     }, []);
 
-    // ================= 2. XỬ LÝ THAY ĐỔI INPUT =================
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         if (message.content) setMessage({ content: '', type: '' });
     };
 
-    // ================= 3. SUBMIT CẬP NHẬT =================
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage({ content: '', type: '' });
 
         try {
-            // Gọi hàm updateProfile từ authService (đã cấu hình khớp với Spring Boot)
+            
             await updateProfile(formData);
             setMessage({ content: 'Cập nhật hồ sơ thành công! 🎉', type: 'success' });
             setTimeout(() => navigate('/profile'), 2000);
@@ -73,7 +73,7 @@ const ProfilePage: React.FC = () => {
         <div className="min-h-screen bg-[#fcf9f2] flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
 
-                {/* Header Profile */}
+                {}
                 <div className="bg-[#2c3e50] p-8 text-center">
                     <div className="relative inline-block">
                         <img
@@ -86,7 +86,7 @@ const ProfilePage: React.FC = () => {
                     <p className="text-gray-300 text-sm">Thành viên của Sunset Books</p>
                 </div>
 
-                {/* Form nội dung */}
+                {}
                 <div className="p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -135,7 +135,7 @@ const ProfilePage: React.FC = () => {
                             />
                         </div>
 
-                        {/* Nút lưu */}
+                        {}
                         <div className="pt-2">
                             <button
                                 type="submit"
@@ -147,7 +147,7 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </form>
 
-                    {/* Điều hướng trang Đổi mật khẩu */}
+                    {}
                     <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                         <button
                             onClick={() => navigate('/users/me/change-password')}
@@ -157,7 +157,7 @@ const ProfilePage: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Thông báo */}
+                    {}
                     {message.content && (
                         <div className={`mt-6 p-4 rounded-xl text-center text-sm font-bold animate-fade-in ${
                             message.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'

@@ -40,7 +40,7 @@ export default function AllCommentsPage() {
     window.scrollTo(0, 0);
   }, [page]);
 
-  // Query thông tin sách
+  
   const { data: book, isLoading: isBookLoading } = useQuery({
     queryKey: ["book", id],
     queryFn: () => bookService.getBookById(Number(id)),
@@ -48,7 +48,7 @@ export default function AllCommentsPage() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Query danh sách review
+  
   const { data: reviewPage, isLoading: isReviewsLoading } = useQuery({
     queryKey: ["reviews", "all", id, page],
     queryFn: async () => {
@@ -63,11 +63,11 @@ export default function AllCommentsPage() {
     enabled: !!id,
   });
 
-  // PHÒNG VỆ: Trích xuất dữ liệu an toàn để tránh lỗi .map()
-  // Nếu Backend dùng cấu hình via-dto, đôi khi dữ liệu nằm trong reviewPage.page.content
+  
+  
   const reviews = reviewPage?.content || [];
   const totalPages = reviewPage?.totalPages || 0;
-  const totalElements = reviewPage?.totalElements || 0; // Đã thêm khai báo biến này
+  const totalElements = reviewPage?.totalElements || 0; 
 
   if (isBookLoading || isReviewsLoading || !book) {
     return (
@@ -79,14 +79,14 @@ export default function AllCommentsPage() {
     );
   }
 
-  // Chỉ thay đổi phần JSX bên trong return để đồng bộ font
+  
   return (
-    <main className="flex justify-center py-8 bg-[#F4F1EA] min-h-screen font-sans"> {/* Đảm bảo font-sans là chủ đạo */}
+    <main className="flex justify-center py-8 bg-[#F4F1EA] min-h-screen font-sans"> {}
       <div className="max-w-[1100px] w-full px-6">
 
         <button
           onClick={() => navigate(`/book-detail/${id}`)}
-          // Font cực nhỏ, đậm và dãn cách rộng giống hệt nút Detail
+          
           className="flex items-center gap-2 text-primary/40 hover:text-primary mb-12 transition-all font-black uppercase tracking-[0.3em] text-[10px]"
         >
           <ChevronLeft className="w-4 h-4" /> Back to Wisdom
@@ -94,7 +94,7 @@ export default function AllCommentsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
 
-          {/* CỘT TRÁI */}
+          {}
           <div className="md:col-span-4 flex flex-col gap-8">
             <div className="w-full aspect-[2/3] rounded-2xl shadow-2xl overflow-hidden bg-white border-8 border-white">
               <img
@@ -118,9 +118,9 @@ export default function AllCommentsPage() {
             </div>
           </div>
 
-          {/* CỘT PHẢI */}
+          {}
           <div className="md:col-span-8">
-            {/* Tiêu đề lớn, sát chữ (tracking-tighter) */}
+            {}
             <h1 className="text-5xl md:text-7xl font-black text-primary tracking-tighter leading-[0.9] mb-4">
               {book.title}
             </h1>
@@ -139,7 +139,7 @@ export default function AllCommentsPage() {
                 </div>
               </div>
 
-              {/* LIST REVIEWS */}
+              {}
               <div className="space-y-10 min-h-[500px]">
                 {Array.isArray(reviews) && reviews.length > 0 ? (
                   reviews.map((r: any) => (
@@ -160,7 +160,7 @@ export default function AllCommentsPage() {
                             {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recent'}
                         </span>
                       </div>
-                      {/* Nội dung Review: Italic và Leading thoáng */}
+                      {}
                       <p className="text-2xl italic text-primary/70 leading-relaxed font-medium tracking-tight pl-2 border-l-2 border-primary/5">
                         "{r.comment}"
                       </p>
@@ -173,7 +173,7 @@ export default function AllCommentsPage() {
                 )}
               </div>
 
-              {/* PAGINATION */}
+              {}
               {totalPages > 1 && (
                 <div className="mt-20 flex justify-center items-center gap-6">
                   <button

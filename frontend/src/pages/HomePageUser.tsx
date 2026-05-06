@@ -1,25 +1,25 @@
-/* cspell:disable */
+
 import React, { useEffect, useState } from "react";
 import type { User, Reading, HistoryItem, Book } from "../types";
 import api from "../services/api";
 
 export default function HomePageUser() {
-  // State chính
+  
   const [user, setUser] = useState<User | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [keyword, setKeyword] = useState("");
 
-  // Tự động load dữ liệu khi vào trang
+  
   useEffect(() => {
-    // Lấy user từ localStorage trước để hiện tên nhanh
+    
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
 
-    // Sau đó gọi API để cập nhật dữ liệu mới nhất
+    
     fetchUser();
     fetchReading();
     fetchHistory();
@@ -86,7 +86,7 @@ export default function HomePageUser() {
 
   return (
       <main className="max-w-7xl mx-auto px-10 py-10">
-        {/* Ô tìm kiếm để sử dụng setKeyword và handleSearch (hết lỗi Unused) */}
+        {}
         <div className="mb-8">
           <input
               type="text"

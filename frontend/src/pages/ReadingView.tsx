@@ -35,7 +35,7 @@ export default function ReadingViewer() {
     const [location, setLocation] = useState<string | number>(0);
     const renditionRef = useRef<Rendition | null>(null);
     
-    // UI States
+    
     const [fontFamily, setFontFamily] = useState("inherit");
     const [fontSize, setFontSize] = useState(18);
     const [bgColor, setBgColor] = useState(BG_COLORS[0]);
@@ -46,14 +46,12 @@ export default function ReadingViewer() {
     const [userId, setUserId] = useState<number | null>(null);
     const saveProgressTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    // ===== READ SAMPLE =====
     const [searchParams] = useSearchParams();
     const isSample = searchParams.get("isSample") === "true";
     const [isLimitReached, setIsLimitReached] = useState(false);
-    const pageFlipsRef = useRef(0); // Đếm số lần lật trang (fallback)
+    const pageFlipsRef = useRef(0); 
 
     const getReaderStyles = useCallback((bg: (typeof BG_COLORS)[0]) => {
-        // We override ReactReaderStyle to hide default Header and TOC
         return {
             ...ReactReaderStyle,
             container: { ...ReactReaderStyle.container, background: bg.value },
@@ -62,9 +60,9 @@ export default function ReadingViewer() {
                 background: bg.value, 
                 transition: "background 0.3s",
             },
-            titleArea: { display: "none" }, // Ẩn header mặc định
-            tocArea: { display: "none" }, // Ẩn toc mặc định
-            tocButton: { display: "none" }, // Ẩn nút toc mặc định
+            titleArea: { display: "none" },
+            tocArea: { display: "none" }, 
+            tocButton: { display: "none" }, 
             tocButtonExpanded: { display: "none" },
             tocButtonBar: { display: "none" },
             reader: { ...ReactReaderStyle.reader, background: bg.value },
@@ -82,7 +80,7 @@ export default function ReadingViewer() {
                     "background": `${bg.value} !important`,
                     "color": `${bg.text} !important`,
                     "line-height": "1.8 !important",
-                    "padding-bottom": "60px !important", // Khoảng trống dưới đáy
+                    "padding-bottom": "60px !important",
                 },
                 p: {
                     "font-family": `${ff} !important`,
@@ -167,7 +165,6 @@ export default function ReadingViewer() {
         fetchBook();
     }, [bookId]);
 
-    // Click outside settings panel to close
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
@@ -179,12 +176,7 @@ export default function ReadingViewer() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showPanel]);
 
-    /**
-     * Tính % vị trí hiện tại trong sách — kết hợp 3 chiến lược:
-     * 1. Multi-spine: dùng spine index (chính xác, không cần generate)
-     * 2. Single-spine: dùng displayed.page/total (không cần generate, không bị sandbox)
-     * 3. Fallback: đếm page flips so với ước lượng tổng
-     */
+   
     const calculatePositionPercent = (rend: Rendition): number => {
         const loc = rend.location?.start;
         if (!loc) return 0;
@@ -193,19 +185,19 @@ export default function ReadingViewer() {
         const spineTotal: number = spineItems.length;
         const currentIndex: number = loc.index ?? 0;
 
-        // Chiến lược 1: Multi-spine EPUB
+        
         if (spineTotal > 1) {
             return Math.round((currentIndex / spineTotal) * 100 * 10) / 10;
         }
 
-        // Chiến lược 2: Single-spine — dùng displayed page
+        
         const displayed = loc.displayed;
         if (displayed && displayed.total > 1) {
             return Math.round((displayed.page / displayed.total) * 100 * 10) / 10;
         }
 
-        // Chiến lược 3: Fallback bằng page-flip counter
-        // Ước tính 1 cuốn sách ~300 trang trung bình
+        
+        
         const estimatedTotalPages = 300;
         return Math.min(Math.round((pageFlipsRef.current / estimatedTotalPages) * 100 * 10) / 10, 100);
     };
@@ -217,9 +209,9 @@ export default function ReadingViewer() {
         const rend = renditionRef.current;
         const percentValue = rend ? calculatePositionPercent(rend) : 0;
 
-        // ===== PAYWALL CHECK (isSample mode) =====
+        
         if (isSample && book && book.previewPercentage != null) {
-            // Normalize: previewPercentage < 1 → dạng 0.15 (BigDecimal), >= 1 → dạng 15
+            
             const limit = book.previewPercentage < 1 ? book.previewPercentage * 100 : book.previewPercentage;
 
             if (percentValue > limit) {
@@ -273,8 +265,7 @@ export default function ReadingViewer() {
     return (
         <div className="flex flex-col h-screen relative overflow-hidden transition-colors duration-300" style={{ background: bgColor.value, color: bgColor.text }}>
             
-            {/* Custom Premium Header */}
-            <div className={`absolute top-0 left-0 right-0 z-50 transition-transform duration-300 ${headerVisible ? "translate-y-0" : "-translate-y-full"}`} 
+            <div className="absolute top-0 left-0 right-0 z-50 transition-transform duration-300 translate-y-0" 
                  style={{ 
                      background: isDark ? "rgba(30,30,48,0.75)" : "rgba(255,255,255,0.75)", 
                      backdropFilter: "blur(16px)", 
@@ -303,7 +294,6 @@ export default function ReadingViewer() {
                 </div>
             </div>
 
-            {/* Panel Cài đặt (Settings) - Premium Glassmorphism */}
             <div className={`settings-panel absolute right-4 z-[100] transition-all duration-300 ease-out origin-top-right ${showPanel ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"}`}
                  style={{
                      top: 64,
@@ -317,7 +307,7 @@ export default function ReadingViewer() {
                      boxShadow: isDark ? "0 10px 40px rgba(0,0,0,0.5)" : "0 10px 40px rgba(0,0,0,0.1)",
                  }}>
                 
-                {/* Phông chữ */}
+                {}
                 <div className="mb-5">
                     <div style={labelStyle}>Phông chữ</div>
                     <div className="flex flex-col gap-1.5">
@@ -341,7 +331,7 @@ export default function ReadingViewer() {
                     </div>
                 </div>
 
-                {/* Cỡ chữ */}
+                {}
                 <div className="mb-5">
                     <div className="flex justify-between items-end mb-2">
                         <div style={{...labelStyle, marginBottom: 0}}>Cỡ chữ</div>
@@ -363,7 +353,7 @@ export default function ReadingViewer() {
                     </div>
                 </div>
 
-                {/* Màu nền */}
+                {}
                 <div>
                     <div style={labelStyle}>Màu nền & Giao diện</div>
                     <div className="flex gap-2 flex-wrap mt-2">
@@ -388,7 +378,7 @@ export default function ReadingViewer() {
                 </div>
             </div>
 
-            {/* TOC Sidebar */}
+            {}
             <div className={`fixed inset-y-0 left-0 z-[60] w-[280px] shadow-2xl transform transition-transform duration-300 ease-in-out ${showTocSidebar ? "translate-x-0" : "-translate-x-full"}`}
                  style={{ background: isDark ? "#1a1a2e" : "#fdfdfd", borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
                 <div className="h-14 px-4 flex justify-between items-center" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
@@ -440,15 +430,14 @@ export default function ReadingViewer() {
                 </div>
             </div>
 
-            {/* Overlay for Sidebar */}
+            {}
             {showTocSidebar && (
                 <div className="fixed inset-0 z-[55] backdrop-blur-[2px]" 
                      style={{ background: isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.2)" }} 
                      onClick={() => setShowTocSidebar(false)} />
             )}
 
-            {/* Reader Area */}
-            <div className="flex-1 w-full" onClick={() => setHeaderVisible(!headerVisible)}>
+            <div className="flex-1 w-full">
                 <ReactReader
                     url={finalEpubUrl}
                     location={location}
@@ -484,7 +473,7 @@ export default function ReadingViewer() {
                 />
             </div>
 
-            {/* ===== PAYWALL OVERLAY ===== */}
+            {}
             {isLimitReached && (
                 <div
                     className="fixed inset-0 z-[200] flex flex-col items-center justify-end"

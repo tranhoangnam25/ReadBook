@@ -42,7 +42,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    // RECOMMEND
+    
     @Transactional(readOnly = true)
     public List<BookResponse> getRecommend() {
         return bookRepository.findAll()
@@ -51,7 +51,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    // SEARCH
+    
     @Transactional(readOnly = true)
     public List<BookResponse> search(String keyword) {
         return bookRepository.findByTitleContaining(keyword)
@@ -60,7 +60,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    // GET BY ID 
+    
     @Transactional(readOnly = true)
     public BookResponse getById(Long id) {
         Book b = bookRepository.findById(id)
@@ -69,7 +69,7 @@ public class BookService {
         return mapToResponse(b);
     }
 
-    // SEARCH
+    
     @Transactional(readOnly = true)
     public Page<BookResponse> searchBooks(String keyword,
                                           String category,
@@ -87,7 +87,7 @@ public class BookService {
         return books.map(this::mapToResponse);
     }
 
-    // MAP ENTITY → DTO 
+    
     private BookResponse mapToResponse(Book b) {
         double avg = 0.0;
         if (b.getReviews() != null && !b.getReviews().isEmpty()) {

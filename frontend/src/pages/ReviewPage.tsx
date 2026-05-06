@@ -33,19 +33,19 @@ export default function ReviewPage() {
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  // ================= FETCH DATA =================
+  
   useEffect(() => {
     if (!id) return;
 
-    // Book detail
+    
     api.get(`/books/${id}`)
       .then(res => setBook(res.data));
 
-    // Reviews
+    
     api.get(`/reviews/book/${id}`)
       .then(res => setReviews(res.data));
 
-    // Related books
+    
     api.get(`/books`, {
       params: { page: 0, size: 10 }
     })
@@ -59,7 +59,7 @@ export default function ReviewPage() {
 
   }, [id]);
 
-  // ================= ORDER =================
+  
   const handleBuy = async () => {
     if (!user) {
       alert("Bạn cần đăng nhập");
@@ -81,7 +81,7 @@ export default function ReviewPage() {
     navigate(`/payment/${orderId}/${id}`);
   };
 
-  // ================= REVIEW =================
+  
   const handleSubmitReview = async () => {
     if (!user) return alert("Login trước");
 
@@ -93,7 +93,7 @@ export default function ReviewPage() {
     }
 
     if (editingId) {
-      // UPDATE
+      
       await api.put(`/reviews/${editingId}`, {
             rating,
             comment
@@ -101,7 +101,7 @@ export default function ReviewPage() {
             params: { userId: user.id }
           });
     } else {
-      // CREATE
+      
       await api.post(`/reviews`, {
             rating,
             comment
@@ -117,7 +117,7 @@ export default function ReviewPage() {
     setComment("");
     setEditingId(null);
 
-    // reload reviews
+    
     const res = await api.get(`/reviews/book/${id}`);
       setReviews(res.data);
   };
@@ -138,14 +138,14 @@ export default function ReviewPage() {
     setComment(r.comment);
   };
 
-  // ================= UI =================
+  
   return (
     <main className="bg-[#F4F1EA] min-h-screen py-10">
       <div className="max-w-6xl mx-auto px-6">
 
         <div className="grid md:grid-cols-12 gap-10">
 
-          {/* LEFT */}
+          {}
           <div className="md:col-span-4 space-y-6">
             <div className="bg-white rounded-xl shadow overflow-hidden">
               <img
@@ -172,7 +172,7 @@ export default function ReviewPage() {
                             </div>
           </div>
 
-          {/* RIGHT */}
+          {}
           <div className="md:col-span-8">
 
             <h1 className="text-4xl font-black text-[#2C3E50]">
@@ -205,7 +205,7 @@ export default function ReviewPage() {
                             <p className="mb-4">Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived. To see how things would be if you had made other choices... Would you have done anything different, if you had the chance to undo your regrets?</p>
                             <p>A dazzling novel about all the choices that go into a life well lived, from the acclaimed author of <i>How To Stop Time</i> and <i>Reasons to Stay Alive</i>.</p>
                         </div>
-            {/* REVIEW FORM */}
+            {}
             <div className="mt-10 bg-white p-6 rounded-xl shadow">
               <h2 className="font-bold mb-3">
                 {editingId ? "Edit Review" : "Write Review"}
@@ -237,7 +237,7 @@ export default function ReviewPage() {
               </div>
             </div>
 
-            {/* REVIEW LIST */}
+            {}
             <div className="mt-6 space-y-4">
               {reviews.map((r) => {
                 const isMyReview = user && r.userId === user.id;
@@ -269,7 +269,7 @@ export default function ReviewPage() {
               })}
             </div>
 
-            {/* RELATED BOOKS */}
+            {}
             <div className="mt-20">
               <h3 className="text-2xl font-bold text-[#2C3E50] mb-8">
                 Readers also enjoyed

@@ -15,13 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/library")
-@Tag(name = "Library", description = "Quản lý thư viện sách của người dùng") // Thêm tag cho Swagger
+@Tag(name = "Library", description = "Quản lý thư viện sách của người dùng") 
 public class LibraryController {
     @Autowired
     private ReadingProgressService readingProgressService;
 
     @Operation(summary = "Lấy danh sách sách trong thư viện theo userId")
-    @GetMapping(value = "/{userId}", produces = "application/json") // Chỉ định rõ trả về JSON
+    @GetMapping(value = "/{userId}", produces = "application/json") 
     public ResponseEntity<List<LibraryResponse>> getLibrary(@PathVariable Long userId){
         return ResponseEntity.ok(readingProgressService.getLibrary(userId));
     }

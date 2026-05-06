@@ -17,11 +17,11 @@ import java.time.LocalDateTime;
 public class Payment {
 
     @Id
-    @Column(name = "payment_id") // ✅ map đúng DB
+    @Column(name = "payment_id") 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🔥 liên kết order
+    
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

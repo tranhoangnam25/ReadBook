@@ -31,7 +31,7 @@ const LibrarySidebar: React.FC<Props> = ({
 
         <nav className="flex flex-col gap-2">
 
-          {/* ALL BOOKS */}
+          {}
           <button
             onClick={() => navigate("/library")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm ${
@@ -43,7 +43,7 @@ const LibrarySidebar: React.FC<Props> = ({
             <Inbox size={18} /> All Books
           </button>
 
-          {/* COLLECTIONS */}
+          {}
           {collections?.map((c) => (
             <div
               key={c.id}
@@ -74,7 +74,7 @@ const LibrarySidebar: React.FC<Props> = ({
         </nav>
       </div>
 
-      {/* CREATE */}
+      {}
       <button
         onClick={onCreateCollection}
         className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/10 px-4 py-3 text-[11px] font-black uppercase tracking-widest text-primary/30 hover:border-accent hover:text-accent transition-all"
