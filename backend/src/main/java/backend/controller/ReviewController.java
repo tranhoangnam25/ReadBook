@@ -19,44 +19,49 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<Page<Review>> getAllReviewsByBook(
+    public ResponseEntity<Page<ReviewResponse>> getAllReviewsByBook(
             @PathVariable Long bookId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "4") int size
     ) {
 
         Page<Review> reviews = reviewService.getByBookId(bookId, page, size);
-        return ResponseEntity.ok(reviews);
+
+       
+        Page<ReviewResponse> response = reviews.map(ReviewResponse::new);
+
+        return ResponseEntity.ok(response);
     }
 
-    
+    // CREATE
     @PostMapping
-    public Review create(
+    public ReviewResponse create(
             @RequestParam Long bookId,
             @RequestParam Long userId,
             @RequestBody Review review
     ) {
-        return reviewService.create(bookId, userId, review);
+        Review r = reviewService.create(bookId, userId, review);
+        return new ReviewResponse(r);
     }
 
-    @PutMapping("/{id}")
-    public Review update(
-            @PathVariable Integer id,
-            @RequestParam Long userId,
-            @RequestBody Review review
-    ) {
-        return reviewService.update(id, userId, review);
-    }
+   @PutMapping("/{id}")
+public ReviewResponse update(
+        @PathVariable Long id,
+        @RequestParam Long userId,
+        @RequestBody Review review
+) {
+    Review r = reviewService.update(id, userId, review); 
+    return new ReviewResponse(r); 
+}
+
 
     @DeleteMapping("/{id}")
-    public void delete(
-            @PathVariable Integer id,
+    public ResponseEntity<?> delete(
+            @PathVariable Long id,
             @RequestParam Long userId
     ) {
         reviewService.delete(id, userId);
+        return ResponseEntity.ok().build();
     }
-
-
 }
