@@ -151,7 +151,7 @@ export default function AllCommentsPage() {
                           </div>
                           <div>
                             <p className="font-black text-primary uppercase text-[11px] tracking-[0.15em] mb-1">
-                                {r.user?.fullName || r.user?.username || "Guest Reader"}
+                                {r.fullName || r.username || "Guest Reader"}
                             </p>
                             <Stars rating={Number(r.rating)} />
                           </div>
