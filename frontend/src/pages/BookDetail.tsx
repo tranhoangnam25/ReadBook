@@ -122,9 +122,14 @@ const handleSubmitReview = async () => {
 
     setShowForm(false);
   } catch (e: any) {
-    console.error(e.response?.data || e);
-    alert("Lỗi khi gửi review");
-  }
+  console.error("ERROR =", e);
+
+  alert(
+    e.response?.data?.message ||
+    e.response?.data ||
+    "Lỗi khi gửi review"
+  );
+}
 };
 const handleDelete = async (reviewId: number) => {
   try {
@@ -466,11 +471,12 @@ function StarPicker({ rating, setRating }: any) {
         </span>
       </div>
 
-     
+      {/* 👇 COMMENT */}
       <p className="text-sm mt-2 italic text-primary/80">
         "{r.comment}"
       </p>
 
+      {/* 👇 THÊM ĐOẠN NÀY Ở ĐÂY */}
       {user?.id === r.userId && (
         <div className="flex gap-3 mt-2">
           <button
