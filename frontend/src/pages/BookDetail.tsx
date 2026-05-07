@@ -2,7 +2,8 @@ import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { bookService } from "../services/bookService";
 import { useQuery } from "@tanstack/react-query";
 import type { BookResponse } from "../types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../services/api";
 
 function Stars({ rating }: { rating: number }) {
@@ -31,19 +32,96 @@ function Stars({ rating }: { rating: number }) {
 }
 
 function ShowBook({ book }: { book: BookResponse }) {
+  const [showForm, setShowForm] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(false);
+const location = useLocation();
   const navigate = useNavigate();
+  const [rating, setRating] = useState(5);
+const [comment, setComment] = useState("");
+const [editingId, setEditingId] = useState<number | null>(null);
 
+const user = JSON.parse(localStorage.getItem("user") || "null");
   
-  const { data: reviewPage } = useQuery({
-    queryKey: ["reviews", book.id],
-    queryFn: async () => {
-      const res = await api.get(`/reviews/book/${book.id}`);
-      return res.data;
-    },
-  });
+  const { data: reviewPage, refetch } = useQuery({
+  queryKey: ["reviews", book.id],
+  queryFn: async () => {
+    const res = await api.get(`/reviews/book/${book.id}`);
+    return res.data;
+  },
+});
 
 const reviews = reviewPage?.content || [];
+const handleSubmitReview = async () => {
+  try {
+    if (!user?.id) {
+      onOpenLogin();
+      return;
+    }
 
+    if (!comment.trim()) {
+      alert("Nhập nội dung review");
+      return;
+    }
+
+    // check đã review chưa
+    const myReview = reviews.find((r: any) => r.user?.id === user.id);
+
+    if (myReview && !editingId) {
+      alert("Bạn đã đánh giá rồi");
+      return;
+    }
+
+    if (editingId) {
+      await api.put(
+        `/reviews/${editingId}`,
+        { rating, comment },
+        { params: { userId: user.id } }
+      );
+    } else {
+      await api.post(
+        `/reviews`,
+        { rating, comment },
+        {
+          params: {
+            userId: user.id,
+            bookId: book.id,
+          },
+        }
+      );
+    }
+
+    setRating(5);
+    setComment("");
+    setEditingId(null);
+
+    await refetch(); 
+    setShowForm(false);
+
+  } catch (e: any) {
+  console.error("ERROR:", e.response?.data || e);
+  alert("Lỗi khi gửi review");
+}
+};
+const handleDelete = async (reviewId: number) => {
+  try {
+    await api.delete(`/reviews/${reviewId}`, {
+      params: { userId: user.id },
+    });
+
+    await refetch(); 
+    setShowForm(true);
+
+  } catch (e) {
+    console.error(e);
+    alert("Xóa thất bại");
+  }
+};
+const handleEdit = (r: any) => {
+  setEditingId(r.id);
+  setRating(r.rating);
+  setComment(r.comment);
+   setShowForm(true);
+};
 
   
   const { data: relatedBooks = [] } = useQuery({
@@ -99,7 +177,57 @@ const reviews = reviewPage?.content || [];
       alert("Tạo order lỗi");
     }
   };
+// check purchased
+useEffect(() => {
+  const checkPurchased = async () => {
+    try {
+      if (!user?.id || !book?.id) return;
 
+      const res = await api.get("/orders/check", {
+        params: {
+          userId: user.id,
+          bookId: book.id,
+        },
+      });
+
+      setIsPurchased(res.data === true || res.data?.purchased === true);
+    } catch (err) {
+      console.error("Check purchase error:", err);
+    }
+  };
+
+  checkPurchased();
+}, [book?.id]);
+
+
+// load review của chính mình vào form
+
+useEffect(() => {
+  const query = new URLSearchParams(location.search);
+  const payment = query.get("payment");
+
+  if (payment === "success") {
+    setIsPurchased(true);
+  }
+}, [location.search]);
+function StarPicker({ rating, setRating }: any) {
+  return (
+    <div className="flex gap-1 cursor-pointer">
+      {[1,2,3,4,5].map((i) => (
+        <span
+          key={i}
+          onClick={() => setRating(i)}
+          className="material-symbols-outlined text-xl"
+          style={{
+            fontVariationSettings: `'FILL' ${i <= rating ? 1 : 0}`
+          }}
+        >
+          star
+        </span>
+      ))}
+    </div>
+  );
+}
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
@@ -121,12 +249,21 @@ const reviews = reviewPage?.content || [];
             </p>
           </div>
 
-          <button
-            onClick={handleBuy}
+          {isPurchased ? (
+            <button
+              onClick={() => navigate(`/reading/${book.id}`)}
             className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90"
-          >
-            Buy Ebook Now
-          </button>
+            >
+              Read Book
+            </button>
+          ) : (
+            <button
+              onClick={handleBuy}
+              className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary/90"
+            >
+              Buy Ebook Now
+            </button>
+          )}
 
           <div className="flex gap-2">
             <button
@@ -190,57 +327,96 @@ const reviews = reviewPage?.content || [];
 
             {}
             <div className="bg-white p-5 rounded-xl border mb-6">
-              <div className="flex gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gray-200" />
+  {isPurchased ? (
+    <>
+      <div className="flex gap-3 mb-3">
+        <div className="w-10 h-10 rounded-full bg-gray-200" />
 
-                <div>
-                  <p className="font-bold text-sm">
-                    Share your thoughts
-                  </p>
+        <div>
+          <p className="font-bold text-sm">Write your review</p>
+          <Stars rating={0} />
+        </div>
+      </div>
 
-                  <Stars rating={0} />
-                </div>
-              </div>
+      <StarPicker rating={rating} setRating={setRating} />
 
-              <div className="bg-primary/5 p-3 rounded-lg text-sm">
-                You must purchase this ebook to write a review.
-              </div>
-            </div>
+<textarea
+  value={comment}
+  onChange={(e) => setComment(e.target.value)}
+  placeholder="Write your comment..."
+  className="w-full border rounded-lg p-3 text-sm mb-3"
+/>
+
+<button
+  onClick={handleSubmitReview}
+  className="bg-primary text-white px-4 py-2 rounded-lg"
+>
+  {editingId ? "Update Review" : "Submit Review"}
+</button>
+    </>
+
+    
+  ) : (
+    <div className="bg-primary/5 p-3 rounded-lg text-sm">
+      You must purchase this ebook to write a review.
+    </div>
+  )}
+</div>
 
             {}
             <div className="space-y-6">
-              {reviews.map((r: any) => (
-                <div key={r.id}>
-                  <div className="flex justify-between">
-                    <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-300" />
+  {reviews.map((r: any) => (
+    <div key={r.id}>
+      <div className="flex justify-between">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-300" />
 
-                      <div>
-                        <p className="font-bold text-sm">
-                          {}
-                          {r.user?.fullName || r.user?.username || "Guest Reader"}
-                        </p>
+          <div>
+            <p className="font-bold text-sm">
+              {r.user?.fullName || r.user?.username || "Guest Reader"}
+            </p>
 
-                        <Stars rating={r.rating || 5} />
-                      </div>
-                    </div>
+            <Stars rating={r.rating || 5} />
+          </div>
+        </div>
 
-                    <span className="text-xs text-primary/40">
-                      recently
-                    </span>
-                  </div>
+        <span className="text-xs text-primary/40">
+          recently
+        </span>
+      </div>
 
-                  <p className="text-sm mt-2 italic text-primary/80">
-                    "{r.comment}"
-                  </p>
+      
+      <p className="text-sm mt-2 italic text-primary/80">
+        "{r.comment}"
+      </p>
 
-                  <div className="flex gap-4 mt-2 text-sm text-primary/60">
-                    <button>👍 24</button>
-                    <button>Reply</button>
-                  </div>
-                </div>
-              ))}
-            </div>
+     
+      {user?.id === r.user?.id && (
+        <div className="flex gap-3 mt-2">
+          <button
+            onClick={() => handleEdit(r)}
+            className="text-blue-500 text-sm"
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={() => handleDelete(r.id)}
+            className="text-red-500 text-sm"
+          >
+            Delete
+          </button>
+        </div>
+      )}
+
+      {/* optional */}
+      <div className="flex gap-4 mt-2 text-sm text-primary/60">
+        <button>👍 24</button>
+        <button>Reply</button>
+      </div>
+    </div>
+  ))}
+</div>
           </div>
         </div>
       </div>
