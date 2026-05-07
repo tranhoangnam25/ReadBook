@@ -122,41 +122,8 @@ export default function ShopPage() {
                     </div>
 
                     {}
-                    <div className="mb-6">
-                        <h4 className="text-xs text-gray-400 mb-2">FORMAT</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {["HARDCOVER","PAPERBACK","EBOOK","AUDIOBOOK"].map((f) => (
-                                <button
-                                    key={f}
-                                    onClick={() => handleFormatChange(f)}
-                                    className={`px-3 py-1 rounded-full text-xs ${
-                                        format===f
-                                            ? "bg-[#2C3E50] text-white"
-                                            : "bg-gray-200"
-                                    }`}
-                                >
-                                    {f}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {}
-                    <div className="mb-6">
-                        <h4 className="text-xs text-gray-400 mb-2">
-                            PUBLICATION YEAR
-                        </h4>
-                        <select
-                            value={year}
-                            onChange={(e)=>handleYearChange(e.target.value)}
-                            className="w-full border px-3 py-2 text-sm rounded-md bg-white"
-                        >
-                            <option value="">All years</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                        </select>
-                    </div>
+                    
+                    
 
                     {}
                     <div className="mb-6">
