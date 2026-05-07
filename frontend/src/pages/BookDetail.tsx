@@ -51,6 +51,23 @@ const user = JSON.parse(localStorage.getItem("user") || "null");
 });
 
 const reviews = reviewPage?.content || [];
+
+const myReview = user
+  ? reviews.find((r: any) => r.userId === user.id)
+  : null;
+useEffect(() => {
+  if (!showForm) return;
+
+  if (myReview) {
+    setEditingId(myReview.id);
+    setRating(myReview.rating);
+    setComment(myReview.comment);
+  } else {
+    setEditingId(null);
+    setRating(5);
+    setComment("");
+  }
+}, [myReview, showForm]);
 const handleSubmitReview = async () => {
   try {
     if (!user?.id) {
@@ -63,24 +80,33 @@ const handleSubmitReview = async () => {
       return;
     }
 
-    // check đã review chưa
-    const myReview = reviews.find((r: any) => r.user?.id === user.id);
-
-    if (myReview && !editingId) {
-      alert("Bạn đã đánh giá rồi");
+    if (!isPurchased) {
+      alert("Bạn phải mua sách trước");
       return;
     }
 
     if (editingId) {
       await api.put(
         `/reviews/${editingId}`,
-        { rating, comment },
-        { params: { userId: user.id } }
+        {
+          rating,
+          comment,
+        },
+        {
+          params: {
+            userId: user.id,
+          },
+        }
       );
+
+      alert("Cập nhật review thành công!");
     } else {
       await api.post(
         `/reviews`,
-        { rating, comment },
+        {
+          rating,
+          comment,
+        },
         {
           params: {
             userId: user.id,
@@ -88,19 +114,17 @@ const handleSubmitReview = async () => {
           },
         }
       );
+
+      alert("Đăng review thành công!");
     }
 
-    setRating(5);
-    setComment("");
-    setEditingId(null);
+    await refetch();
 
-    await refetch(); 
     setShowForm(false);
-
   } catch (e: any) {
-  console.error("ERROR:", e.response?.data || e);
-  alert("Lỗi khi gửi review");
-}
+    console.error(e.response?.data || e);
+    alert("Lỗi khi gửi review");
+  }
 };
 const handleDelete = async (reviewId: number) => {
   try {
@@ -108,9 +132,14 @@ const handleDelete = async (reviewId: number) => {
       params: { userId: user.id },
     });
 
-    await refetch(); 
-    setShowForm(true);
+    await refetch();
 
+    setEditingId(null);
+    setRating(5);
+    setComment("");
+    setShowForm(false);
+
+    alert("Xóa review thành công");
   } catch (e) {
     console.error(e);
     alert("Xóa thất bại");
@@ -207,8 +236,9 @@ useEffect(() => {
   const payment = query.get("payment");
 
   if (payment === "success") {
-    setIsPurchased(true);
-  }
+  setIsPurchased(true);
+  setShowForm(true);
+}
 }, [location.search]);
 function StarPicker({ rating, setRating }: any) {
   return (
@@ -329,33 +359,84 @@ function StarPicker({ rating, setRating }: any) {
             <div className="bg-white p-5 rounded-xl border mb-6">
   {isPurchased ? (
     <>
-      <div className="flex gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-gray-200" />
+      {!showForm && !myReview && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-primary text-white px-4 py-2 rounded-lg"
+        >
+          Write Review
+        </button>
+      )}
 
-        <div>
-          <p className="font-bold text-sm">Write your review</p>
-          <Stars rating={0} />
+      {!showForm && myReview && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-primary/70">
+            Bạn đã review sách này
+          </p>
+
+          <button
+            onClick={() => {
+              setShowForm(true);
+              handleEdit(myReview);
+            }}
+            className="bg-primary text-white px-4 py-2 rounded-lg"
+          >
+            Edit Review
+          </button>
         </div>
-      </div>
+      )}
 
-      <StarPicker rating={rating} setRating={setRating} />
+      {showForm && (
+        <>
+          <div className="flex gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-gray-200" />
 
-<textarea
-  value={comment}
-  onChange={(e) => setComment(e.target.value)}
-  placeholder="Write your comment..."
-  className="w-full border rounded-lg p-3 text-sm mb-3"
-/>
+            <div>
+              <p className="font-bold text-sm">
+                {editingId ? "Update your review" : "Write your review"}
+              </p>
+            </div>
+          </div>
 
-<button
-  onClick={handleSubmitReview}
-  className="bg-primary text-white px-4 py-2 rounded-lg"
->
-  {editingId ? "Update Review" : "Submit Review"}
-</button>
+          <StarPicker
+            rating={rating}
+            setRating={setRating}
+          />
+
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Write your comment..."
+            className="w-full border rounded-lg p-3 text-sm mb-3 mt-3"
+          />
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleSubmitReview}
+              className="bg-primary text-white px-4 py-2 rounded-lg"
+            >
+              {editingId
+                ? "Update Review"
+                : "Submit Review"}
+            </button>
+
+            <button
+              onClick={() => {
+                setShowForm(false);
+
+                if (!myReview) {
+                  setComment("");
+                  setRating(5);
+                }
+              }}
+              className="border px-4 py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </>
-
-    
   ) : (
     <div className="bg-primary/5 p-3 rounded-lg text-sm">
       You must purchase this ebook to write a review.
@@ -373,7 +454,7 @@ function StarPicker({ rating, setRating }: any) {
 
           <div>
             <p className="font-bold text-sm">
-              {r.user?.fullName || r.user?.username || "Guest Reader"}
+              {r.fullName || r.username || "Guest Reader"}
             </p>
 
             <Stars rating={r.rating || 5} />
@@ -385,13 +466,12 @@ function StarPicker({ rating, setRating }: any) {
         </span>
       </div>
 
-      
+     
       <p className="text-sm mt-2 italic text-primary/80">
         "{r.comment}"
       </p>
 
-     
-      {user?.id === r.user?.id && (
+      {user?.id === r.userId && (
         <div className="flex gap-3 mt-2">
           <button
             onClick={() => handleEdit(r)}
