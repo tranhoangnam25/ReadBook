@@ -5,6 +5,7 @@ import type { BookResponse } from "../types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../services/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Stars({ rating }: { rating: number }) {
   const stars = [];
@@ -41,6 +42,7 @@ const [comment, setComment] = useState("");
 const [editingId, setEditingId] = useState<number | null>(null);
 
 const user = JSON.parse(localStorage.getItem("user") || "null");
+const queryClient = useQueryClient();
   
   const { data: reviewPage, refetch } = useQuery({
   queryKey: ["reviews", book.id],
@@ -118,7 +120,9 @@ const handleSubmitReview = async () => {
       alert("Đăng review thành công!");
     }
 
-    await refetch();
+    await queryClient.invalidateQueries({
+  queryKey: ["reviews"]
+});
 
     setShowForm(false);
   } catch (e: any) {
@@ -137,7 +141,9 @@ const handleDelete = async (reviewId: number) => {
       params: { userId: user.id },
     });
 
-    await refetch();
+    await queryClient.invalidateQueries({
+  queryKey: ["reviews"]
+});
 
     setEditingId(null);
     setRating(5);
