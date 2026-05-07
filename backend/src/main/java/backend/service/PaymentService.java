@@ -56,11 +56,15 @@ public class PaymentService {
             int price = order.getPrice().intValueExact();
 
             
-            long orderCode = orderId * 1000 + (System.currentTimeMillis() % 1000);
+            long orderCode = orderId;
 
             
-            String returnUrl = "https://abc123.ngrok-free.app/payment-success";
-            String cancelUrl = "https://abc123.ngrok-free.app/payment-cancel";
+             String frontendUrl = "http://localhost:3000"; 
+
+            Long bookId = order.getBook().getId();
+
+            String returnUrl = frontendUrl + "/book-detail/" + bookId + "?payment=success";
+            String cancelUrl = frontendUrl + "/book-detail/" + bookId + "?payment=cancel";
 
             Map<String, Object> body = new HashMap<>();
             body.put("orderCode", orderCode);
@@ -189,22 +193,22 @@ public class PaymentService {
             Map<String, Object> data = (Map<String, Object>) body.get("data");
 
             Long orderCode = Long.valueOf(data.get("orderCode").toString());
-            String status = data.get("status").toString();
+            String code = data.get("code").toString();
 
             
-            Long orderId = orderCode / 1000;
+            Long orderId = orderCode;
 
             Payment payment = paymentRepo.findByOrder_Id(orderId)
                     .orElseThrow(() -> new RuntimeException("Payment not found"));
 
             Order order = payment.getOrder();
 
-            if ("PAID".equals(status)) {
-                payment.setStatus(StatusPayment.SUCCESS);
-                order.setStatus(backend.enums.StatusOrder.PAID);
-            } else {
-                payment.setStatus(StatusPayment.FAILED);
-            }
+            if ("00".equals(code)) {
+    payment.setStatus(StatusPayment.SUCCESS);
+    order.setStatus(backend.enums.StatusOrder.PAID);
+} else {
+    payment.setStatus(StatusPayment.FAILED);
+}
 
             paymentRepo.save(payment);
             orderRepo.save(order);
