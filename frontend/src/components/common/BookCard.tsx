@@ -1,0 +1,54 @@
+
+import { Link } from 'react-router-dom';
+import type { BookResponse } from '../../types'
+
+const renderStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+        let icon = "star";
+        let fill = 0;
+        if (rating >= i) {
+            icon = "star";
+            fill = 1;
+        } else if (rating >= i - 0.5) {
+            icon = "star_half";
+            fill = 0;
+        }
+        stars.push(
+            <span
+                key={i}
+                className="material-symbols-outlined text-sm text-accent"
+                style={{ fontVariationSettings: `'FILL' ${fill}` }}
+            >
+                {icon}
+            </span>
+        );
+    }
+    return stars;
+};
+
+export default function BookCard(book: BookResponse) {
+    return (
+        <Link to={`/book-detail/${book.id}`}>
+            <div className="group flex flex-col gap-4">
+                <div
+                    className="relative aspect-[3/4] overflow-hidden rounded-xl bg-primary/5 shadow-md transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+                    <img alt={book.title}
+                        src={book.coverImage}
+                        className="h-full w-full object-cover" />
+                    <div className="absolute bottom-3 right-3 rounded-lg bg-accent px-3 py-1 text-sm font-bold text-white">
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
+                    </div>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="text-lg font-bold text-primary">{book.title}</h4>
+                    <p className="text-sm text-primary/60">{book.authorName}</p>
+                    <div className="flex items-center gap-1">
+                        {renderStars(book.averageRating || 0)}
+                        <span className="ml-1 text-xs font-semibold text-primary/40">{book.averageRating || 0}</span>
+                    </div>
+                </div>
+            </div>
+        </Link>
+    )
+}
