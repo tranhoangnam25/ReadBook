@@ -40,18 +40,29 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                 {}
                 <div className="flex items-center gap-12">
                     <div
-                        onClick={() => navigate("/")}
+                        onClick={() => {
+                            const user = JSON.parse(localStorage.getItem("user") || "{}");
+                            if(user.roles === "ADM"){
+                                navigate("/admin");
+                                } else {
+                                    navigate("/");
+                                    }
+                            }
+                        }
                         className="flex items-center gap-2 text-primary cursor-pointer"
                     >
                         <span className="material-symbols-outlined text-3xl">auto_stories</span>
                         <h1 className="text-xl font-bold tracking-tight">Sunset Books</h1>
                     </div>
 
+
+                    {user.roles === "URS" && (
                     <nav className="hidden md:flex items-center gap-8">
                         <a onClick={() => navigate("/")} className="text-sm font-medium hover:text-accent cursor-pointer">Explore</a>
                         <a onClick={() => navigate("/library")} className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>
                         <a onClick={() => navigate("/shop")} className="text-sm font-medium hover:text-accent cursor-pointer">Shop</a>
                     </nav>
+                    )}
                 </div>
 
                 {}
