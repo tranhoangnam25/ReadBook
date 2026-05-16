@@ -7,15 +7,22 @@ import backend.dto.response.ReadingResponse;
 import backend.entity.Book;
 import backend.entity.ReadingProgress;
 import backend.entity.User;
+import backend.exception.AppException;
+import backend.exception.ErrorCode;
 import backend.repository.ReadingProgressRepository;
 import backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @org.springframework.transaction.annotation.Transactional
@@ -27,8 +34,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
+    @PreAuthorize("hasRole('ADM')")
     public List<User> getAllUsers() {
+        log.info("In  method get users");
         return userRepository.findAll();
     }
 
@@ -122,8 +131,13 @@ public class UserService {
                 .toList();
     }
 
-    public User updateUser(Long userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID:" + userId));
+
+
+    public User updateUser(UserUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
 
         if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
             user.setUsername(request.getUsername());
@@ -139,8 +153,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void changePassword(Long userId, ChangePasswordRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID:" + userId));
+    public void changePassword(ChangePasswordRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
 
         if (request.getCurrentPassword() == null) {
             throw new RuntimeException("Phải nhập mật khẩu hiện tại!");

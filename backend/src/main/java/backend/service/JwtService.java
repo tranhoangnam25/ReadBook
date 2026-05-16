@@ -1,5 +1,6 @@
 package backend.service;
 
+import backend.entity.User;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
 import com.nimbusds.jose.*;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Service
 public class JwtService {
@@ -23,17 +25,17 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(String email) {
+    public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .issuer("phn.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plusSeconds(expiration).toEpochMilli()
                 ))
-                .claim("CustomClaim", "custom")
+                .claim("scope", buildScope(user))
                 .build();
 
         JWSObject jwsObject = new JWSObject(header, new Payload(claims.toJSONObject()));
@@ -60,5 +62,12 @@ public class JwtService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return signedJWT;
+    }
+
+    private String buildScope(User user){
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        stringJoiner.add("ROLE_" + user.getRole().name());
+
+        return stringJoiner.toString();
     }
 }

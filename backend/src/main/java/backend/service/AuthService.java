@@ -32,13 +32,14 @@ public class AuthService {
         if(!authenticated){
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        String token = jwtService.generateToken(request.getEmail());
+        String token = jwtService.generateToken(user);
 
 
         UserResponseDTO userDTO = UserResponseDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .roles(user.getRole())
                 .build();
 
         return AuthResponse.builder()
