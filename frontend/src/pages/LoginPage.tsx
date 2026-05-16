@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { login } from '../services/authService';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
     onClose: () => void;
@@ -16,6 +17,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,6 +46,14 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                     if (response.user.id) {
                         localStorage.setItem('userId', response.user.id.toString());
                     }
+
+                    if(response.user.roles === "ADM"){
+                        navigate("/admin");
+                    } else{
+                        navigate("/");
+                        }
+
+
                 }
             }
 

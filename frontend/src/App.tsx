@@ -19,6 +19,7 @@ import AllComments from "./pages/AllComments";
 import ReadingView from './pages/ReadingView';
 import LibraryPage from './pages/LibraryPage';
 import CollectionPage from './pages/CollectionPage';
+import DashBoard from './pages/DashBoard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,15 +72,15 @@ function App() {
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
             />
             <Route path="/collection/:id" element={<CollectionPage />} />
-            <Route path="/users/me/profile" element={<UserUpdatePage />} />
-            <Route path="/users/me/change-password" element={<ChangePassword />} />
-            <Route path="/users/me/update/:id" element={<UserUpdatePage />} />
+            <Route path="/update" element={<UserUpdatePage />} />
+            <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/book-detail/:id" element={<BookDetail />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/hompage2" element={<HomePage2 />} />
             <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
             <Route path="/book-detail/all-comments/:id" element={<AllComments />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/admin" element={<DashBoard />} />
           </Route>
 
           <Route path="/reading/:bookId" element={<ReadingView />} />

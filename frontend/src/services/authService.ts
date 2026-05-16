@@ -42,7 +42,7 @@ export const updateProfile = async (data: any) => {
     if (!userId) throw new Error("No userId found");
 
     
-    const response = await api.put(`/users/${userId}`, data);
+    const response = await api.put(`/users/update`, data);
 
     
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -58,7 +58,7 @@ export const changePassword = async (data: { currentPassword: string; password: 
     if (!userId) throw new Error("No userId found");
 
     
-    return api.put(`/users/${userId}/change-password`, data, {
+    return api.put(`/users/change-password`, data, {
         params: { id: userId }
     });
 };
