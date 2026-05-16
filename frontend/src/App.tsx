@@ -19,7 +19,9 @@ import AllComments from "./pages/AllComments";
 import ReadingView from './pages/ReadingView';
 import LibraryPage from './pages/LibraryPage';
 import CollectionPage from './pages/CollectionPage';
-import DashBoard from './pages/DashBoard';
+import DashBoard from './pages/Dashboard';
+import OrderManagement  from './pages/admin/OrderManager';
+import ReviewManager from './pages/admin/ReviewManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +83,8 @@ function App() {
             <Route path="/book-detail/all-comments/:id" element={<AllComments />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/admin" element={<DashBoard />} />
+            <Route path="/admin/orders" element={<OrderManagement />} />
+            <Route path="/admin/reviews" element={<ReviewManager />} />
           </Route>
 
           <Route path="/reading/:bookId" element={<ReadingView />} />
