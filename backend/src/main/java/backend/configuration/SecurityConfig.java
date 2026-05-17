@@ -69,7 +69,9 @@ public class SecurityConfig {
                                 "/api/payments/payos/webhook",
                                 "/api/reader-settings/**",
                                  "/api/orders/check",
-                                "/api/users/me/reading/progress"
+                                "/api/users/me/reading/progress",
+                                "/api/orders/export",
+                                "/api/orders/admin/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
