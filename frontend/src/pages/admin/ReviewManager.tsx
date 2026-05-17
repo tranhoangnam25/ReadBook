@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+// 1. Import Sidebar của bạn (Điều chỉnh lại đường dẫn cho đúng với cấu trúc dự án của bạn)
+import Sidebar from '../../components/common/Sidebar';
 
 interface Review {
   id: string;
@@ -8,7 +10,7 @@ interface Review {
   rating: number; 
   comment: string;
   date: string;
-  status: 'hien' | 'cho' | 'an'; 
+  status: 'hien' | 'an'; 
 }
 
 interface StatCard {
@@ -31,18 +33,9 @@ export default function ReviewManager(): React.JSX.Element {
       date: "15/10/2023",
       status: "hien"
     },
+    
     {
       id: "2",
-      customerName: "Trần Thị B",
-      customerId: "#C002",
-      bookTitle: "Nhà Giả Kim",
-      rating: 4,
-      comment: "Giao hàng nhanh, đóng gói rất kỹ lưỡng.",
-      date: "14/10/2023",
-      status: "cho"
-    },
-    {
-      id: "3",
       customerName: "Lê Văn C",
       customerId: "#C003",
       bookTitle: "Sapiens",
@@ -56,7 +49,7 @@ export default function ReviewManager(): React.JSX.Element {
   const stats: StatCard[] = [
     { title: "Tổng đánh giá", value: "1,250", trend: "12%", isPositive: true, icon: "trending_up" },
     { title: "Đánh giá 5 sao", value: "850", trend: "5%", isPositive: true, icon: "trending_up" },
-    { title: "Chờ duyệt", value: "42", trend: "-8%", isPositive: false, icon: "pending" }
+    
   ];
 
   const renderStars = (rating: number): React.JSX.Element => {
@@ -75,8 +68,7 @@ export default function ReviewManager(): React.JSX.Element {
     switch (status) {
       case 'hien':
         return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Đã hiện</span>;
-      case 'cho':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">Chờ duyệt</span>;
+      
       case 'an':
         return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Đã ẩn</span>;
     }
@@ -85,57 +77,11 @@ export default function ReviewManager(): React.JSX.Element {
   return (
     <div className="flex min-h-screen w-full bg-[#f6f6f8] dark:bg-[#101222] font-['Inter',_sans-serif] text-slate-900 dark:text-slate-100 antialiased">
       
-      {/* Sidebar cố định độ rộng */}
-      <aside className="w-60 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col hidden md:flex">
-        <div className="p-5 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-[#1121d4] flex items-center justify-center text-white">
-            <span className="material-symbols-outlined text-xl">book_5</span>
-          </div>
-          <h1 className="text-base font-bold tracking-tight">LIBROADMIN</h1>
-        </div>
-        
-        <nav className="flex-1 px-3 py-2 space-y-0.5">
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium" href="#dashboard">
-            <span className="material-symbols-outlined text-xl">dashboard</span>
-            <span>Bảng điều khiển</span>
-          </a>
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium" href="#inventory">
-            <span className="material-symbols-outlined text-xl">inventory_2</span>
-            <span>Quản lý kho sách</span>
-          </a>
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium" href="#orders">
-            <span className="material-symbols-outlined text-xl">shopping_cart</span>
-            <span>Đơn hàng & Hoàn tiền</span>
-          </a>
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium" href="#users">
-            <span className="material-symbols-outlined text-xl">group</span>
-            <span>Người dùng</span>
-          </a>
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#1121d4]/10 text-[#1121d4] text-sm font-bold" href="#reviews">
-            <span className="material-symbols-outlined text-xl">reviews</span>
-            <span>Đánh giá</span>
-          </a>
-          <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium" href="#admins">
-            <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
-            <span>Quản trị viên</span>
-          </a>
-        </nav>
-        
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2.5 px-1 py-1">
-            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-slate-500 text-base">person</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold truncate">Quản trị viên</p>
-              <p className="text-[10px] text-slate-500 truncate">admin@bookstore.vn</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      {/* 2. Gọi Component Sidebar được import từ bên ngoài */}
+      <Sidebar />
 
-      {/* Vùng nội dung chính tự co giãn linh hoạt */}
-      <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
+      {/* Vùng nội dung chính dịch sang phải ml-64 (hoặc ml-60) để cân xứng với Sidebar cố định */}
+      <main className="flex-1 ml-64 min-w-0 flex flex-col overflow-hidden">
         
         {/* Header rút gọn chiều cao và khoảng cách đệm */}
         <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-6 shrink-0">
@@ -181,7 +127,7 @@ export default function ReviewManager(): React.JSX.Element {
                 <select className="appearance-none bg-slate-50 dark:bg-slate-800 border-none rounded-lg pl-3 pr-8 py-1.5 text-xs font-medium focus:ring-2 focus:ring-[#1121d4]/20 cursor-pointer text-slate-700 dark:text-slate-300">
                   <option value="">Tất cả trạng thái</option>
                   <option value="hien">Đã hiện</option>
-                  <option value="cho">Chờ duyệt</option>
+                  
                   <option value="an">Đã ẩn</option>
                 </select>
                 <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs">expand_more</span>
@@ -204,7 +150,7 @@ export default function ReviewManager(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Bảng danh sách - Đã khống chế chiều rộng cột không bao giờ bị vỡ khung */}
+          {/* Bảng danh sách */}
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse table-auto">
@@ -232,7 +178,6 @@ export default function ReviewManager(): React.JSX.Element {
                       <td className="px-4 py-3.5 whitespace-nowrap">
                         {renderStars(review.rating)}
                       </td>
-                      {/* KHỐNG CHẾ ĐỘ RỘNG BÌNH LUẬN: max-w-[220px] và hiển thị dấu 3 chấm */}
                       <td className="px-4 py-3.5 max-w-[220px]">
                         <p className="text-xs truncate text-slate-600 dark:text-slate-400" title={review.comment}>
                           {review.comment}
@@ -250,12 +195,7 @@ export default function ReviewManager(): React.JSX.Element {
                               <button className="text-rose-500 hover:underline">Ẩn</button>
                             </>
                           )}
-                          {review.status === 'cho' && (
-                            <>
-                              <button className="text-emerald-600 hover:underline">Duyệt</button>
-                              <button className="text-rose-500 hover:underline">Ẩn</button>
-                            </>
-                          )}
+                          
                           {review.status === 'an' && (
                             <>
                               <button className="text-[#1121d4] hover:underline">Hiện</button>
