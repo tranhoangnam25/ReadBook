@@ -1,7 +1,10 @@
 package backend.controller;
 
 
+import backend.dto.request.ReviewReplyRequest;
+import backend.dto.response.ReviewAdminResponse;
 import backend.dto.response.ReviewResponse;
+import backend.dto.response.ReviewStatsResponse;
 import backend.entity.Review;
 import backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,7 @@ public class ReviewController {
     res.id = r.getId();
     res.rating = r.getRating();
     res.comment = r.getComment();
+    res.adminReply = r.getAdminReply();
 
     if (r.getUser() != null) {
         res.userId = r.getUser().getId();
@@ -66,6 +70,7 @@ public ReviewResponse create(
     res.comment = r.getComment();
     res.userId = r.getUser().getId();
     res.username = r.getUser().getUsername();
+    
 
     return res;
 }
@@ -91,6 +96,7 @@ public ReviewResponse update(
     // dùng existing user đã load
     res.userId = updated.getUser().getId();
     res.username = updated.getUser().getUsername();
+    res.adminReply = updated.getAdminReply();
 
     return res;
 }
@@ -104,4 +110,83 @@ public ReviewResponse update(
         reviewService.delete(id, userId);
         return ResponseEntity.ok().build();
     }
+
+
+    @GetMapping("/admin")
+public ResponseEntity<Page<ReviewAdminResponse>>
+getAdminReviews(
+
+        @RequestParam(defaultValue = "")
+        String keyword,
+
+        @RequestParam(defaultValue = "")
+        String status,
+
+        @RequestParam(defaultValue = "0")
+        int page,
+
+        @RequestParam(defaultValue = "10")
+        int size
+) {
+
+    return ResponseEntity.ok(
+            reviewService.getReviewsForAdmin(
+                    keyword,
+                    status,
+                    page,
+                    size
+            )
+    );
+}
+
+    @GetMapping("/admin/stats")
+public ResponseEntity<ReviewStatsResponse>
+getStats() {
+
+    return ResponseEntity.ok(
+            reviewService.getReviewStats()
+    );
+}
+
+    @PutMapping("/{id}/hide")
+public ResponseEntity<?> hideReview(
+        @PathVariable Long id
+) {
+
+    reviewService.hideReview(id);
+
+    return ResponseEntity.ok(
+            "Ẩn đánh giá thành công"
+    );
+}
+
+@PutMapping("/{id}/show")
+public ResponseEntity<?> showReview(
+        @PathVariable Long id
+) {
+
+    reviewService.showReview(id);
+
+    return ResponseEntity.ok(
+            "Hiện đánh giá thành công"
+    );
+}
+
+    @PostMapping("/{id}/reply")
+public ResponseEntity<?> replyReview(
+
+        @PathVariable Long id,
+
+        @RequestBody ReviewReplyRequest request
+) {
+
+    reviewService.replyReview(
+            id,
+            request.getReply()
+    );
+
+    return ResponseEntity.ok(
+            "Phản hồi thành công"
+    );
+}
 }

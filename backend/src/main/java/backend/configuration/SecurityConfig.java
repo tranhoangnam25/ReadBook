@@ -71,6 +71,7 @@ public class SecurityConfig {
                                  "/api/orders/check",
                                 "/api/users/me/reading/progress",
                                 "/api/orders/export",
+                                "/api/reviews/{id}/reply",
                                 "/api/orders/admin/**"
                         ).permitAll()
                         .anyRequest().authenticated()

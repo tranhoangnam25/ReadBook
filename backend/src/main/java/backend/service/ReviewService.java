@@ -1,6 +1,8 @@
 package backend.service;
 
+import backend.dto.response.ReviewAdminResponse;
 import backend.dto.response.ReviewResponse;
+import backend.dto.response.ReviewStatsResponse;
 import backend.entity.*;
 import backend.enums.StatusReview;
 import backend.repository.BookRepository;
@@ -116,5 +118,68 @@ public class ReviewService {
     existing.setComment(review.getComment());
 
     return reviewRepository.save(existing);
+}
+
+
+    public Page<ReviewAdminResponse> getReviewsForAdmin(
+        String keyword,
+        String status,
+        int page,
+        int size
+) {
+
+    Pageable pageable =
+            PageRequest.of(
+                    page,
+                    size,
+                    Sort.by("createdAt").descending()
+            );
+
+    return reviewRepository.getReviewsForAdmin(
+            keyword,
+            status,
+            pageable
+    );
+}
+
+    public ReviewStatsResponse getReviewStats() {
+    return reviewRepository.getReviewStats();
+}
+
+    public void hideReview(Long reviewId) {
+
+    Review review =
+            reviewRepository.findById(reviewId)
+                    .orElseThrow();
+
+    review.setStatus(StatusReview.HIDDEN);
+
+    reviewRepository.save(review);
+}
+
+
+    public void showReview(Long reviewId) {
+
+    Review review =
+            reviewRepository.findById(reviewId)
+                    .orElseThrow();
+
+    review.setStatus(StatusReview.VISIBLE);
+
+    reviewRepository.save(review);
+}
+
+    public void replyReview(
+        Long reviewId,
+        String reply
+) {
+
+    Review review =
+            reviewRepository.findById(reviewId)
+                    .orElseThrow();
+
+    review.setAdminReply(reply);
+
+    reviewRepository.save(review);
 }
 }

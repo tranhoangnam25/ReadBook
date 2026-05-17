@@ -61,6 +61,14 @@ public class Review {
     )
     @JsonIgnore
     private Book book;
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+private String adminReply;
+    public String getAdminReply() {
+    return adminReply;
+}
 
+public void setAdminReply(String adminReply) {
+    this.adminReply = adminReply;
+}
 
 }

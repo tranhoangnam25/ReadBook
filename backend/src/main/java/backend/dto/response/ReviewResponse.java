@@ -13,4 +13,5 @@ public class ReviewResponse {
     public Long userId;
 
     public String username;
+    public String adminReply;
 }

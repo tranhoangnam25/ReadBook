@@ -481,6 +481,18 @@ function StarPicker({ rating, setRating }: any) {
       <p className="text-sm mt-2 italic text-primary/80">
         "{r.comment}"
       </p>
+      {/* ADMIN REPLY */}
+{r.adminReply && (
+  <div className="mt-3 ml-6 border-l-4 border-blue-500 bg-blue-50 p-3 rounded-r-lg">
+    <p className="text-xs font-bold text-blue-700 mb-1">
+      Admin phản hồi
+    </p>
+
+    <p className="text-sm text-gray-700">
+      {r.adminReply}
+    </p>
+  </div>
+)}
 
       {/* 👇 THÊM ĐOẠN NÀY Ở ĐÂY */}
       {user?.id === r.userId && (
