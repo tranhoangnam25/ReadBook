@@ -2,16 +2,20 @@ package backend.service;
 
 import backend.dto.request.LoginRequest;
 import backend.dto.response.AuthResponse;
+import backend.dto.response.PermissionResponse;
+import backend.dto.response.RoleResponse;
 import backend.dto.response.UserResponseDTO;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
 import backend.repository.UserRepository;
 import com.nimbusds.jose.*;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,11 +39,25 @@ public class AuthService {
         String token = jwtService.generateToken(user);
 
 
+        Set<RoleResponse> roleResponses = user.getRoles().stream()
+                .map(role -> RoleResponse.builder()
+                        .name(role.getName())
+                        .description(role.getDescription())
+                        .permissions(
+                                role.getPermissions().stream()
+                                        .map(permission -> PermissionResponse.builder()
+                                                .name(permission.getName())
+                                                .description(permission.getDescription())
+                                                .build())
+                                        .collect(Collectors.toSet())
+                        )
+                        .build())
+                .collect(Collectors.toSet());
+
         UserResponseDTO userDTO = UserResponseDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .roles(user.getRole())
                 .build();
 
         return AuthResponse.builder()

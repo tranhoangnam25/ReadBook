@@ -1,6 +1,5 @@
 package backend.entity;
 
-import backend.enums.Role;
 import backend.enums.StatusUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -9,6 +8,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -37,10 +37,9 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 5)
-    @Builder.Default
-    private Role role = Role.USR;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Column(name = "role", nullable = false)
+    private Set<Role> roles;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)

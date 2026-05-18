@@ -11,8 +11,10 @@ import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import java.text.ParseException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 import java.util.StringJoiner;
 
@@ -66,7 +68,14 @@ public class JwtService {
 
     private String buildScope(User user){
         StringJoiner stringJoiner = new StringJoiner(" ");
-        stringJoiner.add("ROLE_" + user.getRole().name());
+        if(!CollectionUtils.isEmpty(user.getRoles())){
+            user.getRoles().forEach(role -> {
+                stringJoiner.add("ROLE_" + role.getName());
+                if(!CollectionUtils.isEmpty(role.getPermissions()))
+                    role.getPermissions()
+                            .forEach(permission -> stringJoiner.add(permission.getName()));
+            });
+        }
 
         return stringJoiner.toString();
     }

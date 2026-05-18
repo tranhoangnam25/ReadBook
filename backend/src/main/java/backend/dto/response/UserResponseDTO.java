@@ -1,6 +1,6 @@
 package backend.dto.response;
 
-import backend.enums.Role;
+import backend.entity.Role;
 import lombok.*;
 
 import java.util.Set;
@@ -13,5 +13,5 @@ public class UserResponseDTO {
     private Long id;
     private String username;
     private String email;
-    private Role roles;
+    private Set<RoleResponse> roles;
 }

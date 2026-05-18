@@ -28,11 +28,6 @@ public class UserController {
 
     @GetMapping
     public List<User> getAll() {
-        var authentication = SecurityContextHolder .getContext().getAuthentication();
-
-        log.info("Username: {}", authentication.getName());
-        authentication.getAuthorities().forEach(auth -> log.info("Role: {}", auth.getAuthority()));
-
         return userService.getAllUsers();
     }
 

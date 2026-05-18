@@ -1,6 +1,8 @@
 import Sidebar from "../components/common/Sidebar";
 
 export default function Dashboard() {
+
+  const user = JSON.parse(localStorage.getItem("user"));
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
@@ -44,7 +46,7 @@ export default function Dashboard() {
             </h2>
 
             <p className="text-slate-500">
-              Chào mừng trở lại, Rivera. Đây là những gì đang diễn ra hôm nay.
+              Chào mừng trở lại, {user?.username || "Admin"}. Đây là những gì đang diễn ra hôm nay.
             </p>
           </div>
 

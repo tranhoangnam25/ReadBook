@@ -49,7 +49,7 @@ public class AuthController {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phone("N/A")
-                .role(Role.USR)
+//                .role(Role.USR)
                 .status(StatusUser.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
