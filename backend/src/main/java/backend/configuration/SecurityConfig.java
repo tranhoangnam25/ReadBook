@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 "/api/orders/export",
                                 "/api/reviews/{id}/reply",
                                 "/api/orders/admin/**",
+                                "/api/uploads/**",
                                 "/api/books/embedding"
                         ).permitAll()
                         .anyRequest().authenticated()

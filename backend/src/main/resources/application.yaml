@@ -16,7 +16,20 @@ groq:
   api:
     key: ${GROQ_API_KEY}
 
+r2:
+  endpoint: ${R2_ENDPOINT:http://localhost:9000}
+  public-url: ${R2_PUBLIC_URL:http://localhost:9000/${R2_BUCKET:ebook-store}}
+  access-key: ${R2_ACCESS_KEY:change-me}
+  secret-key: ${R2_SECRET_KEY:change-me}
+  bucket: ${R2_BUCKET:ebook-store}
+  region: ${R2_REGION:auto}
+
 spring:
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
   application:
     name: backend

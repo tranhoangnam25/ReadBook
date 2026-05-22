@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Bell, Settings, Plus, SlidersHorizontal, Edit, WalletCards, Eye, BookOpen, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Search, Bell, Settings, Plus, SlidersHorizontal, Edit, WalletCards, Eye, BookOpen, TrendingUp, AlertTriangle, UploadCloud } from 'lucide-react';
 
 import Sidebar from '../../components/common/Sidebar';
 import api from '../../services/api';
+import { uploadFileToR2, type UploadType } from '../../services/uploadService';
 import type { BookResponse } from '../../types';
 
 interface BookPage {
@@ -52,6 +53,7 @@ const emptyCreateForm: CreateBookForm = {
 
 const ALL_CATEGORIES = 'Tất cả thể loại';
 const statuses = ['Trạng thái kho', 'In Stock', 'Waitlist', 'Archived'];
+type FeedbackScope = 'page' | 'create' | 'edit' | 'price' | 'preview';
 
 export default function BookInventory(): React.JSX.Element {
     const [books, setBooks] = useState<BookResponse[]>([]);
@@ -65,14 +67,20 @@ export default function BookInventory(): React.JSX.Element {
     const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [feedback, setFeedback] = useState<Record<FeedbackScope, { error: string; success: string }>>({
+        page: { error: '', success: '' },
+        create: { error: '', success: '' },
+        edit: { error: '', success: '' },
+        price: { error: '', success: '' },
+        preview: { error: '', success: '' },
+    });
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingBook, setEditingBook] = useState<BookResponse | null>(null);
     const [pricingBook, setPricingBook] = useState<BookResponse | null>(null);
     const [previewBook, setPreviewBook] = useState<BookResponse | null>(null);
     const [priceValue, setPriceValue] = useState('');
     const [previewValue, setPreviewValue] = useState('');
+    const [uploadingField, setUploadingField] = useState<string | null>(null);
     const [createForm, setCreateForm] = useState<CreateBookForm>(emptyCreateForm);
     const [editForm, setEditForm] = useState<EditBookForm>({
         title: '',
@@ -86,10 +94,43 @@ export default function BookInventory(): React.JSX.Element {
 
     const pageSize = 10;
 
+    const setFeedbackMessage = (scope: FeedbackScope, type: 'error' | 'success', message: string) => {
+        setFeedback((current) => ({
+            ...current,
+            [scope]: {
+                error: type === 'error' ? message : '',
+                success: type === 'success' ? message : '',
+            },
+        }));
+    };
+
+    const clearFeedback = (scope: FeedbackScope) => {
+        setFeedback((current) => ({
+            ...current,
+            [scope]: { error: '', success: '' },
+        }));
+    };
+
+    const renderFeedback = (scope: FeedbackScope) => (
+        <>
+            {feedback[scope].error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {feedback[scope].error}
+                </div>
+            )}
+
+            {feedback[scope].success && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    {feedback[scope].success}
+                </div>
+            )}
+        </>
+    );
+
     const fetchBooks = async () => {
         try {
             setLoading(true);
-            setError('');
+            clearFeedback('page');
 
             const response = await api.get<BookPage>('/books', {
                 params: {
@@ -105,7 +146,7 @@ export default function BookInventory(): React.JSX.Element {
             setTotalElements(response.data.totalElements || 0);
         } catch (err) {
             console.error('Fetch books failed:', err);
-            setError('Không tải được danh sách sách từ database. Kiểm tra backend hoặc kết nối API.');
+            setFeedbackMessage('page', 'error', 'Không tải được danh sách sách từ database. Kiểm tra backend hoặc kết nối API.');
         } finally {
             setLoading(false);
         }
@@ -127,7 +168,7 @@ export default function BookInventory(): React.JSX.Element {
                 setCategoryOptions(categoriesResponse.data || []);
             } catch (err) {
                 console.error('Fetch lookup data failed:', err);
-                setError('Không tải được danh sách tác giả/thể loại.');
+                setFeedbackMessage('page', 'error', 'Không tải được danh sách tác giả/thể loại.');
             }
         };
 
@@ -149,8 +190,7 @@ export default function BookInventory(): React.JSX.Element {
             authorId: authors[0]?.id ? String(authors[0].id) : '',
             categoryId: categoryOptions[0]?.id ? String(categoryOptions[0].id) : '',
         });
-        setError('');
-        setSuccess('');
+        clearFeedback('create');
         setIsCreateOpen(true);
     };
 
@@ -165,8 +205,7 @@ export default function BookInventory(): React.JSX.Element {
 
     const openEditModal = (book: BookResponse) => {
         setEditingBook(book);
-        setError('');
-        setSuccess('');
+        clearFeedback('edit');
         setEditForm({
             title: book.title || '',
             price: String(book.price ?? ''),
@@ -186,8 +225,7 @@ export default function BookInventory(): React.JSX.Element {
     const openPriceModal = (book: BookResponse) => {
         setPricingBook(book);
         setPriceValue(String(book.price ?? ''));
-        setError('');
-        setSuccess('');
+        clearFeedback('price');
     };
 
     const closePriceModal = () => {
@@ -198,8 +236,7 @@ export default function BookInventory(): React.JSX.Element {
     const openPreviewModal = (book: BookResponse) => {
         setPreviewBook(book);
         setPreviewValue(String(book.previewPercentage ?? ''));
-        setError('');
-        setSuccess('');
+        clearFeedback('preview');
     };
 
     const closePreviewModal = () => {
@@ -209,6 +246,85 @@ export default function BookInventory(): React.JSX.Element {
 
     const updateEditForm = (field: keyof EditBookForm, value: string) => {
         setEditForm((current) => ({ ...current, [field]: value }));
+    };
+
+    const handleFileUpload = async (
+        file: File | undefined,
+        uploadType: UploadType,
+        formType: 'create' | 'edit',
+        field: 'coverImage' | 'fileUrl',
+    ) => {
+        if (!file) return;
+
+        const uploadKey = `${formType}-${field}`;
+        const scope: FeedbackScope = formType;
+
+        try {
+            setUploadingField(uploadKey);
+            clearFeedback(scope);
+
+            const uploadedFile = await uploadFileToR2(file, uploadType);
+
+            if (formType === 'create') {
+                updateCreateForm(field, uploadedFile.url);
+            } else {
+                updateEditForm(field, uploadedFile.url);
+            }
+
+            setFeedbackMessage(scope, 'success', `Upload ${file.name} thành công.`);
+        } catch (err) {
+            console.error('Upload file failed:', err);
+            setFeedbackMessage(scope, 'error', uploadType === 'cover' ? 'Không upload được ảnh bìa lên R2.' : 'Không upload được file EPUB lên R2.');
+        } finally {
+            setUploadingField(null);
+        }
+    };
+
+    const renderUploadDropzone = (
+        label: string,
+        uploadType: UploadType,
+        formType: 'create' | 'edit',
+        field: 'coverImage' | 'fileUrl',
+        value: string,
+    ) => {
+        const uploadKey = `${formType}-${field}`;
+        const isUploading = uploadingField === uploadKey;
+        const accept = uploadType === 'cover' ? 'image/jpeg,image/png,image/webp,image/gif' : '.epub,application/epub+zip';
+
+        return (
+            <div className="md:col-span-2 flex flex-col gap-2 text-sm font-medium text-slate-700">
+                <span>{label}</span>
+                <label
+                    className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center transition-colors hover:border-primary hover:bg-primary/5"
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                        event.preventDefault();
+                        void handleFileUpload(event.dataTransfer.files[0], uploadType, formType, field);
+                    }}
+                >
+                    <UploadCloud className="mb-2 h-8 w-8 text-slate-400" />
+                    <span className="font-semibold text-slate-700">
+                        {isUploading ? 'Đang upload...' : 'Kéo-thả file vào đây hoặc bấm để chọn'}
+                    </span>
+                    <span className="mt-1 text-xs text-slate-500">
+                        {uploadType === 'cover' ? 'JPG, PNG, WEBP, GIF' : 'EPUB'}
+                    </span>
+                    <input
+                        accept={accept}
+                        className="hidden"
+                        disabled={isUploading}
+                        type="file"
+                        onChange={(event) => void handleFileUpload(event.target.files?.[0], uploadType, formType, field)}
+                    />
+                </label>
+                <input
+                    className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder="URL sau khi upload sẽ tự điền tại đây"
+                    value={value}
+                    onChange={(event) => (formType === 'create' ? updateCreateForm(field, event.target.value) : updateEditForm(field, event.target.value))}
+                />
+            </div>
+        );
     };
 
     const buildUpdatePayload = (book: BookResponse, price: number, previewPercentage = book.previewPercentage) => ({
@@ -239,19 +355,18 @@ export default function BookInventory(): React.JSX.Element {
 
         const validationError = validateBookForm(createForm);
         if (validationError) {
-            setError(validationError);
+            setFeedbackMessage('create', 'error', validationError);
             return;
         }
 
         if (!createForm.authorId || !createForm.categoryId) {
-            setError('Vui lòng chọn tác giả và thể loại.');
+            setFeedbackMessage('create', 'error', 'Vui lòng chọn tác giả và thể loại.');
             return;
         }
 
         try {
             setSaving(true);
-            setError('');
-            setSuccess('');
+            clearFeedback('create');
 
             await api.post('/books', {
                 title: createForm.title.trim(),
@@ -265,12 +380,12 @@ export default function BookInventory(): React.JSX.Element {
                 categoryId: Number(createForm.categoryId),
             });
 
-            setSuccess('Thêm sách mới thành công.');
+            setFeedbackMessage('page', 'success', 'Thêm sách mới thành công.');
             setIsCreateOpen(false);
             await fetchBooks();
         } catch (err) {
             console.error('Create book failed:', err);
-            setError('Không thêm được sách mới. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('create', 'error', 'Không thêm được sách mới. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
             setSaving(false);
         }
@@ -285,29 +400,28 @@ export default function BookInventory(): React.JSX.Element {
         const publishYear = Number(editForm.publishYear);
 
         if (!editForm.title.trim()) {
-            setError('Tên sách không được để trống.');
+            setFeedbackMessage('edit', 'error', 'Tên sách không được để trống.');
             return;
         }
 
         if (Number.isNaN(price) || price < 0) {
-            setError('Giá sách không hợp lệ.');
+            setFeedbackMessage('edit', 'error', 'Giá sách không hợp lệ.');
             return;
         }
 
         if (Number.isNaN(previewPercentage) || previewPercentage < 0 || previewPercentage > 100) {
-            setError('Phần trăm đọc thử phải từ 0 đến 100.');
+            setFeedbackMessage('edit', 'error', 'Phần trăm đọc thử phải từ 0 đến 100.');
             return;
         }
 
         if (Number.isNaN(publishYear) || publishYear < 1000) {
-            setError('Năm xuất bản không hợp lệ.');
+            setFeedbackMessage('edit', 'error', 'Năm xuất bản không hợp lệ.');
             return;
         }
 
         try {
             setSaving(true);
-            setError('');
-            setSuccess('');
+            clearFeedback('edit');
 
             await api.put(`/books/${editingBook.id}`, {
                 title: editForm.title.trim(),
@@ -319,12 +433,12 @@ export default function BookInventory(): React.JSX.Element {
                 publishYear,
             });
 
-            setSuccess('Cập nhật sách thành công.');
+            setFeedbackMessage('page', 'success', 'Cập nhật sách thành công.');
             setEditingBook(null);
             await fetchBooks();
         } catch (err) {
             console.error('Update book failed:', err);
-            setError('Không cập nhật được sách. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('edit', 'error', 'Không cập nhật được sách. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
             setSaving(false);
         }
@@ -337,23 +451,22 @@ export default function BookInventory(): React.JSX.Element {
         const nextPrice = Number(priceValue);
 
         if (Number.isNaN(nextPrice) || nextPrice < 0) {
-            setError('Giá sách không hợp lệ.');
+            setFeedbackMessage('price', 'error', 'Giá sách không hợp lệ.');
             return;
         }
 
         try {
             setSaving(true);
-            setError('');
-            setSuccess('');
+            clearFeedback('price');
 
             await api.put(`/books/${pricingBook.id}`, buildUpdatePayload(pricingBook, nextPrice));
 
-            setSuccess(`Cập nhật giá "${pricingBook.title}" thành công.`);
+            setFeedbackMessage('page', 'success', `Cập nhật giá "${pricingBook.title}" thành công.`);
             setPricingBook(null);
             await fetchBooks();
         } catch (err) {
             console.error('Update price failed:', err);
-            setError('Không cập nhật được giá sách. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('price', 'error', 'Không cập nhật được giá sách. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
             setSaving(false);
         }
@@ -366,23 +479,22 @@ export default function BookInventory(): React.JSX.Element {
         const nextPreview = Number(previewValue);
 
         if (Number.isNaN(nextPreview) || nextPreview < 0 || nextPreview > 100) {
-            setError('Phần trăm đọc thử phải từ 0 đến 100.');
+            setFeedbackMessage('preview', 'error', 'Phần trăm đọc thử phải từ 0 đến 100.');
             return;
         }
 
         try {
             setSaving(true);
-            setError('');
-            setSuccess('');
+            clearFeedback('preview');
 
             await api.put(`/books/${previewBook.id}`, buildUpdatePayload(previewBook, previewBook.price, nextPreview));
 
-            setSuccess(`Cập nhật đọc thử "${previewBook.title}" thành công.`);
+            setFeedbackMessage('page', 'success', `Cập nhật đọc thử "${previewBook.title}" thành công.`);
             setPreviewBook(null);
             await fetchBooks();
         } catch (err) {
             console.error('Update preview failed:', err);
-            setError('Không cập nhật được nội dung đọc thử. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('preview', 'error', 'Không cập nhật được nội dung đọc thử. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
             setSaving(false);
         }
@@ -471,17 +583,9 @@ export default function BookInventory(): React.JSX.Element {
                 </header>
 
                 <div className="p-8 flex-1 overflow-auto">
-                    {error && (
-                        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            {error}
-                        </div>
-                    )}
-
-                    {success && (
-                        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                            {success}
-                        </div>
-                    )}
+                    <div className="mb-4 space-y-3">
+                        {renderFeedback('page')}
+                    </div>
 
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
@@ -652,6 +756,8 @@ export default function BookInventory(): React.JSX.Element {
                         </div>
 
                         <form className="space-y-4 px-6 py-5" onSubmit={handleCreateSubmit}>
+                            {renderFeedback('create')}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
                                     Tên sách
@@ -724,23 +830,9 @@ export default function BookInventory(): React.JSX.Element {
                                     />
                                 </label>
 
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    URL ảnh bìa
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.coverImage}
-                                        onChange={(event) => updateCreateForm('coverImage', event.target.value)}
-                                    />
-                                </label>
+                                {renderUploadDropzone('Ảnh bìa', 'cover', 'create', 'coverImage', createForm.coverImage)}
 
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    URL file sách
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.fileUrl}
-                                        onChange={(event) => updateCreateForm('fileUrl', event.target.value)}
-                                    />
-                                </label>
+                                {renderUploadDropzone('File sách EPUB', 'book', 'create', 'fileUrl', createForm.fileUrl)}
 
                                 <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
                                     Mô tả
@@ -783,6 +875,8 @@ export default function BookInventory(): React.JSX.Element {
                         </div>
 
                         <form className="space-y-4 px-6 py-5" onSubmit={handleEditSubmit}>
+                            {renderFeedback('edit')}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
                                     Tên sách
@@ -827,23 +921,9 @@ export default function BookInventory(): React.JSX.Element {
                                     />
                                 </label>
 
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    URL ảnh bìa
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={editForm.coverImage}
-                                        onChange={(event) => updateEditForm('coverImage', event.target.value)}
-                                    />
-                                </label>
+                                {renderUploadDropzone('Ảnh bìa', 'cover', 'edit', 'coverImage', editForm.coverImage)}
 
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    URL file sách
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={editForm.fileUrl}
-                                        onChange={(event) => updateEditForm('fileUrl', event.target.value)}
-                                    />
-                                </label>
+                                {renderUploadDropzone('File sách EPUB', 'book', 'edit', 'fileUrl', editForm.fileUrl)}
 
                                 <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
                                     Mô tả
@@ -886,6 +966,8 @@ export default function BookInventory(): React.JSX.Element {
                         </div>
 
                         <form className="space-y-4 px-6 py-5" onSubmit={handlePreviewSubmit}>
+                            {renderFeedback('preview')}
+
                             <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
                                 Phần trăm đọc thử
                                 <input
@@ -933,6 +1015,8 @@ export default function BookInventory(): React.JSX.Element {
                         </div>
 
                         <form className="space-y-4 px-6 py-5" onSubmit={handlePriceSubmit}>
+                            {renderFeedback('price')}
+
                             <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
                                 Giá mới
                                 <input
