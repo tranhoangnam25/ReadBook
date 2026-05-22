@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { login } from '../services/authService';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,12 @@ interface LoginProps {
     onLoginSuccess: () => void;
 }
 
+interface LoginUser {
+    id: number;
+    username: string;
+    email: string;
+    roles?: string | Array<{ name?: string } | string>;
+}
 
 const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSuccess }) => {
     const [formData, setFormData] = useState({
@@ -47,10 +53,12 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                         localStorage.setItem('userId', response.user.id.toString());
                     }
 
-                    const roles = response.user.roles || [];
-                    const isAdmin = roles.some((r: any) => r.name === "ADM");
-                    
-                    if(isAdmin){
+                    const roles = (response.user as LoginUser).roles || [];
+                    const isAdmin = Array.isArray(roles)
+                        ? roles.some((role) => (typeof role === 'string' ? role : role.name) === 'ADM')
+                        : roles === 'ADM';
+
+                    if (isAdmin) {
                         navigate("/admin");
                     } else{
                         navigate("/");
@@ -60,16 +68,16 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                 }
             }
 
-            alert("Đăng nhập thành công!");
+            alert("ÄÄƒng nháº­p thÃ nh cÃ´ng!");
 
             onLoginSuccess();
             onClose();
 
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || "Email hoặc mật khẩu không đúng");
+                setError(err.response?.data?.message || "Email hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng");
             } else {
-                setError("Đã xảy ra lỗi không xác định");
+                setError("ÄÃ£ xáº£y ra lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh");
             }
         } finally {
             setLoading(false);
@@ -130,7 +138,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                                 <input
                                     name="password"
                                     className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                    placeholder="••••••••"
+                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                                     type="password"
                                     onChange={handleChange}
                                     required
@@ -169,3 +177,4 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
 };
 
 export default LoginPage; 
+

@@ -31,8 +31,6 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
         window.location.href = "/";
     };
 
-    const isActive = (path: string) => location.pathname === path;
-
     return (
         <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 backdrop-blur-md px-6 lg:px-20 py-4">
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-8">

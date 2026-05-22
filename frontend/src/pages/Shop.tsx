@@ -63,16 +63,6 @@ export default function ShopPage() {
         setPage(0);
     };
 
-    const handleFormatChange = (f: string) => {
-        setFormat(format === f ? "" : f);
-        setPage(0);
-    };
-
-    const handleYearChange = (y: string) => {
-        setYear(y ? Number(y) : "");
-        setPage(0);
-    };
-
     const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") setPage(0);
     };

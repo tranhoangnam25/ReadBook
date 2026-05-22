@@ -1,14 +1,13 @@
 package backend.controller;
 
+import backend.dto.request.CreateBookRequest;
+import backend.dto.request.UpdateBookRequest;
 import backend.dto.response.BookResponse;
-import backend.entity.Book;
 import backend.service.BookService;
 import backend.service.EmbeddingService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -26,6 +25,16 @@ public class BookController {
     public BookResponse getBook(@PathVariable Long id) {
     return bookService.getById(id);
 }
+
+    @PostMapping
+    public BookResponse createBook(@RequestBody CreateBookRequest request) {
+        return bookService.createBook(request);
+    }
+
+    @PutMapping("/{id}")
+    public BookResponse updateBook(@PathVariable Long id, @RequestBody UpdateBookRequest request) {
+        return bookService.updateBook(id, request);
+    }
 
     @GetMapping("/bestRatings")
     public ResponseEntity<List<BookResponse>> getBestsellers(

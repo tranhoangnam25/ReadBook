@@ -44,7 +44,7 @@ const [editingId, setEditingId] = useState<number | null>(null);
 const user = JSON.parse(localStorage.getItem("user") || "null");
 const queryClient = useQueryClient();
   
-  const { data: reviewPage, refetch } = useQuery({
+  const { data: reviewPage } = useQuery({
   queryKey: ["reviews", book.id],
   queryFn: async () => {
     const res = await api.get(`/reviews/book/${book.id}`);

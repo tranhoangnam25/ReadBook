@@ -1,10 +1,8 @@
 package backend.configuration;
 
-import backend.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +24,7 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 
@@ -56,6 +54,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/books/**",
+                                "/api/authors/**",
+                                "/api/categories/**",
                                 "/api/reviews/**",
                                 "/api/auth/**",
                                 "/swagger-ui/**",
@@ -70,10 +70,11 @@ public class SecurityConfig {
                                 "/api/payments/payos/webhook",
                                 "/api/reader-settings/**",
                                 "/api/orders/check",
+                                "/api/users/me/reading/progress",
                                 "/api/orders/export",
                                 "/api/reviews/{id}/reply",
                                 "/api/orders/admin/**",
-                                "/books/embedding"
+                                "/api/books/embedding"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -84,8 +85,7 @@ public class SecurityConfig {
                             response.getWriter().write("Unauthorized : token expired or missing");
                             response.setCharacterEncoding("UTF-8");
                             response.setContentType("text/plain; charset=UTF-8");
-                        })
-                );
+                        }));
 
         return http.build();
     }

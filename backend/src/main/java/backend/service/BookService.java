@@ -1,8 +1,14 @@
 package backend.service;
 
+import backend.dto.request.CreateBookRequest;
+import backend.dto.request.UpdateBookRequest;
 import backend.dto.response.BookResponse;
+import backend.entity.Author;
 import backend.entity.Book;
+import backend.entity.Category;
+import backend.repository.AuthorRepository;
 import backend.repository.BookRepository;
+import backend.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,8 +26,9 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
+    private final CategoryRepository categoryRepository;
 
-    
     @Transactional(readOnly = true)
     public List<BookResponse> getBestRating(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -42,7 +49,6 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    
     @Transactional(readOnly = true)
     public List<BookResponse> getRecommend() {
         return bookRepository.findAll()
@@ -51,7 +57,6 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    
     @Transactional(readOnly = true)
     public List<BookResponse> search(String keyword) {
         return bookRepository.findByTitleContaining(keyword)
@@ -60,7 +65,6 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    
     @Transactional(readOnly = true)
     public BookResponse getById(Long id) {
         Book b = bookRepository.findById(id)
@@ -69,7 +73,6 @@ public class BookService {
         return mapToResponse(b);
     }
 
-    
     @Transactional(readOnly = true)
     public Page<BookResponse> searchBooks(String keyword,
                                           String category,
@@ -87,16 +90,46 @@ public class BookService {
         return books.map(this::mapToResponse);
     }
 
-    
+    @Transactional
+    public BookResponse createBook(CreateBookRequest request) {
+        Author author = authorRepository.findById(request.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Book book = Book.builder()
+                .title(request.getTitle())
+                .price(request.getPrice())
+                .previewPercentage(request.getPreviewPercentage())
+                .description(request.getDescription())
+                .coverImage(request.getCoverImage())
+                .fileUrl(request.getFileUrl())
+                .publishYear(request.getPublishYear())
+                .author(author)
+                .category(category)
+                .build();
+
+        return mapToResponse(bookRepository.save(book));
+    }
+
+    @Transactional
+    public BookResponse updateBook(Long id, UpdateBookRequest request) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        book.setTitle(request.getTitle());
+        book.setPrice(request.getPrice());
+        book.setPreviewPercentage(request.getPreviewPercentage());
+        book.setDescription(request.getDescription());
+        book.setCoverImage(request.getCoverImage());
+        book.setFileUrl(request.getFileUrl());
+        book.setPublishYear(request.getPublishYear());
+
+        return mapToResponse(bookRepository.save(book));
+    }
+
     private BookResponse mapToResponse(Book b) {
         double avg = 0.0;
-        if (b.getReviews() != null && !b.getReviews().isEmpty()) {
-            avg = b.getReviews().stream()
-                    .mapToDouble(r -> r.getRating().doubleValue())
-                    .average()
-                    .orElse(0.0);
-        }
-        avg = Math.round(avg * 10.0) / 10.0;
 
         return BookResponse.builder()
                 .id(b.getId())

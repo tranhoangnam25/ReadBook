@@ -2,7 +2,7 @@ import Sidebar from "../components/common/Sidebar";
 
 export default function Dashboard() {
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
