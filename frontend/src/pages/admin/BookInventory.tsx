@@ -50,7 +50,7 @@ const emptyCreateForm: CreateBookForm = {
     categoryId: '',
 };
 
-const categories = ['Tất cả thể loại', 'Fiction', 'Business', 'Technology'];
+const ALL_CATEGORIES = 'Tất cả thể loại';
 const statuses = ['Trạng thái kho', 'In Stock', 'Waitlist', 'Archived'];
 
 export default function BookInventory(): React.JSX.Element {
@@ -58,7 +58,7 @@ export default function BookInventory(): React.JSX.Element {
     const [authors, setAuthors] = useState<AuthorOption[]>([]);
     const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
     const [keyword, setKeyword] = useState('');
-    const [category, setCategory] = useState(categories[0]);
+    const [category, setCategory] = useState(ALL_CATEGORIES);
     const [status, setStatus] = useState(statuses[0]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -96,7 +96,7 @@ export default function BookInventory(): React.JSX.Element {
                     page,
                     size: pageSize,
                     ...(keyword.trim() && { keyword: keyword.trim() }),
-                    ...(category !== categories[0] && { category }),
+                    ...(category !== ALL_CATEGORIES && { category }),
                 },
             });
 
@@ -139,6 +139,9 @@ export default function BookInventory(): React.JSX.Element {
 
         return books.filter((book) => (book.previewPercentage > 0 ? 'In Stock' : 'Archived') === status);
     }, [books, status]);
+
+    const previewEnabledCount = filteredBooks.filter((book) => book.previewPercentage > 0).length;
+    const needsPriceUpdateCount = filteredBooks.filter((book) => Number(book.price) <= 0).length;
 
     const openCreateModal = () => {
         setCreateForm({
@@ -440,8 +443,9 @@ export default function BookInventory(): React.JSX.Element {
                                     setPage(0);
                                 }}
                             >
-                                {categories.map((item) => (
-                                    <option key={item}>{item}</option>
+                                <option value={ALL_CATEGORIES}>{ALL_CATEGORIES}</option>
+                                {categoryOptions.map((item) => (
+                                    <option key={item.id} value={item.name}>{item.name}</option>
                                 ))}
                             </select>
 
@@ -612,8 +616,8 @@ export default function BookInventory(): React.JSX.Element {
                             <BookOpen className="h-6 w-6" />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Đang đọc thử</p>
-                            <p className="text-xl font-bold">452 Cuốn</p>
+                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Tổng số sách</p>
+                            <p className="text-xl font-bold">{totalElements.toLocaleString('vi-VN')} Cuốn</p>
                         </div>
                     </div>
 
@@ -622,8 +626,8 @@ export default function BookInventory(): React.JSX.Element {
                             <TrendingUp className="h-6 w-6" />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Đang đọc thử</p>
-                            <p className="text-xl font-bold">452 Cuốn</p>
+                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Có đọc thử trang này</p>
+                            <p className="text-xl font-bold">{previewEnabledCount.toLocaleString('vi-VN')} Cuốn</p>
                         </div>
                     </div>
 
@@ -632,8 +636,8 @@ export default function BookInventory(): React.JSX.Element {
                             <AlertTriangle className="h-6 w-6" />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Cần cập nhật giá</p>
-                            <p className="text-xl font-bold">12 Mục</p>
+                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Cần cập nhật giá trang này</p>
+                            <p className="text-xl font-bold">{needsPriceUpdateCount.toLocaleString('vi-VN')} Mục</p>
                         </div>
                     </div>
                 </footer>
