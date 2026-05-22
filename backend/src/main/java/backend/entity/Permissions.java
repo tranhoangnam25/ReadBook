@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "permissions")
 public class Permissions {
     @Id
     @Column(name = "name", nullable = false, unique = true, length = 100)

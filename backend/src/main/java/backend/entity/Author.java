@@ -23,7 +23,7 @@ public class Author {
     @Column(name = "author_id")
     private Long id;
 
-    @Column(name = "name", columnDefinition = "NVARCHAR", nullable = false)
+    @Column(name = "name", columnDefinition = "NVARCHAR(100)", nullable = false)
     private String name;
 
     @Column(name = "biography", columnDefinition = "NVARCHAR(MAX)", nullable = false)

@@ -34,17 +34,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             String token = authHeader.substring((7));
+            logger.info("Processing token for request: " + request.getRequestURI());
             try {
                 var signedJWT = jwtService.verifyToken(token);
                 String email = signedJWT.getJWTClaimsSet().getSubject();
+                logger.info("Token verified for email: " + email);
 
                 String scope = signedJWT.getJWTClaimsSet()
                         .getStringClaim("scope");
+                logger.info("Token scope: " + scope);
 
-                List<SimpleGrantedAuthority> authorities =
-                        Arrays.stream(scope.split(" "))
-                                .map(SimpleGrantedAuthority::new)
-                                .toList();
+                List<SimpleGrantedAuthority> authorities = Collections.emptyList();
+                if (scope != null && !scope.isEmpty()) {
+                    authorities = Arrays.stream(scope.split(" "))
+                                    .filter(s -> !s.isEmpty())
+                                    .map(SimpleGrantedAuthority::new)
+                                    .toList();
+                }
 
                 if (email != null &&
                         SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -57,12 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.info("Authentication set in SecurityContext");
                 }
             } catch (Exception e) {
-                // Token invalid or expired - just don't set authentication
-                // and let the filter chain continue.
-                // SecurityFilterChain will handle access control.
+                logger.error("Authentication failed: " + e.getMessage());
             }
+        } else {
+            logger.info("No Bearer token found in header for request: " + request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);

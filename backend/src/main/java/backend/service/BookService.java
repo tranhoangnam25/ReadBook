@@ -116,4 +116,7 @@ public class BookService {
                 .averageRating(avg)
                 .build();
     }
+    public BookResponse toResponseSafe(Book b) {
+        return mapToResponse(b);
+    }
 }

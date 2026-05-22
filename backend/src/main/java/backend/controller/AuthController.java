@@ -36,6 +36,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private backend.repository.RoleRepository roleRepository;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -44,12 +47,16 @@ public class AuthController {
         if (userRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email đã được sử dụng"));
         }
+        
+        var userRole = roleRepository.findById("USR")
+                .orElseThrow(() -> new RuntimeException("Default role USR not found"));
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phone("N/A")
-//                .role(Role.USR)
+                .roles(java.util.Set.of(userRole))
                 .status(StatusUser.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

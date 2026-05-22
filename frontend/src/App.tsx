@@ -39,6 +39,16 @@ function App() {
   
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('token'));
 
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+    
+    window.addEventListener('storage', checkToken);
+    return () => window.removeEventListener('storage', checkToken);
+  }, []);
+
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
     setIsLoginOpen(false); 

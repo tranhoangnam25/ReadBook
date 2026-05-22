@@ -20,8 +20,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("API Error:", error.config?.url, error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
-      console.warn("Token hết hạn → logout");
+      console.warn("Token hết hạn hoặc không hợp lệ tại:", error.config?.url, "→ logout");
+      console.log("Full error response:", error.response);
 
       
       localStorage.removeItem("token");

@@ -32,7 +32,7 @@ public class Book {
     @Builder.Default
     private BigDecimal price = BigDecimal.ZERO;
 
-    @Column(name = "preview_percentage", nullable = false, precision = 3, scale = 2)
+    @Column(name = "preview_percentage", nullable = false, precision = 5, scale = 2)
     @Builder.Default
     private BigDecimal previewPercentage = BigDecimal.ZERO;
 
@@ -69,6 +69,11 @@ public class Book {
             nullable = false
     )
     private Category category;
+
+    @Column(name = "summary_content", columnDefinition = "NVARCHAR(MAX)")
+    private String summaryContent;
+    @Column(name = "embedding")
+    private byte[] embedding;
 
     @OneToMany(mappedBy = "book", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private List<Order> orders = new ArrayList<>();

@@ -47,11 +47,14 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                         localStorage.setItem('userId', response.user.id.toString());
                     }
 
-                    if(response.user.roles === "ADM"){
+                    const roles = response.user.roles || [];
+                    const isAdmin = roles.some((r: any) => r.name === "ADM");
+                    
+                    if(isAdmin){
                         navigate("/admin");
                     } else{
                         navigate("/");
-                        }
+                    }
 
 
                 }

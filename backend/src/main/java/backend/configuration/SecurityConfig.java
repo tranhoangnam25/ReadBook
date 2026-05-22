@@ -34,10 +34,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -68,11 +69,11 @@ public class SecurityConfig {
                                 "/payment-cancel/**",
                                 "/api/payments/payos/webhook",
                                 "/api/reader-settings/**",
-                                 "/api/orders/check",
-                                "/api/users/me/reading/progress",
+                                "/api/orders/check",
                                 "/api/orders/export",
                                 "/api/reviews/{id}/reply",
-                                "/api/orders/admin/**"
+                                "/api/orders/admin/**",
+                                "/books/embedding"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -38,7 +38,11 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @Column(name = "role", nullable = false)
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_user_id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_name")
+    )
     private Set<Role> roles;
 
     @Enumerated(EnumType.STRING)

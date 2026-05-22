@@ -29,16 +29,20 @@ public class JwtService {
 
     public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+        
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + expiration * 1000);
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .issuer("phn.com")
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plusSeconds(expiration).toEpochMilli()
-                ))
+                .issueTime(now)
+                .expirationTime(expirationDate)
                 .claim("scope", buildScope(user))
                 .build();
+        
+        System.out.println("Generating token for: " + user.getEmail());
+        System.out.println("Expiration: " + expirationDate);
 
         JWSObject jwsObject = new JWSObject(header, new Payload(claims.toJSONObject()));
 
@@ -56,11 +60,13 @@ public class JwtService {
 
         boolean verified = signedJWT.verify(verifier);
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        System.out.println("verified = " + verified);
-        System.out.println("exp = " + expirationTime);
-        System.out.println("now = " + new Date());
+        
+        System.out.println("Verifying token. Verified: " + verified);
+        System.out.println("Token Exp: " + expirationTime);
+        System.out.println("Current Time: " + new Date());
 
         if (!(verified && expirationTime.after(new Date()))) {
+            System.out.println("Token verification failed!");
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return signedJWT;

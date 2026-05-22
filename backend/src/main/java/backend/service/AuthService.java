@@ -58,6 +58,7 @@ public class AuthService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .roles(roleResponses)
                 .build();
 
         return AuthResponse.builder()

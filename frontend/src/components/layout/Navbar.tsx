@@ -42,13 +42,14 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                     <div
                         onClick={() => {
                             const user = JSON.parse(localStorage.getItem("user") || "{}");
-                            if(user.roles === "ADM"){
+                            const roles = user.roles || [];
+                            const isAdmin = roles.some((r: any) => r.name === "ADM");
+                            if(isAdmin){
                                 navigate("/admin");
-                                } else {
-                                    navigate("/");
-                                    }
+                            } else {
+                                navigate("/");
                             }
-                        }
+                        }}
                         className="flex items-center gap-2 text-primary cursor-pointer"
                     >
                         <span className="material-symbols-outlined text-3xl">auto_stories</span>
@@ -56,7 +57,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                     </div>
 
 
-                    {user.roles === "USR" && (
+                    {user.roles?.some((r: any) => r.name === "USR") && (
                     <nav className="hidden md:flex items-center gap-8">
                         <a onClick={() => navigate("/")} className="text-sm font-medium hover:text-accent cursor-pointer">Explore</a>
                         <a onClick={() => navigate("/library")} className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>

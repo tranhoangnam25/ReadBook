@@ -29,6 +29,7 @@ export default function HomePageUser() {
       if (!userId) return;
       const res = await api.get("/users/me", { params: { id: userId } });
       setUser(res.data);
+      console.log("userId =", userId);
     } catch (err) {
       console.error("fetchUser:", err);
     }
@@ -39,6 +40,7 @@ export default function HomePageUser() {
       const userId = localStorage.getItem("userId");
       const res = await api.get("/users/me/reading", { params: { id: userId } });
       setReading(res.data);
+      console.log("userId =", userId);
     } catch (err) {
       console.error("fetchReading:", err);
     }
@@ -49,6 +51,7 @@ export default function HomePageUser() {
       const userId = localStorage.getItem("userId");
       const res = await api.get("/users/me/history", { params: { userId } });
       setHistory(res.data || []);
+      console.log("userId =", userId);
     } catch (err) {
       console.error("fetchHistory:", err);
     }
