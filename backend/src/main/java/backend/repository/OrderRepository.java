@@ -2,6 +2,7 @@ package backend.repository;
 
 import backend.dto.response.OrderAdminResponse;
 import backend.dto.response.OrderExportResponse;
+import backend.dto.response.OrderResponseUser;
 import backend.dto.response.OrderStatsResponse;
 import backend.entity.Order;
 import backend.enums.StatusOrder;
@@ -13,6 +14,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+
+    @Query("""
+SELECT new backend.dto.response.OrderResponseUser(
+    o.id,
+    o.book.title,
+    o.price,
+    o.status,
+    o.createdAt
+)
+FROM Order o
+WHERE o.user.id = :userId
+""")
+    List<OrderResponseUser> findOrderDTOByUserId(Long userId);
 
     boolean existsByUser_IdAndBook_IdAndStatus(
         Long userId,

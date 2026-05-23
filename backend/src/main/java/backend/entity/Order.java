@@ -1,6 +1,7 @@
 package backend.entity;
 
 import backend.enums.StatusOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,6 +42,7 @@ public class Order {
             name = "user_id",
             nullable = false
     )
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

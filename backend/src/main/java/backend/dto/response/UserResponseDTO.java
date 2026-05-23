@@ -1,6 +1,5 @@
 package backend.dto.response;
 
-import backend.entity.Role;
 import lombok.*;
 
 import java.util.Set;

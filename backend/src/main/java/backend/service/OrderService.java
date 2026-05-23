@@ -1,8 +1,6 @@
 package backend.service;
 
-import backend.dto.response.OrderAdminResponse;
-import backend.dto.response.OrderResponse;
-import backend.dto.response.OrderStatsResponse;
+import backend.dto.response.*;
 import backend.entity.Book;
 import backend.entity.Order;
 import backend.entity.User;
@@ -22,13 +20,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.util.*;
-import backend.dto.response.OrderExportResponse;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.stream.Collectors;
+
 @Service
 public class OrderService {
 
@@ -40,6 +39,10 @@ public class OrderService {
 
     @Autowired
     private BookRepository bookRepo;
+
+    public List<OrderResponseUser> getOrdersByUserId(Long userId) {
+        return orderRepo.findOrderDTOByUserId(userId);
+    }
 
     public OrderResponse createOrder(Integer userId, Integer bookId, Double price) {
 

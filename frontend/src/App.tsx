@@ -22,7 +22,10 @@ import CollectionPage from './pages/CollectionPage';
 import DashBoard from './pages/Dashboard';
 import OrderManagement  from './pages/admin/OrderManager';
 import ReviewManager from './pages/admin/ReviewManager';
-
+import BookInventory from './pages/admin/BookInventory';
+import ChatBot from "./components/common/ChatBot";
+import ManageUser from './pages/admin/ManageUser';
+import UserDetail from './pages/admin/UserDetail';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +103,8 @@ function App() {
 
           <Route path="/admin/books" element={<BookInventory />} />
           <Route path="/reading/:bookId" element={<ReadingView />} />
+          <Route path="/admin/users" element={<ManageUser />} />
+          <Route path="/admin/users/:id" element={<UserDetail />} />
 
           {}
           <Route path="*" element={<Navigate to="/" replace />} />

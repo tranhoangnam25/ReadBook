@@ -34,7 +34,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-//    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasRole('ADM')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

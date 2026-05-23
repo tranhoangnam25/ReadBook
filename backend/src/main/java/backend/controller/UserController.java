@@ -4,7 +4,10 @@ import backend.dto.request.ChangePasswordRequest;
 import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.BookResponse;
 import backend.dto.response.HistoryResponse;
+import backend.dto.response.OrderResponseUser;
 import backend.dto.response.ReadingResponse;
+import backend.entity.Order;
+import backend.service.OrderService;
 import backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +28,8 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    private final OrderService orderService;
 
     @GetMapping
     public List<User> getAll() {
@@ -83,5 +88,9 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @GetMapping("/{id}/orders")
+    public List<OrderResponseUser> getUserOrders(@PathVariable Long id) {
+        return orderService.getOrdersByUserId(id);
     }
 }
