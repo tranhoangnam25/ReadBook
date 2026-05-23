@@ -33,15 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if(authHeader != null && authHeader.startsWith("Bearer ")){
-            String token = authHeader.substring((7));
-            logger.info("Processing token for request: " + request.getRequestURI());
+            String token = authHeader.substring(7);
+            logger.info("Processing token for request: " + request.getMethod() + " " + request.getRequestURI());
             try {
                 var signedJWT = jwtService.verifyToken(token);
                 String email = signedJWT.getJWTClaimsSet().getSubject();
-                logger.info("Token verified for email: " + email);
+                logger.info("Token verified successfully for email: " + email);
 
-                String scope = signedJWT.getJWTClaimsSet()
-                        .getStringClaim("scope");
+                String scope = signedJWT.getJWTClaimsSet().getStringClaim("scope");
                 logger.info("Token scope: " + scope);
 
                 List<SimpleGrantedAuthority> authorities = Collections.emptyList();
@@ -52,24 +51,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     .toList();
                 }
 
-                if (email != null &&
-                        SecurityContextHolder.getContext().getAuthentication() == null) {
-
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    email,
-                                    null,
-                                    authorities
-                            );
-
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    logger.info("Authentication set in SecurityContext");
+                    logger.info("Authentication set in SecurityContext for: " + email);
                 }
             } catch (Exception e) {
-                logger.error("Authentication failed: " + e.getMessage());
+                SecurityContextHolder.clearContext();
+                logger.error("JWT FAILED: " + e.getMessage());
+                // e.printStackTrace(); // Optional: remove if too noisy
             }
         } else {
-            logger.info("No Bearer token found in header for request: " + request.getRequestURI());
+            logger.info("No Bearer token found for: " + request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);

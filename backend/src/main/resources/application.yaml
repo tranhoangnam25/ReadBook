@@ -5,12 +5,12 @@ server:
     uri-encoding: UTF-8
 
 jwt:
-  secret: "9f3c7a1e5b8d2c4f6a9e0b7d1c3f8a2e4b6c9d0f1a2b3c4d5e6f7a8b9c0d1e2"
+  secret: 9f3c7a1e5b8d2c4f6a9e0b7d1c3f8a2e4b6c9d0f1a2b3c4d5e6f7a8b9c0d1e2
   expiration: 3600
 
 gemini:
   api:
-    key: AIzaSyBcHcaWBus6DqDPweymh5g4CxBE4WSHkOM
+    key: ${GEMINI_API_KEY}
 
 groq:
   api:
@@ -68,3 +68,6 @@ spring:
 
     clean-disabled: false
     clean-on-validation-error: true
+
+    config:
+      import: "optional:file:.env[.properties]"

@@ -3,7 +3,6 @@ package backend.service;
 import backend.entity.Book;
 import backend.repository.BookRepository;
 import backend.utils.VectorUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +18,11 @@ public class EmbeddingService {
     private final GeminiService geminiService;
 
 
+    @org.springframework.scheduling.annotation.Async
     @Transactional
     public void generateEmbeddings(){
         System.out.println("START EMBEDDING...");
 
-
-        ObjectMapper mapper =
-                new ObjectMapper();
 
         List<Book> books =
                 bookRepository.findAll();
@@ -34,9 +31,14 @@ public class EmbeddingService {
             System.out.println("Processing: " + book.getTitle());
 
             try{
-                String text = book.getTitle() + " " +
-                                book.getDescription() + " " +
-                                book.getSummaryContent();
+                String text = (book.getTitle() != null ? book.getTitle() : "") + " " +
+                                (book.getDescription() != null ? book.getDescription() : "") + " " +
+                                (book.getSummaryContent() != null ? book.getSummaryContent() : "");
+
+                if (text.trim().isEmpty()) {
+                    System.out.println("Skipping book with no content: " + book.getId());
+                    continue;
+                }
 
                 List<Double> embedding = geminiService.createEmbedding(text);
 

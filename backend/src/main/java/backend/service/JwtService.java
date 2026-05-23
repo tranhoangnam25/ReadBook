@@ -27,6 +27,15 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        if (signerKey == null || signerKey.trim().isEmpty()) {
+            System.err.println("JWT Secret is EMPTY!");
+        } else {
+            System.out.println("JWT Secret loaded. Length: " + signerKey.length());
+        }
+    }
+
     public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
         

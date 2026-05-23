@@ -22,7 +22,7 @@ import CollectionPage from './pages/CollectionPage';
 import DashBoard from './pages/Dashboard';
 import OrderManagement  from './pages/admin/OrderManager';
 import ReviewManager from './pages/admin/ReviewManager';
-import BookInventory from './pages/admin/BookInventory';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,6 +126,8 @@ function App() {
             onLoginSuccess={handleLoginSuccess}
           />
         )}
+
+        <ChatBot />
       </BrowserRouter>
     </QueryClientProvider>
   );

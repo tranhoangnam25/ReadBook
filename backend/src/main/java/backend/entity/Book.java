@@ -73,6 +73,8 @@ public class Book {
     @Column(name = "summary_content", columnDefinition = "NVARCHAR(MAX)")
     private String summaryContent;
     @Column(name = "embedding")
+
+
     private byte[] embedding;
 
     @OneToMany(mappedBy = "book", cascade = {CascadeType.MERGE, CascadeType.PERSIST})

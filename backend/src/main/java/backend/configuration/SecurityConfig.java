@@ -73,9 +73,7 @@ public class SecurityConfig {
                                 "/api/users/me/reading/progress",
                                 "/api/orders/export",
                                 "/api/reviews/{id}/reply",
-                                "/api/orders/admin/**",
-                                "/api/uploads/**",
-                                "/api/books/embedding"
+                                "/api/orders/admin/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

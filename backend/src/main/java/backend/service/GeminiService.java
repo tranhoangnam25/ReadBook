@@ -57,49 +57,37 @@ public class GeminiService {
     }
 
     public List<Double> createEmbedding(String text) {
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            System.err.println("ERROR: Gemini API Key is missing. Please check your environment variables or .env file.");
+            return List.of();
+        }
 
-        String url =
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key="
-                        + apiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
 
-        HttpHeaders headers =
-                new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", apiKey);
 
-        headers.setContentType(
-                MediaType.APPLICATION_JSON
+        Map<String, Object> body = Map.of(
+                "content", Map.of(
+                        "parts", List.of(
+                                Map.of("text", text)
+                        )
+                )
         );
 
-        Map<String, Object> body =
-                Map.of(
-                        "content",
-                        Map.of(
-                                "parts",
-                                List.of(
-                                        Map.of(
-                                                "text",
-                                                text
-                                        )
-                                )
-                        )
-                );
+        try {
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
-        HttpEntity<Map<String, Object>> request =
-                new HttpEntity<>(
-                        body,
-                        headers
-                );
-
-        ResponseEntity<Map> response =
-                restTemplate.postForEntity(
-                        url,
-                        request,
-                        Map.class
-                );
-
-        Map embedding =
-                (Map) response.getBody()
-                        .get("embedding");
-
-        return (List<Double>) embedding.get("values");
+            if (response.getBody() != null && response.getBody().containsKey("embedding")) {
+                Map embedding = (Map) response.getBody().get("embedding");
+                return (List<Double>) embedding.get("values");
+            }
+            return List.of();
+        } catch (Exception e) {
+            System.err.println("Gemini Embedding Error: " + e.getMessage());
+            return List.of();
+        }
     }
 }
