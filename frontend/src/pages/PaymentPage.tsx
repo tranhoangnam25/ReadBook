@@ -15,16 +15,54 @@ export default function PaymentPage() {
 
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(false);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+const [salePrice, setSalePrice] = useState(0);
 
   
   useEffect(() => {
-    if (!bookId) return;
+  if (!bookId) return;
 
-    api.get(`/books/${bookId}`)
-      .then(res => setBook(res.data))
-      .catch(console.error);
+  const fetchBook = async () => {
+    try {
+      const res = await api.get(`/books/${bookId}`);
 
-  }, [bookId]);
+      const bookData = res.data;
+
+      setBook(bookData);
+
+      // check sale
+      try {
+        const saleRes = await api.get(
+          `/sales/check-discount/${bookId}`
+        );
+
+        const discount = Number(saleRes.data || 0);
+
+        setDiscountPercentage(discount);
+
+        if (discount > 0) {
+          const finalPrice = Math.round(
+            bookData.price * (100 - discount) / 100
+          );
+
+          setSalePrice(finalPrice);
+        } else {
+          setSalePrice(bookData.price);
+        }
+
+      } catch (err) {
+        console.error("Discount error:", err);
+        setSalePrice(bookData.price);
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchBook();
+
+}, [bookId]);
 
   
   const handlePay = async () => {
@@ -82,9 +120,38 @@ export default function PaymentPage() {
           <div>
             <p className="font-bold text-sm">{book.title}</p>
             <p className="text-xs text-gray-500">{book.author}</p>
-            <p className="font-bold mt-1">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
-            </p>
+            <div className="mt-1">
+  {discountPercentage > 0 ? (
+    <>
+      <div className="flex items-center gap-2">
+        <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+          -{discountPercentage}%
+        </span>
+
+        <span className="text-xs line-through text-gray-400">
+          {new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND"
+          }).format(book.price)}
+        </span>
+      </div>
+
+      <p className="font-bold text-red-500 text-lg">
+        {new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND"
+        }).format(salePrice)}
+      </p>
+    </>
+  ) : (
+    <p className="font-bold">
+      {new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND"
+      }).format(book.price)}
+    </p>
+  )}
+</div>
           </div>
 
           <span className="ml-auto text-xs bg-orange-100 text-orange-500 px-2 py-1 rounded">

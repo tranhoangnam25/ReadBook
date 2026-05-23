@@ -40,11 +40,13 @@ const location = useLocation();
   const [rating, setRating] = useState(5);
 const [comment, setComment] = useState("");
 const [editingId, setEditingId] = useState<number | null>(null);
+const [discountPercentage, setDiscountPercentage] = useState(0);
+const [salePrice, setSalePrice] = useState(book.price);
 
 const user = JSON.parse(localStorage.getItem("user") || "null");
 const queryClient = useQueryClient();
   
-  const { data: reviewPage } = useQuery({
+  const { data: reviewPage, refetch } = useQuery({
   queryKey: ["reviews", book.id],
   queryFn: async () => {
     const res = await api.get(`/reviews/book/${book.id}`);
@@ -193,7 +195,7 @@ const handleEdit = (r: any) => {
         params: {
           userId: user.id,
           bookId: book.id,
-          price: book.price
+          price: salePrice
         }
       });
 
@@ -251,6 +253,37 @@ useEffect(() => {
   setShowForm(true);
 }
 }, [location.search]);
+
+useEffect(() => {
+  const checkDiscount = async () => {
+    try {
+      if (!book?.id) return;
+
+      const res = await api.get(
+        `/sales/check-discount/${book.id}`
+      );
+
+      const discount = Number(res.data || 0);
+
+      setDiscountPercentage(discount);
+
+      if (discount > 0) {
+        const finalPrice =
+          book.price * (100 - discount) / 100;
+
+        setSalePrice(finalPrice);
+      } else {
+        setSalePrice(book.price);
+      }
+
+    } catch (err) {
+      console.error("Discount error:", err);
+      setSalePrice(book.price);
+    }
+  };
+
+  checkDiscount();
+}, [book?.id]);
 function StarPicker({ rating, setRating }: any) {
   return (
     <div className="flex gap-1 cursor-pointer">
@@ -282,13 +315,41 @@ function StarPicker({ rating, setRating }: any) {
           </div>
 
           <div className="bg-primary/5 p-4 rounded-xl border border-primary/10">
-            <p className="text-xs uppercase tracking-widest text-primary/50">
-              Price
-            </p>
-            <p className="text-3xl font-black text-primary">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.price)}
-            </p>
-          </div>
+  <p className="text-xs uppercase tracking-widest text-primary/50">
+    Price
+  </p>
+
+  {discountPercentage > 0 ? (
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+          -{discountPercentage}%
+        </span>
+
+        <span className="text-sm line-through text-gray-400">
+          {new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          }).format(book.price)}
+        </span>
+      </div>
+
+      <p className="text-3xl font-black text-red-500">
+        {new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(salePrice)}
+      </p>
+    </div>
+  ) : (
+    <p className="text-3xl font-black text-primary">
+      {new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(book.price)}
+    </p>
+  )}
+</div>
 
           {isPurchased ? (
             <button

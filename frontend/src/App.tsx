@@ -26,6 +26,8 @@ import BookInventory from './pages/admin/BookInventory';
 import ChatBot from "./components/common/ChatBot";
 import ManageUser from './pages/admin/ManageUser';
 import UserDetail from './pages/admin/UserDetail';
+import SalePage from './pages/SalePage';
+import SaleManager from './pages/admin/ManagerSale';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,12 +101,14 @@ function App() {
             <Route path="/admin" element={<DashBoard />} />
             <Route path="/admin/orders" element={<OrderManagement />} />
             <Route path="/admin/reviews" element={<ReviewManager />} />
+            <Route path="/sale" element={<SalePage />} />
           </Route>
 
           <Route path="/admin/books" element={<BookInventory />} />
           <Route path="/reading/:bookId" element={<ReadingView />} />
           <Route path="/admin/users" element={<ManageUser />} />
           <Route path="/admin/users/:id" element={<UserDetail />} />
+          <Route path="/admin/sale-manager" element={<SaleManager />} />
 
           {}
           <Route path="*" element={<Navigate to="/" replace />} />

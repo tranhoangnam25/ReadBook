@@ -214,3 +214,28 @@ GO
 
 ALTER TABLE [collection_items] ADD CONSTRAINT [fk_col_items_book] FOREIGN KEY ([book_id]) REFERENCES [books] ([book_id])
 GO
+
+
+CREATE TABLE [Sales] (
+  [sale_id] INT PRIMARY KEY IDENTITY(1, 1),
+  [title] NVARCHAR(255) NOT NULL,            -- Tên đợt sale (Ví dụ: "Sale Hè Rực Rỡ", "Black Friday")
+  [description] NVARCHAR(MAX),
+  [discount_percentage] INT NOT NULL,       -- Phần trăm giảm giá (Ví dụ: 20 nghĩa là giảm 20%)
+  [start_date] DATETIME NOT NULL,           -- Thời gian bắt đầu đợt sale
+  [end_date] DATETIME NOT NULL,             -- Thời gian kết thúc đợt sale
+  [status] NVARCHAR(10) DEFAULT 'active',   -- 'active', 'disabled'
+  [created_at] DATETIME DEFAULT (GETDATE()),
+  CONSTRAINT [ck_sales_percentage] CHECK ([discount_percentage] BETWEEN 1 AND 100),
+  CONSTRAINT [ck_sales_status] CHECK ([status] IN ('active', 'disabled'))
+)
+GO
+
+-- Bảng trung gian liên kết các Sách được giảm giá trong đợt Sale đó
+CREATE TABLE [Sale_Books] (
+  [sale_book_id] INT PRIMARY KEY IDENTITY(1, 1),
+  [sale_id] INT NOT NULL,
+  [book_id] INT NOT NULL,
+  [added_at] DATETIME DEFAULT (GETDATE()),
+  CONSTRAINT [uk_sale_book] UNIQUE ([sale_id], [book_id]) -- Một cuốn sách không được trùng lặp trong cùng 1 đợt sale
+)
+GO
