@@ -64,6 +64,45 @@ public class RoleService {
                 .toList();
     }
 
+    public RoleResponse getById(String roleName) {
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        return RoleResponse.builder()
+                .name(role.getName())
+                .description(role.getDescription())
+                .permissions(role.getPermissions().stream()
+                        .map(p -> PermissionResponse.builder()
+                                .name(p.getName())
+                                .description(p.getDescription())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+    public RoleResponse update(String roleName, RoleRequest request) {
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        role.setDescription(request.getDescription());
+
+        var permissions = permissionRepository.findAllById(request.getPermissions());
+        role.setPermissions(new HashSet<>(permissions));
+
+        roleRepository.save(role);
+
+        return RoleResponse.builder()
+                .name(role.getName())
+                .description(role.getDescription())
+                .permissions(role.getPermissions().stream()
+                        .map(p -> PermissionResponse.builder()
+                                .name(p.getName())
+                                .description(p.getDescription())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
     public void delete(String role){
         roleRepository.deleteById(role);
     }

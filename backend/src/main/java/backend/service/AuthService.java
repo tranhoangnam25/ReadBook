@@ -5,6 +5,7 @@ import backend.dto.response.AuthResponse;
 import backend.dto.response.PermissionResponse;
 import backend.dto.response.RoleResponse;
 import backend.dto.response.UserResponseDTO;
+import backend.enums.StatusUser;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
 import backend.repository.UserRepository;
@@ -35,6 +36,9 @@ public class AuthService {
         boolean authenticated =  passwordEncoder.matches( request.getPassword(), user.getPassword());
         if(!authenticated){
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        if(user.getStatus() == StatusUser.LOCKED){
+            throw new AppException(ErrorCode.ACC_WAS_LOCKED);
         }
         String token = jwtService.generateToken(user);
 

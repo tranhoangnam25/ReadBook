@@ -7,6 +7,7 @@ import backend.dto.response.ReadingResponse;
 import backend.entity.Book;
 import backend.entity.ReadingProgress;
 import backend.entity.User;
+import backend.enums.StatusUser;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
 import backend.repository.ReadingProgressRepository;
@@ -49,6 +50,16 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public User toggleLock(long id){
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
+        if(user.getStatus() == StatusUser.LOCKED){
+            user.setStatus(StatusUser.ACTIVE);
+        } else {
+            user.setStatus(StatusUser.LOCKED);
+        }
+        return userRepository.save(user);
     }
 
     

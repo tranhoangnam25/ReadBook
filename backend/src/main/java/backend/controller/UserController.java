@@ -24,7 +24,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -66,7 +65,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    
+
     @GetMapping("/me/history")
     public List<HistoryResponse> getHistory(@RequestParam Long userId) {
         return userService.getHistory(userId);
@@ -92,5 +91,11 @@ public class UserController {
     @GetMapping("/{id}/orders")
     public List<OrderResponseUser> getUserOrders(@PathVariable Long id) {
         return orderService.getOrdersByUserId(id);
+    }
+
+    @PatchMapping("/{id}/toggle-status")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADM')")
+    public ResponseEntity<User> toggleStatus(@PathVariable Long id){
+        return ResponseEntity.ok(userService.toggleLock(id));
     }
 }

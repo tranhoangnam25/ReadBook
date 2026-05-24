@@ -91,3 +91,21 @@ export interface ReaderSettingRequest {
     lineHeight: number;
     backgroundColor: BackgroundColorId;
 }
+// types/api.ts
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+  errors?: unknown;
+  code: number;
+}
+export interface Permission {
+  name: string;
+  description: string;
+}
+
+export interface Role {
+  name: string;
+  description: string;
+  permissions: Permission[];
+}

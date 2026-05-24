@@ -7,19 +7,20 @@ import backend.service.PermissionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/permissions")
+@RequestMapping("/api/permissions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADM')")
     ApiResponse<PermissionResponse> create(@RequestBody PermissionRequest request){
         return ApiResponse.<PermissionResponse>builder()
                 .success(true)
@@ -29,6 +30,7 @@ public class PermissionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADM')")
     ApiResponse<List<PermissionResponse>> getAll(){
         return ApiResponse.<List<PermissionResponse>>builder()
                 .success(true)
@@ -38,6 +40,7 @@ public class PermissionController {
     }
 
     @DeleteMapping("/{permission}")
+    @PreAuthorize("hasRole('ADM')")
     ApiResponse<Void> delete(@PathVariable String permission){
         permissionService.delete(permission);
         return ApiResponse.<Void>builder()

@@ -34,6 +34,9 @@ interface User {
   updatedAt: string;
   roles: Role[];
 }
+export const toggleUserStatus = async (id: number) => {
+  return await api.patch(`/users/${id}/toggle-status`);
+};
 
 export default function ManageUser() {
   const [users, setUsers] = useState<User[]>([]);
@@ -59,6 +62,23 @@ export default function ManageUser() {
     fetchUsers();
   }, []);
 
+const handleToggleStatus = async (id: number) => {
+  try {
+    const res = await toggleUserStatus(id);
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id
+          ? { ...u, status: res.data.status }
+          : u
+      )
+    );
+  } catch (err) {
+    console.error("Toggle status error:", err);
+    alert("Không thể cập nhật trạng thái");
+  }
+};
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchKeyword =
@@ -80,6 +100,8 @@ const filteredBaseUsers = useMemo(() => {
     return isNotAdmin;
   });
 }, [users]);
+
+
 
   const totalUsers = filteredBaseUsers.length;
 
@@ -320,6 +342,7 @@ const filteredBaseUsers = useMemo(() => {
 
 
                               <button
+                                onClick={() => handleToggleStatus(user.id)}
                                 className={`p-2 rounded-lg ${
                                   isLocked
                                     ? "bg-red-50 text-red-500"

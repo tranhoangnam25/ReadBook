@@ -14,7 +14,8 @@ public enum ErrorCode {
     USERNAME_NOT_EXISTED(1003, "User not existed"),
     UNAUTHENTICATED(1006, "Unauthenticated"),
     COLLECTION_NOT_FOUND(1007, "Collection not found!"),
-    BOOK_NOT_FOUND(1006, "Book not found!")
+    BOOK_NOT_FOUND(1006, "Book not found!"),
+    ACC_WAS_LOCKED(1008, "Account is locked!")
     ;
     private int code;
     private String message;

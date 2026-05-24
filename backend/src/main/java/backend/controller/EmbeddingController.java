@@ -2,6 +2,7 @@ package backend.controller;
 
 import backend.service.EmbeddingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,10 +15,9 @@ public class EmbeddingController {
     private final EmbeddingService embeddingService;
 
     @GetMapping("/books/embedding")
+    @PreAuthorize("hasAuthoriry('CREATE_BOOK')")
     public String embedding(){
-
         embeddingService.generateEmbeddings();
-
         return "Embedding generation started. Check server logs for progress.";
     }
 }

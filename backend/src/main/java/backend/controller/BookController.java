@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import java.util.List;
@@ -27,11 +28,13 @@ public class BookController {
 }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_BOOK')")
     public BookResponse createBook(@RequestBody CreateBookRequest request) {
         return bookService.createBook(request);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADD_BOOK')")
     public BookResponse updateBook(@PathVariable Long id, @RequestBody UpdateBookRequest request) {
         return bookService.updateBook(id, request);
     }
@@ -48,6 +51,7 @@ public class BookController {
         return ResponseEntity.ok(bookService.getBestSellers(limit));
     }
     @PostMapping("/embedding")
+    @PreAuthorize("hasAuthority('CREATE_BOOK')")
     public String generateEmbeddings() {
 
         embeddingService.generateEmbeddings();

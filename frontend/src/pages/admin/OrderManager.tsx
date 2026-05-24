@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 
 import {
   Search,
@@ -81,8 +81,8 @@ const [showModal, setShowModal] =
 
       setLoading(true);
 
-      const response = await axios.get(
-        "http://localhost:8080/api/orders/admin",
+      const response = await api.get(
+        "/orders/admin",
         {
           params: {
             keyword,
@@ -117,8 +117,8 @@ const [showModal, setShowModal] =
 
     try {
 
-      const response = await axios.get(
-        "http://localhost:8080/api/orders/admin/stats"
+      const response = await api.get(
+        "/orders/admin/stats"
       );
 
       setStats(response.data);
@@ -143,8 +143,8 @@ const [showModal, setShowModal] =
     const realId =
       orderId.replace("#BK-", "");
 
-    const response = await axios.get(
-      `http://localhost:8080/api/orders/admin/${realId}`
+    const response = await api.get(
+      `/orders/admin/${realId}`
     );
 
     setSelectedOrder(response.data);
@@ -168,8 +168,8 @@ const [showModal, setShowModal] =
 
     try {
 
-      const response = await axios.get(
-        "http://localhost:8080/api/orders/export",
+      const response = await api.get(
+        "/orders/export",
         {
           responseType: "blob"
         }

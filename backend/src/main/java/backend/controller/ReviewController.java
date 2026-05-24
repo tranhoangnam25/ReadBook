@@ -10,19 +10,18 @@ import backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/reviews")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
 
-    // ✅ FIX: trả DTO thay vì entity
     @GetMapping("/book/{bookId}")
     public ResponseEntity<Page<ReviewResponse>> getAllReviewsByBook(
             @PathVariable Long bookId,
@@ -32,7 +31,7 @@ public class ReviewController {
 
         Page<Review> reviews = reviewService.getByBookId(bookId, page, size);
 
-        // 👉 map sang DTO
+
         Page<ReviewResponse> response = reviews.map(r -> {
 
     ReviewResponse res = new ReviewResponse();
@@ -53,7 +52,6 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ CREATE
     @PostMapping
 public ReviewResponse create(
         @RequestParam Long bookId,
@@ -75,7 +73,7 @@ public ReviewResponse create(
     return res;
 }
 
-    // ✅ FIX: Integer -> Long
+
     
   @PutMapping("/{id}")
 public ReviewResponse update(
@@ -101,7 +99,7 @@ public ReviewResponse update(
     return res;
 }
 
-    // ✅ FIX: Integer -> Long
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(
             @PathVariable Long id,
@@ -113,7 +111,8 @@ public ReviewResponse update(
 
 
     @GetMapping("/admin")
-public ResponseEntity<Page<ReviewAdminResponse>>
+    @PreAuthorize("hasRole('ADM') or hasAuthority('GET_ALL_REVIEW')")
+    public ResponseEntity<Page<ReviewAdminResponse>>
 getAdminReviews(
 
         @RequestParam(defaultValue = "")
@@ -140,6 +139,7 @@ getAdminReviews(
 }
 
     @GetMapping("/admin/stats")
+    @PreAuthorize("hasRole('ADM') or hasAuthority('GET_ALL_REVIEW')")
 public ResponseEntity<ReviewStatsResponse>
 getStats() {
 
@@ -149,21 +149,16 @@ getStats() {
 }
 
     @PutMapping("/{id}/hide")
-public ResponseEntity<?> hideReview(
-        @PathVariable Long id
-) {
-
+    @PreAuthorize("hasAuthority('MANAGE_REVIEW')")
+    public ResponseEntity<?> hideReview(@PathVariable Long id) {
     reviewService.hideReview(id);
-
-    return ResponseEntity.ok(
-            "Ẩn đánh giá thành công"
-    );
+    return ResponseEntity.ok("Ẩn đánh giá thành công");
 }
-
-@PutMapping("/{id}/show")
-public ResponseEntity<?> showReview(
-        @PathVariable Long id
-) {
+    @PutMapping("/{id}/show")
+    @PreAuthorize("hasAuthority('MANAGE_REVIEW')")
+    public ResponseEntity<?> showReview(
+            @PathVariable Long id
+    ) {
 
     reviewService.showReview(id);
 
@@ -173,17 +168,13 @@ public ResponseEntity<?> showReview(
 }
 
     @PostMapping("/{id}/reply")
-public ResponseEntity<?> replyReview(
-
+    public ResponseEntity<?> replyReview(
         @PathVariable Long id,
+        @RequestBody ReviewReplyRequest request) {
 
-        @RequestBody ReviewReplyRequest request
-) {
-
-    reviewService.replyReview(
+        reviewService.replyReview(
             id,
-            request.getReply()
-    );
+            request.getReply());
 
     return ResponseEntity.ok(
             "Phản hồi thành công"

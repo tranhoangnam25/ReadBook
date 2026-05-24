@@ -3,6 +3,7 @@ import {
   Search, Bell, Settings, MessageSquare, Eye, EyeOff, ChevronLeft, ChevronRight, Star, X, CheckCircle 
 } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar'; 
+import api from '../../services/api';
 
 // --- Interface hứng dữ liệu chuẩn từ Spring Boot ---
 interface SpringPage<T> {
@@ -51,22 +52,17 @@ export default function ReviewManagement(): React.JSX.Element {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalElements, setTotalElements] = useState<number>(0);
 
-  const API_BASE_URL = 'http://localhost:8080/api/reviews';
-
   // 1. Lấy danh sách đánh giá có Phân trang + Keyword + Status
   const fetchReviews = useCallback(async (searchKey: string, status: string, page: number) => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin?keyword=${encodeURIComponent(searchKey)}&status=${status}&page=${page}&size=${pageSize}`,
-        { method: 'GET' }
+      const response = await api.get<SpringPage<ReviewAdminResponse>>(
+        `/reviews/admin?keyword=${encodeURIComponent(searchKey)}&status=${status}&page=${page}&size=${pageSize}`
       );
-      if (response.ok) {
-        const data: SpringPage<ReviewAdminResponse> = await response.json();
-        setReviews(data.content || []);
-        setTotalPages(data.totalPages || 1);
-        setTotalElements(data.totalElements || 0);
-      }
+      const data = response.data;
+      setReviews(data.content || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalElements(data.totalElements || 0);
     } catch (error) {
       console.error("Lỗi khi tải danh sách reviews:", error);
     } finally {
@@ -77,11 +73,8 @@ export default function ReviewManagement(): React.JSX.Element {
   // 2. Lấy số liệu thống kê Widgets chân trang
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/stats`);
-      if (response.ok) {
-        const data: ReviewStatsResponse = await response.json();
-        setStats(data);
-      }
+      const response = await api.get<ReviewStatsResponse>(`/reviews/admin/stats`);
+      setStats(response.data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu thống kê:", error);
     }
@@ -91,8 +84,8 @@ export default function ReviewManagement(): React.JSX.Element {
   const handleHideReview = async (id: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn ẩn đánh giá này khỏi giao diện người dùng?")) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/${id}/hide`, { method: 'PUT' });
-      if (response.ok) {
+      const response = await api.put(`/reviews/${id}/hide`);
+      if (response.status === 200) {
         alert("Ẩn đánh giá thành công!");
         refreshData();
       }
@@ -104,8 +97,8 @@ export default function ReviewManagement(): React.JSX.Element {
   // 4. Xử lý Hiện đánh giá (Sử dụng API /{id}/show)
   const handleShowReview = async (id: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/${id}/show`, { method: 'PUT' });
-      if (response.ok) {
+      const response = await api.put(`/reviews/${id}/show`);
+      if (response.status === 200) {
         alert("Hiển thị đánh giá thành công!");
         refreshData();
       }
@@ -118,12 +111,10 @@ export default function ReviewManagement(): React.JSX.Element {
   const handleSendReply = async () => {
     if (!selectedReview || !replyText.trim()) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/${selectedReview.id}/reply`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reply: replyText }) // Body chứa thuộc tính reply khớp với ReviewReplyRequest
+      const response = await api.post(`/reviews/${selectedReview.id}/reply`, {
+        reply: replyText 
       });
-      if (response.ok) {
+      if (response.status === 200) {
         alert("Gửi phản hồi thành công!");
         setModalType(null);
         setReplyText('');

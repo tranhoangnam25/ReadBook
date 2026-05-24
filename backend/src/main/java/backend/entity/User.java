@@ -45,7 +45,6 @@ public class User {
     )
     private Set<Role> roles;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private StatusUser status = StatusUser.ACTIVE;

@@ -38,31 +38,15 @@ export default function Sidebar() {
           Đánh giá
         </NavLink>
 
-        <NavLink to="/admin/admins" className={navClass}>
+        <NavLink to="/admin/roles" className={navClass}>
           <span className="material-symbols-outlined">
             admin_panel_settings
           </span>
-          Quản trị viên
+          Phân quyền
         </NavLink>
       </nav>
 
-      <div className="p-4 border-t border-slate-200">
-        <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-xl">
-          <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-            AR
-          </div>
 
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-semibold truncate">
-              Alex Rivera
-            </span>
-
-            <span className="text-xs text-slate-500 truncate">
-              Quản trị viên cấp cao
-            </span>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

@@ -56,7 +56,6 @@ public class SecurityConfig {
                                 "/api/books/**",
                                 "/api/authors/**",
                                 "/api/categories/**",
-                                "/api/reviews/**",
                                 "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -68,12 +67,9 @@ public class SecurityConfig {
                                 "/payment-success/**",
                                 "/payment-cancel/**",
                                 "/api/payments/payos/webhook",
-                                "/api/reader-settings/**",
-                                "/api/orders/check",
-                                "/api/users/me/reading/progress",
-                                "/api/orders/export",
-                                "/api/reviews/{id}/reply",
-                                "/api/orders/admin/**"
+//                                "/api/orders/check",
+                                "/api/users/me/reading/progress"
+//                                "/api/reviews/{id}/reply"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -14,8 +14,16 @@ import {
   Download,
 } from "lucide-react";
 
+export const toggleUserStatus = async (id: number) => {
+  return await api.patch(`/users/${id}/toggle-status`);
+};
+
 export default function UserDetail() {
   const { id } = useParams();
+  const userId = Number(id);
+  if (!userId) {
+    return <div>Invalid user</div>;
+  }
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +34,22 @@ export default function UserDetail() {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("vi-VN");
   };
+
+
+const handleToggleStatus = async () => {
+  try {
+    const res = await toggleUserStatus(userId);
+
+    // update UI ngay sau khi API trả về
+    setUser((prev: any) => ({
+      ...prev,
+      status: res.data.status,
+    }));
+  } catch (err) {
+    console.error(err);
+    alert("Không thể cập nhật trạng thái");
+  }
+};
 
   useEffect(() => {
     const fetchUserAndOrders = async () => {
@@ -39,7 +63,7 @@ export default function UserDetail() {
 
         setOrders(
           orderRes.data.map((o: any) => ({
-            name: o.book?.title,
+            name: o.bookTitle,
             date: new Date(o.createdAt).toLocaleDateString("vi-VN"),
             total: o.price?.toLocaleString("vi-VN") + "đ",
             status: o.status,
@@ -131,9 +155,13 @@ export default function UserDetail() {
             <div className="flex gap-3">
 
 
-              <button className="px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white flex items-center gap-2">
+              <button
+                onClick={handleToggleStatus}
+                className={`px-4 py-2.5 rounded-xl text-white flex items-center gap-2
+                  ${isActive ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+              >
                 <Lock className="w-4 h-4" />
-                Khóa tài khoản
+                {isActive ? "Khóa tài khoản" : "Mở khóa"}
               </button>
             </div>
           </div>
@@ -152,10 +180,7 @@ export default function UserDetail() {
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <h3 className="font-bold">Lịch sử mua hàng</h3>
 
-              <button className="flex items-center gap-2 text-sm font-semibold text-[#1121d4]">
-                <Download className="w-4 h-4" />
-                Xuất báo cáo
-              </button>
+
             </div>
 
             <div className="overflow-x-auto">
