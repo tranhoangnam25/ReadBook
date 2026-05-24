@@ -362,7 +362,13 @@ export default function ReviewManagement(): React.JSX.Element {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Điểm số trung bình</p>
-                <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats.averageRating ? stats.averageRating.toFixed(1) : '0.0'} / 5.0</p>
+                <p className="text-2xl font-extrabold text-slate-900 mt-0.5">
+        {/* 🌟 TỰ TÍNH TOÁN: Cộng tổng cột rating rồi chia trung bình */}
+        {reviews.length > 0 
+          ? (reviews.reduce((sum, rev) => sum + (rev.rating || 0), 0) / reviews.length).toFixed(1)
+          : '0.0'
+        } / 5.0
+      </p>
               </div>
             </div>
 
@@ -372,7 +378,9 @@ export default function ReviewManagement(): React.JSX.Element {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Đánh giá đang ẩn kiểm duyệt</p>
-                <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats.hiddenReviews} vi phạm</p>
+                <p className="text-2xl font-extrabold text-slate-900 mt-0.5">
+        {stats.hiddenReviews ?? reviews.filter(rev => rev.status === 'hidden').length} vi phạm
+      </p>
               </div>
             </div>
           </div>

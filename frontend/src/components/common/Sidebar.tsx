@@ -25,7 +25,7 @@ export default function Sidebar() {
 
         <NavLink to="/admin/orders" className={navClass}>
           <span className="material-symbols-outlined">receipt_long</span>
-          Đơn hàng & Hoàn tiền
+          Đơn hàng
         </NavLink>
 
         <NavLink to="/admin/users" className={navClass}>
@@ -38,7 +38,14 @@ export default function Sidebar() {
           Đánh giá
         </NavLink>
 
-        <NavLink to="/admin/roles" className={navClass}>
+
+
+        <NavLink to="/admin/sale-manager" className={navClass}>
+          <span className="material-symbols-outlined">star</span>
+          FlashSale
+        </NavLink>
+
+         <NavLink to="/admin/roles" className={navClass}>
           <span className="material-symbols-outlined">
             admin_panel_settings
           </span>

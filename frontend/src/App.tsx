@@ -26,10 +26,14 @@ import BookInventory from './pages/admin/BookInventory';
 import ChatBot from "./components/common/ChatBot";
 import ManageUser from './pages/admin/ManageUser';
 import UserDetail from './pages/admin/UserDetail';
+
 import ManageRole from './pages/admin/ManageRole';
 import ManagePermission from './pages/admin/ManagePermission';
 import CreateRole from './pages/admin/CreateRole';
 import UpdateRole from './pages/admin/UpdateRole';
+
+import SalePage from './pages/SalePage';
+import SaleManager from './pages/admin/ManagerSale';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,16 +107,21 @@ function App() {
             <Route path="/admin" element={<DashBoard />} />
             <Route path="/admin/orders" element={<OrderManagement />} />
             <Route path="/admin/reviews" element={<ReviewManager />} />
+            <Route path="/sale" element={<SalePage />} />
           </Route>
 
           <Route path="/admin/books" element={<BookInventory />} />
           <Route path="/reading/:bookId" element={<ReadingView />} />
           <Route path="/admin/users" element={<ManageUser />} />
           <Route path="/admin/users/:id" element={<UserDetail />} />
+
           <Route path="/admin/roles" element={<ManageRole />} />
           <Route path="/admin/permissions" element={<ManagePermission />} />
           <Route path="/admin/create-role" element={<CreateRole />} />
           <Route path="/admin/update-role/:id" element={<UpdateRole />} />
+
+          <Route path="/admin/sale-manager" element={<SaleManager />} />
+
 
           {}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -67,14 +67,21 @@ public class SecurityConfig {
                                 "/payment-success/**",
                                 "/payment-cancel/**",
                                 "/api/payments/payos/webhook",
-//                                "/api/orders/check",
-                                "/api/users/me/reading/progress"
-//                                "/api/reviews/{id}/reply"
+                                "/api/users/me/reading/progress",
+                                "/api/reader-settings/**",
+                                "/api/users/me/reading/progress",
+                                "/api/sales/**"
                         ).permitAll()
                         .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception
+                );
+                
+                // 💡 NẾU BẠN MUỐN TEST THOẢI MÁI KHÔNG CẦN TOKEN:
+                // Hãy tạm thời khóa (comment) dòng addFilterBefore dưới đây bằng dấu gạch chéo //
+                // Sau khi comment, request sẽ chạy thẳng vào hệ thống mà không đi qua bộ lọc JwtAuthenticationFilter nữa.
+                
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+                http.exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
                             response.getWriter().write("Unauthorized : token expired or missing");
