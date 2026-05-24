@@ -68,16 +68,16 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                 }
             }
 
-            alert("ÄÄƒng nháº­p thÃ nh cÃ´ng!");
+            alert("Đăng nhập thành công");
 
             onLoginSuccess();
             onClose();
 
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || "Email hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng");
+                setError(err.response?.data?.message || "Email hoặc mật khẩu khong chính xác");
             } else {
-                setError("ÄÃ£ xáº£y ra lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh");
+                setError("Đã xảy ra lỗi không xác định");
             }
         } finally {
             setLoading(false);
@@ -138,7 +138,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                                 <input
                                     name="password"
                                     className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                    placeholder="••••••••"
                                     type="password"
                                     onChange={handleChange}
                                     required
