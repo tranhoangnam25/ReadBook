@@ -748,8 +748,14 @@ export default function BookInventory(): React.JSX.Element {
             </main>
 
             {isCreateOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-                    <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+                    onClick={closeCreateModal}
+                >
+                    <div
+                        className="w-full max-w-3xl rounded-2xl bg-white shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className="border-b border-slate-200 px-6 py-4">
                             <h2 className="text-lg font-bold text-slate-900">Thêm sách mới</h2>
                             <p className="text-sm text-slate-500">Chọn tác giả, thể loại và nhập thông tin sách.</p>
@@ -867,8 +873,14 @@ export default function BookInventory(): React.JSX.Element {
             )}
 
             {editingBook && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-                    <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+                    onClick={closeEditModal}
+                >
+                    <div
+                        className="w-full max-w-3xl rounded-2xl bg-white shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className="border-b border-slate-200 px-6 py-4">
                             <h2 className="text-lg font-bold text-slate-900">Chỉnh sửa sách</h2>
                             <p className="text-sm text-slate-500">Cập nhật thông tin sách trong database.</p>
@@ -958,8 +970,14 @@ export default function BookInventory(): React.JSX.Element {
             )}
 
             {previewBook && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+                    onClick={closePreviewModal}
+                >
+                    <div
+                        className="w-full max-w-md rounded-2xl bg-white shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className="border-b border-slate-200 px-6 py-4">
                             <h2 className="text-lg font-bold text-slate-900">Quản lý nội dung đọc thử</h2>
                             <p className="text-sm text-slate-500">{previewBook.title}</p>
@@ -1007,8 +1025,14 @@ export default function BookInventory(): React.JSX.Element {
             )}
 
             {pricingBook && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+                    onClick={closePriceModal}
+                >
+                    <div
+                        className="w-full max-w-md rounded-2xl bg-white shadow-xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className="border-b border-slate-200 px-6 py-4">
                             <h2 className="text-lg font-bold text-slate-900">Cập nhật giá</h2>
                             <p className="text-sm text-slate-500">{pricingBook.title}</p>

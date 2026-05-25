@@ -26,6 +26,9 @@ r2:
 
 spring:
 
+  config:
+    import: "optional:file:.env[.properties]"
+
   servlet:
     multipart:
       max-file-size: 100MB
@@ -68,6 +71,3 @@ spring:
 
     clean-disabled: false
     clean-on-validation-error: true
-
-    config:
-      import: "optional:file:.env[.properties]"

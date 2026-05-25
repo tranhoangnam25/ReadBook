@@ -21,7 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileUploadService {
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/gif");
-    private static final Set<String> ALLOWED_BOOK_TYPES = Set.of("application/epub+zip", "application/octet-stream");
 
     private final S3Client r2S3Client;
     private final R2Properties r2Properties;
@@ -32,12 +31,17 @@ public class FileUploadService {
         }
 
         String normalizedType = type == null ? "" : type.toLowerCase(Locale.ROOT);
-        String contentType = file.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE
-                : file.getContentType();
+        String contentType = file.getContentType() == null || file.getContentType().isBlank()
+            ? MediaType.APPLICATION_OCTET_STREAM_VALUE
+            : file.getContentType().toLowerCase(Locale.ROOT);
         String originalFileName = file.getOriginalFilename() == null ? "file" : file.getOriginalFilename();
         String extension = getExtension(originalFileName);
 
         validateFile(normalizedType, contentType, extension);
+
+        if ("book".equals(normalizedType)) {
+            contentType = "application/epub+zip";
+        }
 
         String safeName = sanitizeFileName(stripExtension(originalFileName));
         String key = String.format("books/%s/%s/%s-%s%s", normalizedType, LocalDate.now(), UUID.randomUUID(), safeName,
@@ -70,7 +74,7 @@ public class FileUploadService {
         }
 
         if ("book".equals(type)) {
-            if (!".epub".equals(extension) || !ALLOWED_BOOK_TYPES.contains(contentType)) {
+            if (!".epub".equals(extension)) {
                 throw new IllegalArgumentException("File sách chỉ hỗ trợ EPUB.");
             }
             return;
