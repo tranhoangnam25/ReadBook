@@ -120,88 +120,96 @@ GO
 -- 7. SÁCH
 SET IDENTITY_INSERT [Books] ON;
 
-INSERT INTO [Books] ([book_id],[title],[description],[price],[preview_percentage],[file_url],[cover_image],[author_id],[category_id],[publish_year],[created_at],[updated_at])
+INSERT INTO [Books]
+([title], [description], [summary_content], [price], [preview_percentage], [file_url], [cover_image], [author_id], [category_id], [publish_year])
 VALUES
-    (1,  N'Tôi thấy hoa vàng trên cỏ xanh',
-     N'Câu chuyện về tuổi thơ đẹp đẽ và trong sáng của hai anh em Thiều và Tường ở một làng quê Việt Nam. Tác phẩm được chuyển thể thành bộ phim điện ảnh nổi tiếng.',
-     85000, 15, 'files/books/hoa_vang_co_xanh.epub', 'https://picsum.photos/seed/book001/200/300', 1, 1, 2015, '2024-01-05 08:00:00', '2024-01-05 08:00:00'),
+    -- Nguyễn Nhật Ánh (author_id=1), Văn học Việt Nam (category_id=1)
+    (N'Tôi Thấy Hoa Vàng Trên Cỏ Xanh',
+     N'Câu chuyện cảm động về tuổi thơ của hai anh em Thiều và Tường ở một làng quê Việt Nam. Tác phẩm mang đến những kỷ niệm đẹp về tuổi thơ hồn nhiên, vô tư.',
+     N'Tác phẩm kể về cuộc sống của hai anh em Thiều và Tường trong một làng quê nghèo yên bình. Qua góc nhìn trẻ thơ, độc giả được dẫn dắt vào thế giới của những trò chơi, tình bạn, sự ganh tị và tình cảm gia đình sâu sắc. Những biến cố nhỏ trong cuộc sống đã khiến Thiều dần trưởng thành và nhận ra giá trị của tình thân. Cuốn sách là bản hòa ca đầy cảm xúc về tuổi thơ Việt Nam.',
+     89000.00, 15,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/T%C3%B4i%20Th%E1%BA%A5y%20Hoa%20V%C3%A0ng%20Tr%C3%AAn%20C%E1%BB%8F%20Xanh%20-%20Nguy%E1%BB%85n%20Nh%E1%BA%ADt%20%C3%81nh.epub',
+     'https://covers.openlibrary.org/b/id/12547329-L.jpg',
+     1, 1, 2010),
 
-    (2,  N'Mắt biếc',
-     N'Câu chuyện tình yêu lãng mạn, buồn thương giữa Ngạn và Hà Lan trải dài suốt những năm tháng tuổi thơ đến trưởng thành. Một trong những tác phẩm được yêu thích nhất của Nguyễn Nhật Ánh.',
-     79000, 10, 'files/books/mat_biec.epub', 'https://picsum.photos/seed/book002/200/300', 1, 1, 2016, '2024-01-05 08:30:00', '2024-01-05 08:30:00'),
+    (N'Mắt Biếc',
+     N'Câu chuyện tình đơn phương buồn bã của Ngạn dành cho Hà Lan – cô gái có đôi mắt biếc đẹp nhất làng Đo Đo. Một tác phẩm về tình yêu, sự lựa chọn và những nuối tiếc của cuộc đời.',
+     N'Ngạn và Hà Lan lớn lên cùng nhau tại làng Đo Đo yên bình. Ngạn luôn yêu Hà Lan bằng thứ tình cảm chân thành và sâu đậm, nhưng Hà Lan lại bị cuốn hút bởi cuộc sống nơi thành thị. Những lựa chọn sai lầm, sự thay đổi của thời gian và khoảng cách trong tâm hồn khiến câu chuyện tình trở nên day dứt. Đây là một tác phẩm giàu cảm xúc về tình yêu, tuổi trẻ và những điều không thể quay lại.',
+     79000.00, 20,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/M%E1%BA%AFt%20bi%E1%BA%BFc%20-%20Nguy%E1%BB%85n%20Nh%E1%BA%ADt%20%C3%81nh.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/mat-biec-pdf-epub-azw3-mobi.jpg',
+     1, 1, 1990),
 
-    (3,  N'Cho tôi xin một vé đi tuổi thơ',
-     N'Cuốn sách kể về những ngày tháng tuổi thơ hồn nhiên, trong sáng của một cậu bé tám tuổi với những trò chơi và ước mơ giản dị.',
-     69000, 20, 'files/books/ve_di_tuoi_tho.epub', 'https://picsum.photos/seed/book003/200/300', 1, 5, 2008, '2024-01-05 09:00:00', '2024-01-05 09:00:00'),
+    -- Paulo Coelho (author_id=2), Văn học nước ngoài (category_id=2)
+    (N'Nhà Giả Kim',
+     N'Câu chuyện về Santiago, một cậu bé chăn cừu người Andalusia theo đuổi giấc mơ tìm kho báu ở Ai Cập. Hành trình của cậu là một ẩn dụ sâu sắc về việc theo đuổi ước mơ và lắng nghe tiếng gọi của trái tim.',
+     N'Santiago, một chàng trai chăn cừu trẻ tuổi, quyết định rời bỏ cuộc sống bình yên để theo đuổi giấc mơ về kho báu bên kim tự tháp Ai Cập. Trên hành trình ấy, cậu gặp nhiều con người đặc biệt, học được ngôn ngữ của thế giới và khám phá “Vận mệnh cá nhân” của mình. Cuốn sách truyền cảm hứng mạnh mẽ về việc dám theo đuổi ước mơ và tin vào chính mình.',
+     95000.00, 20,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/Nh%C3%A0%20Gi%E1%BA%A3%20Kim%20-%20Paulo%20Coelho.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/nha-gia-kim-pdf-epub-azw3-mobi.jpg',
+     2, 2, 1988),
 
-    (4,  N'Chí Phèo',
-     N'Tác phẩm xuất sắc của Nam Cao, kể về số phận bi thảm của Chí Phèo - người nông dân lương thiện bị xã hội đẩy vào con đường tha hóa. Tác phẩm kinh điển của văn học hiện thực Việt Nam.',
-     45000, 25, 'files/books/chi_pheo.epub', 'https://picsum.photos/seed/book004/200/300', 2, 1, 1941, '2024-01-06 08:00:00', '2024-01-06 08:00:00'),
+    (N'Veronika Quyết Chết',
+     N'Veronika, một cô gái 24 tuổi xinh đẹp và có mọi thứ, quyết định tự tử. Nhưng cô tỉnh dậy trong một bệnh viện tâm thần và bắt đầu khám phá ý nghĩa thực sự của cuộc sống.',
+     N'Sau khi tự tử bất thành, Veronika tỉnh dậy tại một bệnh viện tâm thần và được thông báo rằng trái tim cô chỉ còn hoạt động trong vài ngày ngắn ngủi. Tại đây, cô gặp những con người bị xã hội xem là “điên”, nhưng chính họ lại giúp cô hiểu được giá trị của tự do, tình yêu và sự sống. Cuốn sách đặt ra nhiều câu hỏi sâu sắc về ý nghĩa cuộc đời và những giới hạn do xã hội áp đặt.',
+     88000.00, 15,
+     'https://files.example.com/books/veronika-quyet-chet.epub',
+     'https://covers.openlibrary.org/b/isbn/9780061741975-L.jpg',
+     2, 2, 1998),
 
-    (5,  N'Lão Hạc',
-     N'Truyện ngắn của Nam Cao viết về người nông dân nghèo khổ tên Lão Hạc với tình cảm sâu sắc dành cho người con trai và con chó. Tác phẩm phản ánh hiện thực xã hội Việt Nam trước 1945.',
-     35000, 30, 'files/books/lao_hac.epub', 'https://picsum.photos/seed/book005/200/300', 2, 1, 1943, '2024-01-06 08:30:00', '2024-01-06 08:30:00'),
+    -- Haruki Murakami (author_id=3), Văn học nước ngoài (category_id=2)
+    (N'Rừng Na Uy',
+     N'Câu chuyện về Watanabe, một sinh viên đại học ở Tokyo những năm 1960, với những mối quan hệ phức tạp và những đau thương của tuổi trẻ. Một tác phẩm về tình yêu, cái chết và sự trưởng thành.',
+     N'Watanabe hồi tưởng về quãng đời sinh viên tại Tokyo, nơi anh bị cuốn vào những mối quan hệ đầy cảm xúc với Naoko mong manh và Midori sôi nổi. Giữa mất mát, cô đơn và những khủng hoảng tinh thần, anh phải tìm cách trưởng thành và hiểu rõ chính mình. Tác phẩm mang màu sắc trầm buồn đặc trưng của Haruki Murakami và khắc họa sâu sắc tâm hồn tuổi trẻ.',
+     105000.00, 10,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/sachmoi.net_rung_na_uy.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/tieu-thuyet-rung-nauy.jpg',
+     3, 2, 1987),
 
-    (6,  N'Dế Mèn phiêu lưu ký',
-     N'Tác phẩm văn học thiếu nhi nổi tiếng nhất Việt Nam của Tô Hoài. Cuộc phiêu lưu của chú Dế Mèn qua nhiều vùng đất kỳ thú chứa đựng nhiều bài học về cuộc sống.',
-     55000, 20, 'files/books/de_men_phieu_luu_ky.epub', 'https://picsum.photos/seed/book006/200/300', 3, 5, 1941, '2024-01-07 08:00:00', '2024-01-07 08:00:00'),
+    -- Dale Carnegie (author_id=4), Kỹ năng sống (category_id=3)
+    (N'Đắc Nhân Tâm',
+     N'Cuốn sách nổi tiếng nhất về nghệ thuật giao tiếp và ảnh hưởng đến người khác. Dale Carnegie chia sẻ những nguyên tắc cơ bản giúp bạn kết bạn, tạo ảnh hưởng và thành công trong cuộc sống.',
+     N'Đắc Nhân Tâm tổng hợp những nguyên tắc ứng xử và giao tiếp giúp con người xây dựng mối quan hệ tốt đẹp trong cuộc sống và công việc. Thông qua nhiều câu chuyện thực tế, Dale Carnegie chỉ ra cách thấu hiểu tâm lý người khác, tạo thiện cảm và truyền cảm hứng tích cực. Đây là một trong những cuốn sách kỹ năng sống có sức ảnh hưởng lớn nhất thế giới.',
+     75000.00, 25,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/%C4%90%E1%BA%AFc%20Nh%C3%A2n%20T%C3%A2m%20-%20Dale%20Carnegie.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/dac-nhan-tam-pdf-epub-azw3-mobi.jpg',
+     4, 3, 1936),
 
-    (7,  N'Nhà Giả Kim',
-     N'Tiểu thuyết của Paulo Coelho kể về cuộc hành trình của chàng chăn cừu Santiago tìm kiếm kho báu và khám phá ý nghĩa của cuộc đời. Sách bán chạy nhất mọi thời đại.',
-     95000, 15, 'files/books/nha_gia_kim.epub', 'https://picsum.photos/seed/book007/200/300', 4, 2, 1988, '2024-01-08 08:00:00', '2024-01-08 08:00:00'),
+    -- Nam Cao (author_id=5), Văn học Việt Nam (category_id=1)
+    (N'Chí Phèo',
+     N'Tuyển tập truyện ngắn của Nam Cao bao gồm tác phẩm kinh điển "Chí Phèo" và nhiều truyện ngắn khác. Phản ánh hiện thực xã hội Việt Nam trước năm 1945 một cách sắc sảo và nhân văn.',
+     N'Chí Phèo kể về cuộc đời bi kịch của một người nông dân lương thiện bị xã hội phong kiến đẩy vào con đường lưu manh hóa. Sau nhiều năm sống trong men rượu và sự khinh miệt của làng Vũ Đại, Chí gặp Thị Nở và lần đầu tiên khao khát được trở lại làm người. Tuy nhiên, định kiến xã hội đã dập tắt hy vọng cuối cùng của hắn. Tác phẩm là tiếng nói tố cáo sâu sắc xã hội bất công trước Cách mạng.',
+     65000.00, 30,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/CH%C3%8D%20PH%C3%88O%20-%20Nam%20Cao.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/tai-ebook-chi-pheo-nam-cao-pdf-epub-azw3-mobi.jpg',
+     5, 1, 1941),
 
-    (8,  N'Rừng Na Uy',
-     N'Tiểu thuyết của Haruki Murakami kể về Watanabe và những mối tình phức tạp trong những năm 1960 tại Nhật Bản. Tác phẩm mang âm hưởng buồn bã, sâu lắng về tình yêu và sự mất mát.',
-     110000, 10, 'files/books/rung_na_uy.epub', 'https://picsum.photos/seed/book008/200/300', 5, 2, 1987, '2024-01-09 08:00:00', '2024-01-09 08:00:00'),
+    -- Stephen King (author_id=6), Văn học nước ngoài (category_id=2)
+    (N'It',
+     N'Câu chuyện kinh dị về nhóm bạn thời thơ ấu phải đối mặt với một thực thể ma quái ẩn mình trong hệ thống cống ngầm của thành phố Derry. Được coi là một trong những tác phẩm kinh dị vĩ đại nhất mọi thời đại.',
+     N'Tại thị trấn Derry, một thực thể tà ác xuất hiện theo chu kỳ và gieo rắc nỗi sợ hãi dưới hình dạng gã hề Pennywise. Một nhóm trẻ em có tên “The Losers Club” đã cùng nhau chống lại nó khi còn nhỏ, nhưng nhiều năm sau họ buộc phải quay lại để đối mặt lần cuối. Cuốn tiểu thuyết khai thác sâu nỗi sợ, ký ức tuổi thơ và sức mạnh của tình bạn.',
+     120000.00, 10,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/G%C3%A3%20H%E1%BB%81%20Ma%20Qu%C3%A1i%20-%20Stephen%20King%20%26%20%C4%90%E1%BB%97%20Phan%20Thu%20H%C3%A0%20(d%E1%BB%8Bch).epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/tai-ebook-it-ga-he-ma-quai-pdf-epub-mobi.jpg',
+     6, 2, 1986),
 
-    (9,  N'Kafka bên bờ biển',
-     N'Tiểu thuyết của Murakami xen lẫn thực tế và huyền ảo, kể về cậu bé Kafka Tamura bỏ nhà ra đi và người đàn ông già Nakata có khả năng nói chuyện với mèo.',
-     120000, 10, 'files/books/kafka_ben_bo_bien.epub', 'https://picsum.photos/seed/book009/200/300', 5, 2, 2002, '2024-01-09 09:00:00', '2024-01-09 09:00:00'),
+    -- Tô Hoài (author_id=7), Thiếu nhi (category_id=7)
+    (N'Dế Mèn Phiêu Lưu Ký',
+     N'Cuộc phiêu lưu của chú dế mèn dũng cảm qua nhiều vùng đất kỳ thú, gặp gỡ nhiều nhân vật thú vị. Tác phẩm văn học thiếu nhi kinh điển nhất của Việt Nam, truyền tải bài học về dũng cảm và tình bạn.',
+     N'Dế Mèn, một chú dế trẻ tuổi hiếu thắng, bắt đầu hành trình khám phá thế giới sau biến cố khiến Dế Choắt qua đời. Trên đường phiêu lưu, Dế Mèn gặp nhiều loài vật khác nhau và học được những bài học quý giá về lòng nhân ái, tình bạn và trách nhiệm. Tác phẩm vừa giàu trí tưởng tượng vừa mang nhiều ý nghĩa giáo dục sâu sắc.',
+     55000.00, 35,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/sachmoi.net_de_men_phieu_luu_ky.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/ebook-de-men-phieu-luu-ky-epub-pdf.jpg',
+     7, 7, 1941),
 
-    (10, N'Harry Potter và Hòn đá Phù thủy',
-     N'Tập đầu tiên trong bộ truyện Harry Potter của J.K. Rowling. Cậu bé Harry Potter khám phá ra mình là phù thủy và bắt đầu hành trình tại trường Hogwarts.',
-     125000, 15, 'files/books/harry_potter_1.epub', 'https://picsum.photos/seed/book010/200/300', 6, 2, 1997, '2024-01-10 08:00:00', '2024-01-10 08:00:00'),
-
-    (11, N'Harry Potter và Phòng chứa Bí mật',
-     N'Tập thứ hai của bộ truyện Harry Potter. Harry trở lại Hogwarts và phải đối mặt với bí ẩn của Phòng Chứa Bí Mật và Kẻ Thừa Kế của Slytherin.',
-     125000, 10, 'files/books/harry_potter_2.epub', 'https://picsum.photos/seed/book011/200/300', 6, 2, 1998, '2024-01-10 08:30:00', '2024-01-10 08:30:00'),
-
-    (12, N'Đắc Nhân Tâm',
-     N'Cuốn sách kinh điển của Dale Carnegie về nghệ thuật giao tiếp và gây ảnh hưởng đến người khác. Một trong những cuốn sách self-help bán chạy nhất lịch sử.',
-     89000, 20, 'files/books/dac_nhan_tam.epub', 'https://picsum.photos/seed/book012/200/300', 7, 3, 1936, '2024-01-11 08:00:00', '2024-01-11 08:00:00'),
-
-    (13, N'Sapiens: Lược sử loài người',
-     N'Yuval Noah Harari đưa người đọc qua hành trình 70.000 năm lịch sử loài người, từ thời đồ đá đến cách mạng khoa học. Một tác phẩm phi hư cấu xuất sắc.',
-     135000, 15, 'files/books/sapiens.epub', 'https://picsum.photos/seed/book013/200/300', 8, 4, 2011, '2024-01-12 08:00:00', '2024-01-12 08:00:00'),
-
-    (14, N'Homo Deus: Lược sử tương lai',
-     N'Tiếp nối Sapiens, Harari khám phá tương lai của loài người trong thế kỷ 21 khi công nghệ và trí tuệ nhân tạo ngày càng phát triển.',
-     135000, 15, 'files/books/homo_deus.epub', 'https://picsum.photos/seed/book014/200/300', 8, 4, 2015, '2024-01-12 09:00:00', '2024-01-12 09:00:00'),
-
-    (15, N'Số đỏ',
-     N'Tiểu thuyết trào phúng xuất sắc của Vũ Trọng Phụng viết về nhân vật Xuân Tóc Đỏ - kẻ cơ hội leo lên đỉnh cao xã hội. Tác phẩm phê phán sắc nét xã hội thực dân nửa phong kiến.',
-     55000, 25, 'files/books/so_do.epub', 'https://picsum.photos/seed/book015/200/300', 9, 1, 1936, '2024-01-13 08:00:00', '2024-01-13 08:00:00'),
-
-    (16, N'Tắt đèn',
-     N'Tiểu thuyết của Ngô Tất Tố khắc họa cuộc sống khốn khổ của người nông dân nghèo qua hình ảnh chị Dậu phải bán con và chồng để nộp sưu thuế.',
-     45000, 25, 'files/books/tat_den.epub', 'https://picsum.photos/seed/book016/200/300', 10, 1, 1939, '2024-01-14 08:00:00', '2024-01-14 08:00:00'),
-
-    (17, N'Vợ chồng A Phủ',
-     N'Truyện ngắn của Tô Hoài kể về cuộc đời của Mị và A Phủ - hai người dân tộc Mông bị áp bức, bóc lột và hành trình giải phóng bản thân.',
-     40000, 30, 'files/books/vo_chong_a_phu.epub', 'https://picsum.photos/seed/book017/200/300', 3, 1, 1952, '2024-01-15 08:00:00', '2024-01-15 08:00:00'),
-
-    (18, N'21 bài học cho thế kỷ 21',
-     N'Harari phân tích những thách thức lớn nhất mà nhân loại đang đối mặt trong thế kỷ 21: chủ nghĩa dân tộc, tôn giáo, khủng bố, công nghệ và biến đổi khí hậu.',
-     129000, 15, 'files/books/21_bai_hoc.epub', 'https://picsum.photos/seed/book018/200/300', 8, 4, 2018, '2024-01-16 08:00:00', '2024-01-16 08:00:00'),
-
-    (19, N'Đường về',
-     N'Tiểu thuyết của Nguyễn Nhật Ánh kể về hành trình tìm lại ký ức và tình yêu của nhân vật chính sau nhiều năm xa cách quê hương.',
-     75000, 10, 'files/books/duong_ve.epub', 'https://picsum.photos/seed/book019/200/300', 1, 1, 2020, '2024-01-17 08:00:00', '2024-01-17 08:00:00'),
-
-    (20, N'Muôn kiếp nhân sinh',
-     N'Tác phẩm tâm linh của Nguyên Phong kể về những câu chuyện luân hồi, nhân quả và ý nghĩa của cuộc sống qua nhiều kiếp người khác nhau.',
-     98000, 20, 'files/books/muon_kiep_nhan_sinh.epub', 'https://picsum.photos/seed/book020/200/300', 1, 8, 2019, '2024-01-18 08:00:00', '2024-01-18 08:00:00');
-
+    -- Nguyễn Nhật Ánh (author_id=1), Thiếu nhi (category_id=7)
+    (N'Cho Tôi Xin Một Vé Đi Tuổi Thơ',
+     N'Hành trình trở về tuổi thơ với những ký ức trong sáng, hồn nhiên của nhóm bạn nhỏ. Tác phẩm gợi lên nỗi nhớ tuổi thơ và những điều giản dị nhưng đẹp đẽ của cuộc sống.',
+     N'Tác phẩm là lời kể hài hước và đầy cảm xúc của một người trưởng thành khi nhớ lại tuổi thơ của mình cùng nhóm bạn thân. Những trò nghịch ngợm, suy nghĩ ngây ngô và cách nhìn thế giới rất riêng của trẻ nhỏ khiến câu chuyện vừa vui vẻ vừa sâu lắng. Cuốn sách giúp người đọc tìm lại những ký ức đẹp và sự trong trẻo đã bị thời gian lãng quên.',
+     72000.00, 20,
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/s%C3%A1ch/Cho%20t%C3%B4i%20xin%20m%E1%BB%99t%20v%C3%A9%20%C4%91i%20tu%E1%BB%95i%20th%C6%A1%20-%20Nguy%E1%BB%85n%20Nh%E1%BA%ADt%20%C3%81nh.epub',
+     'https://pub-c171790faebb4d1c803ee83383ed9093.r2.dev/%E1%BA%A3nh%20b%C3%ACa/cho-toi-xin-mot-ve-di-tuoi-tho-pdf-epub-azw3-mobi.jpg',
+     1, 7, 2008);
 SET IDENTITY_INSERT [Books] OFF;
 GO
 
