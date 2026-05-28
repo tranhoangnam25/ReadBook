@@ -91,6 +91,46 @@ export interface ReaderSettingRequest {
     lineHeight: number;
     backgroundColor: BackgroundColorId;
 }
+
+export interface ReaderBookmarkResponse {
+    id: number;
+    bookId: number;
+    cfiLocation: string;
+    progressPercentage: number;
+    label?: string;
+    note?: string;
+    createdAt: string;
+}
+
+export interface ReaderBookmarkRequest {
+    userId: number;
+    bookId: number;
+    cfiLocation: string;
+    progressPercentage: number;
+    label?: string;
+    note?: string;
+}
+
+export interface ReaderBookmarkNoteRequest {
+    note: string;
+}
+
+export interface ReaderHighlightResponse {
+    id: number;
+    bookId: number;
+    cfiRange: string;
+    text?: string;
+    color: string;
+    createdAt: string;
+}
+
+export interface ReaderHighlightRequest {
+    userId: number;
+    bookId: number;
+    cfiRange: string;
+    text?: string;
+    color: string;
+}
 // types/api.ts
 export interface ApiResponse<T> {
   success: boolean;

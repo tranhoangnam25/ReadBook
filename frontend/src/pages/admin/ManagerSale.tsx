@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, Bell, Settings, Tag, Calendar, Trash2, Eye, Edit3, ChevronLeft, ChevronRight, X, Plus, Percent, CheckSquare
+  Search, Bell, Settings, Tag, Calendar, Trash2, Eye, Edit3, ChevronLeft, ChevronRight, X, Plus, CheckSquare
 } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar'; 
 import api from '../../services/api';

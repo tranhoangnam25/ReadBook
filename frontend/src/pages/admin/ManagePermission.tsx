@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import Sidebar from "../../components/common/Sidebar";
 import api from "../../services/api";
@@ -9,7 +9,6 @@ import type { ApiResponse, Permission } from "../../types";
 import {
   Search,
   Plus,
-  Edit,
   ChevronLeft,
   ChevronRight,
   KeyRound,

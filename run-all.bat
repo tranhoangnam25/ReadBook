@@ -5,6 +5,10 @@ set "ROOT=%~dp0"
 set "BACKEND_DIR=%ROOT%backend"
 set "FRONTEND_DIR=%ROOT%frontend"
 
+echo Stopping previous online-bookstore terminals...
+taskkill /F /FI "WINDOWTITLE eq online-bookstore-backend*" /T >nul 2>&1
+taskkill /F /FI "WINDOWTITLE eq online-bookstore-frontend*" /T >nul 2>&1
+
 echo Starting backend...
 start "online-bookstore-backend" cmd /k "cd /d "%BACKEND_DIR%" && call mvnw.cmd spring-boot:run"
 

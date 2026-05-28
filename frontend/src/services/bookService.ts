@@ -26,6 +26,12 @@ export const bookService = {
         });
         return res.data;
     },
+    checkPurchased: async (userId: number, bookId: number): Promise<boolean> => {
+        const res = await api.get<boolean | { purchased?: boolean }>("/orders/check", {
+            params: { userId, bookId }
+        });
+        return res.data === true || (typeof res.data === 'object' && res.data?.purchased === true);
+    },
     saveReadingProgress: async (userId: number, bookId: number, cfiLocation: string, progressPercentage: number): Promise<void> => {
         await api.post(`/users/me/reading/progress`, {
             userId, bookId, cfiLocation, progressPercentage

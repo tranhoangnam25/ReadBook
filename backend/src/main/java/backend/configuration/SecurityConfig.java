@@ -70,6 +70,8 @@ public class SecurityConfig {
                                 "/api/payments/payos/webhook",
                                 "/api/users/me/reading/progress",
                                 "/api/reader-settings/**",
+                                "/api/reader-bookmarks/**",
+                                "/api/reader-highlights/**",
                                 "/api/users/me/reading/progress",
                                 "/api/sales/**",
                                 "/api/chat"

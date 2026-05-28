@@ -6,12 +6,13 @@ import { readerSettingService } from "../services/readerSettingService";
 import { BG_COLORS, FONT_FAMILIES } from "../constants/readerConstants";
 import type { TocItem, BookResponse, FontFamilyId, BackgroundColorId } from "../types";
 
-export function useEpubReader(bookId: string | undefined, book: BookResponse | null, isSample: boolean) {
+export function useEpubReader(bookId: string | undefined, book: BookResponse | null) {
     const [location, setLocation] = useState<string | number>(0);
     const [progressLoaded, setProgressLoaded] = useState(false);
     const initialLocationLoaded = useRef(false); 
     const [toc, setToc] = useState<TocItem[]>([]);
     const [userId, setUserId] = useState<number | null>(null);
+    const [isPurchased, setIsPurchased] = useState(false);
     const [isLimitReached, setIsLimitReached] = useState(false);
     const [progressPercentage, setProgressPercentage] = useState(0);
     
@@ -27,7 +28,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
     const renditionRef = useRef<Rendition | null>(null);
     const saveProgressInterval = useRef<NodeJS.Timeout | null>(null);
     const saveProgressDebounce = useRef<NodeJS.Timeout | null>(null);
-    const pageFlipsRef = useRef(0);
+    const locationsReadyRef = useRef(false);
 
     const latestLocation = useRef<string | number>(location);
     const latestPercentage = useRef<number>(0);
@@ -59,41 +60,65 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
     }, []);
 
     useEffect(() => {
-        if (userId && bookId) {
-            bookService.getReadingProgress(userId, Number(bookId))
-                .then(progressData => {
-                    if (progressData) {
-                        if (progressData.cfiLocation) {
-                            setLocation(progressData.cfiLocation);
-                            latestLocation.current = progressData.cfiLocation;
-                            initialLocationLoaded.current = true;
-                        }
-                        if (progressData.progressPercentage != null) {
-                            const percent = Number(progressData.progressPercentage);
-                            setProgressPercentage(percent);
-                            latestPercentage.current = percent;
-                        }
+        const loadAccessAndProgress = async () => {
+            if (!userId || !bookId) {
+                initialLocationLoaded.current = true;
+                setProgressLoaded(true);
+                return;
+            }
+
+            try {
+                const purchased = await bookService.checkPurchased(userId, Number(bookId));
+                setIsPurchased(purchased);
+
+                if (!purchased) {
+                    setLocation(0);
+                    setProgressPercentage(0);
+                    latestLocation.current = 0;
+                    latestPercentage.current = 0;
+                    initialLocationLoaded.current = true;
+                    setProgressLoaded(true);
+                    return;
+                }
+
+                const progressData = await bookService.getReadingProgress(userId, Number(bookId));
+                if (progressData) {
+                    if (progressData.cfiLocation) {
+                        setLocation(progressData.cfiLocation);
+                        latestLocation.current = progressData.cfiLocation;
+                        initialLocationLoaded.current = true;
                     }
-                    setProgressLoaded(true);
-                })
-                .catch(err => {
-                    console.error("Lỗi tải tiến độ:", err);
-                    initialLocationLoaded.current = true; 
-                    setProgressLoaded(true);
-                });
-        } else {
-  
-            initialLocationLoaded.current = true;
-            setProgressLoaded(true);
-        }
+                    if (progressData.progressPercentage != null) {
+                        const percent = Number(progressData.progressPercentage);
+                        setProgressPercentage(percent);
+                        latestPercentage.current = percent;
+                    }
+                }
+                setProgressLoaded(true);
+            } catch (err) {
+                console.error("Lỗi kiểm tra quyền đọc hoặc tải tiến độ:", err);
+                initialLocationLoaded.current = true;
+                setProgressLoaded(true);
+            }
+        };
+
+        setProgressLoaded(false);
+        initialLocationLoaded.current = false;
+        loadAccessAndProgress();
     }, [userId, bookId]);
 
     useEffect(() => {
-        if (bookId) {
-            const reached = sessionStorage.getItem(paywallKey) === 'true';
-            setIsLimitReached(reached);
+        if (!bookId) return;
+
+        if (isPurchased) {
+            sessionStorage.removeItem(paywallKey);
+            setIsLimitReached(false);
+            return;
         }
-    }, [bookId, paywallKey]);
+
+        const reached = sessionStorage.getItem(paywallKey) === 'true';
+        setIsLimitReached(reached);
+    }, [bookId, isPurchased, paywallKey]);
 
     const injectEpubStyles = useCallback((ffCss: string, fs: number, lh: number, bg: typeof BG_COLORS[0]) => {
         const rend = renditionRef.current;
@@ -144,7 +169,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
 
  
     useEffect(() => {
-        if (!userId || !bookId || isSample) return;
+        if (!userId || !bookId || !isPurchased) return;
 
         const saveProgress = () => {
             if (!initialLocationLoaded.current) return;
@@ -164,7 +189,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
             if (saveProgressInterval.current) clearInterval(saveProgressInterval.current);
             window.removeEventListener('beforeunload', saveProgress);
         };
-    }, [userId, bookId, isSample]);
+    }, [userId, bookId, isPurchased]);
 
     const handleReadAgain = () => {
         sessionStorage.removeItem(paywallKey);
@@ -172,53 +197,74 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
         setLocation(0); 
     };
 
-    const calculatePositionPercent = useCallback((rend: Rendition): number => {
-        const loc = rend.location?.start;
-        if (!loc) return 0;
+    const ensureLocationsReady = useCallback(async (rend: Rendition): Promise<boolean> => {
+        const bookLocations = (rend.book as any)?.locations;
+        if (!bookLocations || locationsReadyRef.current) return true;
 
-        const spineItems = (rend.book as any)?.spine?.items ?? [];
-        const spineTotal: number = spineItems.length;
-        const currentIndex: number = loc.index ?? 0;
-
-        if (spineTotal > 1) {
-            return Math.round((currentIndex / spineTotal) * 100 * 10) / 10;
+        const hasLocations = typeof bookLocations.length === "function" && bookLocations.length() > 0;
+        if (hasLocations) {
+            locationsReadyRef.current = true;
+            return true;
         }
 
-        const displayed = loc.displayed;
-        if (displayed && displayed.total > 1) {
-            return Math.round((displayed.page / displayed.total) * 100 * 10) / 10;
+        if (typeof bookLocations.generate !== "function") return false;
+
+        try {
+            await bookLocations.generate(1024);
+            locationsReadyRef.current = true;
+            return true;
+        } catch (err) {
+            console.error("Không tạo được dữ liệu vị trí EPUB:", err);
+            return false;
+        }
+    }, []);
+
+    const calculatePositionPercent = useCallback((rend: Rendition, epubcfi: string): number => {
+        const bookLocations = (rend.book as any)?.locations;
+        if (bookLocations && typeof bookLocations.percentageFromCfi === "function") {
+            const percent = bookLocations.percentageFromCfi(epubcfi);
+            if (Number.isFinite(percent)) {
+                return Math.min(Math.max(Math.round(percent * 1000) / 10, 0), 100);
+            }
         }
 
-        const estimatedTotalPages = 300;
-        return Math.min(Math.round((pageFlipsRef.current / estimatedTotalPages) * 100 * 10) / 10, 100);
+        return latestPercentage.current;
+    }, []);
+
+    const updateProgressPercentage = useCallback((percent: number) => {
+        const safePercent = Math.min(Math.max(percent, 0), 100);
+        setProgressPercentage(safePercent);
+        latestPercentage.current = safePercent;
     }, []);
 
     const handleLocationChanged = useCallback((epubcfi: string) => {
         setLocation(epubcfi);
         latestLocation.current = epubcfi;
-        pageFlipsRef.current += 1;
 
         const rend = renditionRef.current;
-        const percentValue = rend ? calculatePositionPercent(rend) : 0;
-        setProgressPercentage(percentValue);
-        latestPercentage.current = percentValue;
+        if (!rend) return;
 
-        if (isSample && book && book.previewPercentage != null) {
-            const limit = book.previewPercentage < 1 ? book.previewPercentage * 100 : book.previewPercentage;
-            if (percentValue > limit) {
-                setIsLimitReached(true);
-                sessionStorage.setItem(paywallKey, 'true');
+        ensureLocationsReady(rend).then(() => {
+            const percentValue = calculatePositionPercent(rend, epubcfi);
+            updateProgressPercentage(percentValue);
+
+            if (!isPurchased && book && book.previewPercentage != null) {
+                const limit = book.previewPercentage < 1 ? book.previewPercentage * 100 : book.previewPercentage;
+                if (percentValue > limit) {
+                    setIsLimitReached(true);
+                    sessionStorage.setItem(paywallKey, 'true');
+                }
             }
-        }
 
-        if (initialLocationLoaded.current && userId && bookId && !isSample) {
-            if (saveProgressDebounce.current) clearTimeout(saveProgressDebounce.current);
-            saveProgressDebounce.current = setTimeout(() => {
-                bookService.saveReadingProgress(userId, Number(bookId), epubcfi, percentValue)
-                    .catch(e => console.error("Lưu tiến độ thất bại (debounce):", e));
-            }, 2000);
-        }
-    }, [isSample, book, calculatePositionPercent, paywallKey, userId, bookId]);
+            if (initialLocationLoaded.current && userId && bookId && isPurchased) {
+                if (saveProgressDebounce.current) clearTimeout(saveProgressDebounce.current);
+                saveProgressDebounce.current = setTimeout(() => {
+                    bookService.saveReadingProgress(userId, Number(bookId), epubcfi, percentValue)
+                        .catch(e => console.error("Lưu tiến độ thất bại (debounce):", e));
+                }, 2000);
+            }
+        });
+    }, [isPurchased, book, ensureLocationsReady, calculatePositionPercent, updateProgressPercentage, paywallKey, userId, bookId]);
 
     return {
         location,
@@ -228,6 +274,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
         userId,
         isLimitReached,
         progressPercentage,
+        updateProgressPercentage,
         renditionRef,
         handleLocationChanged,
         fontFamilyId,      

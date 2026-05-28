@@ -46,7 +46,7 @@ const [salePrice, setSalePrice] = useState(book.price);
 const user = JSON.parse(localStorage.getItem("user") || "null");
 const queryClient = useQueryClient();
   
-  const { data: reviewPage, refetch } = useQuery({
+  const { data: reviewPage } = useQuery({
   queryKey: ["reviews", book.id],
   queryFn: async () => {
     const res = await api.get(`/reviews/book/${book.id}`);
@@ -307,7 +307,7 @@ function StarPicker({ rating, setRating }: any) {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
         {}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="w-full aspect-[2/3] rounded-lg shadow-xl overflow-hidden bg-white">
+          <div className="w-full aspect-2/3 rounded-lg shadow-xl overflow-hidden bg-white">
             <img
               src={book.coverImage}
               className="w-full h-full object-cover"
@@ -369,7 +369,7 @@ function StarPicker({ rating, setRating }: any) {
 
           <div className="flex gap-2">
             <button
-              onClick={() => navigate(`/reading/${book.id}?isSample=true`)}
+              onClick={() => navigate(`/reading/${book.id}`)}
               className="flex-1 bg-white border border-primary text-primary py-3 rounded-lg font-bold hover:bg-primary/5 transition-all"
             >
               Read Sample
@@ -596,12 +596,12 @@ function StarPicker({ rating, setRating }: any) {
           {relatedBooks.map((b: BookResponse) => (
             <div
               key={b.id}
-              className="min-w-[160px] cursor-pointer group"
+              className="min-w-40 cursor-pointer group"
               onClick={() =>
                 navigate(`/book-detail/${b.id}`)
               }
             >
-              <div className="w-[160px] h-[240px] rounded-lg overflow-hidden shadow-sm bg-white">
+              <div className="w-40 h-60 rounded-lg overflow-hidden shadow-sm bg-white">
                 <img
                   src={b.coverImage}
                   className="w-full h-full object-cover group-hover:scale-105 transition"
@@ -666,7 +666,7 @@ export default function BookDetail() {
 
   return (
     <main className="flex justify-center py-8">
-      <div className="max-w-[1100px] w-full px-6">
+      <div className="max-w-275 w-full px-6">
         <ShowBook book={book} />
       </div>
     </main>

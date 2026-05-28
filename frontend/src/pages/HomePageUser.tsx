@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User, Reading, HistoryItem, BookResponse } from "../types";
 import api from "../services/api";
-import BookCard from "../components/common/BookCard";
 
 export default function HomePageUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -230,7 +229,7 @@ useEffect(() => {
             e.stopPropagation(); // Ngăn chặn sự kiện nổi bọt
             navigate("/sale");  // Đã cập nhật đúng Route /sale theo yêu cầu của bạn
           }}
-          className="mb-8 bg-gradient-to-r from-[#FF5722] to-[#EE4D2D] rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-center text-white cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-200"
+          className="mb-8 bg-linear-to-r from-[#FF5722] to-[#EE4D2D] rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-center text-white cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-200"
         >
           <div className="flex items-center gap-4 pointer-events-none">
             {/* Sử dụng pointer-events-none để ép trình duyệt nhận diện cú click từ thẻ div cha to bên ngoài */}
@@ -307,7 +306,7 @@ useEffect(() => {
           {/* Reading History */}
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
             <h3 className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-widest">Reading History</h3>
-            <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2">
+            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
               {history.length > 0 ? (
                 history.map((item, i) => (
                   <div key={i} className="flex items-center gap-4 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-gray-200 transition-colors">
@@ -344,7 +343,7 @@ useEffect(() => {
 >
   <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100">
 
-    <div className="relative aspect-[2/3] overflow-hidden bg-gray-100">
+    <div className="relative aspect-2/3 overflow-hidden bg-gray-100">
 
       <img
         src={
@@ -363,7 +362,7 @@ useEffect(() => {
     </div>
 
     <div className="p-4">
-      <h3 className="font-bold text-sm line-clamp-2 min-h-[40px] text-gray-800">
+      <h3 className="font-bold text-sm line-clamp-2 min-h-10 text-gray-800">
         {book.title}
       </h3>
 

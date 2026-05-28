@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import type { BookResponse } from "../types";
-import BookCard from "../components/common/BookCard";
 export default function ShopPage() {
     type FlashSaleBook = BookResponse & {
     discountPercentage?: number;

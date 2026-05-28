@@ -1,15 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../components/common/Sidebar";
 import Navbar from "../../components/layout/Navbar";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Bell,
   Search,
   Filter,
   Eye,
-  Pencil,
   Lock,
   LockOpen,
   ChevronLeft,
