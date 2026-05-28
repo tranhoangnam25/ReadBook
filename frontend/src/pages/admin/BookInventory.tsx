@@ -1,71 +1,31 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Bell, Settings, Plus, SlidersHorizontal, Edit, WalletCards, Eye, BookOpen, TrendingUp, AlertTriangle, UploadCloud } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Search, Bell, Settings, Plus, SlidersHorizontal, Edit, WalletCards, Eye, BookOpen, TrendingUp, AlertTriangle } from 'lucide-react';
 
 import Sidebar from '../../components/common/Sidebar';
 import api from '../../services/api';
-import { uploadFileToR2, type UploadType } from '../../services/uploadService';
+import { uploadFileToR2 } from '../../services/uploadService';
 import type { BookResponse } from '../../types';
-
-interface BookPage {
-    content: BookResponse[];
-    totalPages: number;
-    totalElements: number;
-    number: number;
-    size: number;
-}
-
-interface EditBookForm {
-    title: string;
-    price: string;
-    previewPercentage: string;
-    description: string;
-    coverImage: string;
-    fileUrl: string;
-    publishYear: string;
-}
-
-interface AuthorOption {
-    id: number;
-    name: string;
-}
-
-interface CategoryOption {
-    id: number;
-    name: string;
-}
-
-interface CreateBookForm extends EditBookForm {
-    authorId: string;
-    categoryId: string;
-}
-
-const emptyCreateForm: CreateBookForm = {
-    title: '',
-    price: '0',
-    previewPercentage: '0',
-    description: '',
-    coverImage: '',
-    fileUrl: '',
-    publishYear: String(new Date().getFullYear()),
-    authorId: '',
-    categoryId: '',
-};
-
-const ALL_CATEGORIES = 'Tất cả thể loại';
-const statuses = ['Trạng thái kho', 'In Stock', 'Waitlist', 'Archived'];
-type FeedbackScope = 'page' | 'create' | 'edit' | 'price' | 'preview';
+import { toBookPayload, toCreateBookPayload, toEditForm, validateBookForm } from './bookInventory/bookFormUtils';
+import BookFormFields from './bookInventory/BookFormFields';
+import FeedbackMessage from './bookInventory/FeedbackMessage';
+import { useBookInventoryData } from './bookInventory/useBookInventoryData';
+import {
+    ALL_CATEGORIES,
+    emptyCreateForm,
+    emptyEditForm,
+    pageSize,
+    statuses,
+    uploadEntries,
+    type BookFileField,
+    type BookFiles,
+    type CreateBookForm,
+    type EditBookForm,
+    type FeedbackScope,
+    type FormMode,
+} from './bookInventory/types';
 
 export default function BookInventory(): React.JSX.Element {
-    const [books, setBooks] = useState<BookResponse[]>([]);
-    const [authors, setAuthors] = useState<AuthorOption[]>([]);
-    const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
-    const [keyword, setKeyword] = useState('');
-    const [category, setCategory] = useState(ALL_CATEGORIES);
     const [status, setStatus] = useState(statuses[0]);
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalElements, setTotalElements] = useState(0);
-    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [feedback, setFeedback] = useState<Record<FeedbackScope, { error: string; success: string }>>({
         page: { error: '', success: '' },
@@ -81,20 +41,12 @@ export default function BookInventory(): React.JSX.Element {
     const [priceValue, setPriceValue] = useState('');
     const [previewValue, setPreviewValue] = useState('');
     const [uploadingField, setUploadingField] = useState<string | null>(null);
+    const [createFiles, setCreateFiles] = useState<BookFiles>({});
+    const [editFiles, setEditFiles] = useState<BookFiles>({});
     const [createForm, setCreateForm] = useState<CreateBookForm>(emptyCreateForm);
-    const [editForm, setEditForm] = useState<EditBookForm>({
-        title: '',
-        price: '',
-        previewPercentage: '',
-        description: '',
-        coverImage: '',
-        fileUrl: '',
-        publishYear: '',
-    });
+    const [editForm, setEditForm] = useState<EditBookForm>(emptyEditForm);
 
-    const pageSize = 10;
-
-    const setFeedbackMessage = (scope: FeedbackScope, type: 'error' | 'success', message: string) => {
+    const setFeedbackMessage = useCallback((scope: FeedbackScope, type: 'error' | 'success', message: string) => {
         setFeedback((current) => ({
             ...current,
             [scope]: {
@@ -102,78 +54,39 @@ export default function BookInventory(): React.JSX.Element {
                 success: type === 'success' ? message : '',
             },
         }));
-    };
+    }, []);
 
-    const clearFeedback = (scope: FeedbackScope) => {
+    const clearFeedback = useCallback((scope: FeedbackScope) => {
         setFeedback((current) => ({
             ...current,
             [scope]: { error: '', success: '' },
         }));
-    };
+    }, []);
 
-    const renderFeedback = (scope: FeedbackScope) => (
-        <>
-            {feedback[scope].error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {feedback[scope].error}
-                </div>
-            )}
-
-            {feedback[scope].success && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                    {feedback[scope].success}
-                </div>
-            )}
-        </>
+    const showPageError = useCallback(
+        (message: string) => setFeedbackMessage('page', 'error', message),
+        [setFeedbackMessage],
     );
 
-    const fetchBooks = async () => {
-        try {
-            setLoading(true);
-            clearFeedback('page');
+    const clearPageFeedback = useCallback(() => clearFeedback('page'), [clearFeedback]);
 
-            const response = await api.get<BookPage>('/books', {
-                params: {
-                    page,
-                    size: pageSize,
-                    ...(keyword.trim() && { keyword: keyword.trim() }),
-                    ...(category !== ALL_CATEGORIES && { category }),
-                },
-            });
+    const {
+        authors,
+        books,
+        category,
+        categoryOptions,
+        fetchBooks,
+        keyword,
+        loading,
+        page,
+        setCategory,
+        setKeyword,
+        setPage,
+        totalElements,
+        totalPages,
+    } = useBookInventoryData(showPageError, clearPageFeedback);
 
-            setBooks(response.data.content || []);
-            setTotalPages(response.data.totalPages || 1);
-            setTotalElements(response.data.totalElements || 0);
-        } catch (err) {
-            console.error('Fetch books failed:', err);
-            setFeedbackMessage('page', 'error', 'Không tải được danh sách sách từ database. Kiểm tra backend hoặc kết nối API.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchBooks();
-    }, [category, keyword, page]);
-
-    useEffect(() => {
-        const fetchLookupData = async () => {
-            try {
-                const [authorsResponse, categoriesResponse] = await Promise.all([
-                    api.get<AuthorOption[]>('/authors'),
-                    api.get<CategoryOption[]>('/categories'),
-                ]);
-
-                setAuthors(authorsResponse.data || []);
-                setCategoryOptions(categoriesResponse.data || []);
-            } catch (err) {
-                console.error('Fetch lookup data failed:', err);
-                setFeedbackMessage('page', 'error', 'Không tải được danh sách tác giả/thể loại.');
-            }
-        };
-
-        fetchLookupData();
-    }, []);
+    const renderFeedback = (scope: FeedbackScope) => <FeedbackMessage feedback={feedback} scope={scope} />;
 
     const filteredBooks = useMemo(() => {
         if (status === statuses[0]) return books;
@@ -190,6 +103,7 @@ export default function BookInventory(): React.JSX.Element {
             authorId: authors[0]?.id ? String(authors[0].id) : '',
             categoryId: categoryOptions[0]?.id ? String(categoryOptions[0].id) : '',
         });
+        setCreateFiles({});
         clearFeedback('create');
         setIsCreateOpen(true);
     };
@@ -205,16 +119,9 @@ export default function BookInventory(): React.JSX.Element {
 
     const openEditModal = (book: BookResponse) => {
         setEditingBook(book);
+        setEditFiles({});
         clearFeedback('edit');
-        setEditForm({
-            title: book.title || '',
-            price: String(book.price ?? ''),
-            previewPercentage: String(book.previewPercentage ?? ''),
-            description: book.description || '',
-            coverImage: book.coverImage || '',
-            fileUrl: book.fileUrl || '',
-            publishYear: String(book.publishYear ?? ''),
-        });
+        setEditForm(toEditForm(book));
     };
 
     const closeEditModal = () => {
@@ -248,83 +155,42 @@ export default function BookInventory(): React.JSX.Element {
         setEditForm((current) => ({ ...current, [field]: value }));
     };
 
-    const handleFileUpload = async (
+    const handleFileSelect = (
         file: File | undefined,
-        uploadType: UploadType,
-        formType: 'create' | 'edit',
-        field: 'coverImage' | 'fileUrl',
+        formType: FormMode,
+        field: BookFileField,
     ) => {
         if (!file) return;
 
-        const uploadKey = `${formType}-${field}`;
-        const scope: FeedbackScope = formType;
+        clearFeedback(formType);
 
-        try {
-            setUploadingField(uploadKey);
-            clearFeedback(scope);
-
-            const uploadedFile = await uploadFileToR2(file, uploadType);
-
-            if (formType === 'create') {
-                updateCreateForm(field, uploadedFile.url);
-            } else {
-                updateEditForm(field, uploadedFile.url);
-            }
-
-            setFeedbackMessage(scope, 'success', `Upload ${file.name} thành công.`);
-        } catch (err) {
-            console.error('Upload file failed:', err);
-            setFeedbackMessage(scope, 'error', uploadType === 'cover' ? 'Không upload được ảnh bìa lên R2.' : 'Không upload được file EPUB lên R2.');
-        } finally {
-            setUploadingField(null);
+        if (formType === 'create') {
+            setCreateFiles((current) => ({ ...current, [field]: file }));
+            updateCreateForm(field, '');
+        } else {
+            setEditFiles((current) => ({ ...current, [field]: file }));
+            updateEditForm(field, '');
         }
     };
 
-    const renderUploadDropzone = (
-        label: string,
-        uploadType: UploadType,
-        formType: 'create' | 'edit',
-        field: 'coverImage' | 'fileUrl',
-        value: string,
+    const uploadPendingFiles = async (
+        formType: FormMode,
+        files: BookFiles,
     ) => {
-        const uploadKey = `${formType}-${field}`;
-        const isUploading = uploadingField === uploadKey;
-        const accept = uploadType === 'cover' ? 'image/jpeg,image/png,image/webp,image/gif' : '.epub,application/epub+zip';
+        const result: Partial<Record<BookFileField, string>> = {};
 
-        return (
-            <div className="md:col-span-2 flex flex-col gap-2 text-sm font-medium text-slate-700">
-                <span>{label}</span>
-                <label
-                    className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center transition-colors hover:border-primary hover:bg-primary/5"
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                        event.preventDefault();
-                        void handleFileUpload(event.dataTransfer.files[0], uploadType, formType, field);
-                    }}
-                >
-                    <UploadCloud className="mb-2 h-8 w-8 text-slate-400" />
-                    <span className="font-semibold text-slate-700">
-                        {isUploading ? 'Đang upload...' : 'Kéo-thả file vào đây hoặc bấm để chọn'}
-                    </span>
-                    <span className="mt-1 text-xs text-slate-500">
-                        {uploadType === 'cover' ? 'JPG, PNG, WEBP, GIF' : 'EPUB'}
-                    </span>
-                    <input
-                        accept={accept}
-                        className="hidden"
-                        disabled={isUploading}
-                        type="file"
-                        onChange={(event) => void handleFileUpload(event.target.files?.[0], uploadType, formType, field)}
-                    />
-                </label>
-                <input
-                    className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    placeholder="URL sau khi upload sẽ tự điền tại đây"
-                    value={value}
-                    onChange={(event) => (formType === 'create' ? updateCreateForm(field, event.target.value) : updateEditForm(field, event.target.value))}
-                />
-            </div>
-        );
+        for (const [field, uploadType] of uploadEntries) {
+            const file = files[field];
+            if (!file) continue;
+
+            const uploadKey = `${formType}-${field}`;
+            setUploadingField(uploadKey);
+            const uploadedFile = await uploadFileToR2(file, uploadType);
+            result[field] = uploadedFile.url;
+        }
+
+        setUploadingField(null);
+        return result;
     };
 
     const buildUpdatePayload = (book: BookResponse, price: number, previewPercentage = book.previewPercentage) => ({
@@ -336,19 +202,6 @@ export default function BookInventory(): React.JSX.Element {
         fileUrl: book.fileUrl || '',
         publishYear: book.publishYear,
     });
-
-    const validateBookForm = (form: CreateBookForm | EditBookForm) => {
-        const price = Number(form.price);
-        const previewPercentage = Number(form.previewPercentage);
-        const publishYear = Number(form.publishYear);
-
-        if (!form.title.trim()) return 'Tên sách không được để trống.';
-        if (Number.isNaN(price) || price < 0) return 'Giá sách không hợp lệ.';
-        if (Number.isNaN(previewPercentage) || previewPercentage < 0 || previewPercentage > 100) return 'Phần trăm đọc thử phải từ 0 đến 100.';
-        if (Number.isNaN(publishYear) || publishYear < 1000) return 'Năm xuất bản không hợp lệ.';
-
-        return '';
-    };
 
     const handleCreateSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -368,25 +221,19 @@ export default function BookInventory(): React.JSX.Element {
             setSaving(true);
             clearFeedback('create');
 
-            await api.post('/books', {
-                title: createForm.title.trim(),
-                price: Number(createForm.price),
-                previewPercentage: Number(createForm.previewPercentage),
-                description: createForm.description.trim(),
-                coverImage: createForm.coverImage.trim(),
-                fileUrl: createForm.fileUrl.trim(),
-                publishYear: Number(createForm.publishYear),
-                authorId: Number(createForm.authorId),
-                categoryId: Number(createForm.categoryId),
-            });
+            const uploadedFiles = await uploadPendingFiles('create', createFiles);
+
+            await api.post('/books', toCreateBookPayload(createForm, uploadedFiles));
 
             setFeedbackMessage('page', 'success', 'Thêm sách mới thành công.');
+            setCreateFiles({});
             setIsCreateOpen(false);
             await fetchBooks();
         } catch (err) {
             console.error('Create book failed:', err);
-            setFeedbackMessage('create', 'error', 'Không thêm được sách mới. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('create', 'error', 'Không thêm được sách mới hoặc upload file thất bại. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
+            setUploadingField(null);
             setSaving(false);
         }
     };
@@ -395,27 +242,9 @@ export default function BookInventory(): React.JSX.Element {
         event.preventDefault();
         if (!editingBook) return;
 
-        const price = Number(editForm.price);
-        const previewPercentage = Number(editForm.previewPercentage);
-        const publishYear = Number(editForm.publishYear);
-
-        if (!editForm.title.trim()) {
-            setFeedbackMessage('edit', 'error', 'Tên sách không được để trống.');
-            return;
-        }
-
-        if (Number.isNaN(price) || price < 0) {
-            setFeedbackMessage('edit', 'error', 'Giá sách không hợp lệ.');
-            return;
-        }
-
-        if (Number.isNaN(previewPercentage) || previewPercentage < 0 || previewPercentage > 100) {
-            setFeedbackMessage('edit', 'error', 'Phần trăm đọc thử phải từ 0 đến 100.');
-            return;
-        }
-
-        if (Number.isNaN(publishYear) || publishYear < 1000) {
-            setFeedbackMessage('edit', 'error', 'Năm xuất bản không hợp lệ.');
+        const validationError = validateBookForm(editForm);
+        if (validationError) {
+            setFeedbackMessage('edit', 'error', validationError);
             return;
         }
 
@@ -423,23 +252,21 @@ export default function BookInventory(): React.JSX.Element {
             setSaving(true);
             clearFeedback('edit');
 
+            const uploadedFiles = await uploadPendingFiles('edit', editFiles);
+
             await api.put(`/books/${editingBook.id}`, {
-                title: editForm.title.trim(),
-                price,
-                previewPercentage,
-                description: editForm.description.trim(),
-                coverImage: editForm.coverImage.trim(),
-                fileUrl: editForm.fileUrl.trim(),
-                publishYear,
+                ...toBookPayload(editForm, uploadedFiles),
             });
 
             setFeedbackMessage('page', 'success', 'Cập nhật sách thành công.');
+            setEditFiles({});
             setEditingBook(null);
             await fetchBooks();
         } catch (err) {
             console.error('Update book failed:', err);
-            setFeedbackMessage('edit', 'error', 'Không cập nhật được sách. Kiểm tra backend hoặc dữ liệu nhập.');
+            setFeedbackMessage('edit', 'error', 'Không cập nhật được sách hoặc upload file thất bại. Kiểm tra backend hoặc dữ liệu nhập.');
         } finally {
+            setUploadingField(null);
             setSaving(false);
         }
     };
@@ -764,91 +591,16 @@ export default function BookInventory(): React.JSX.Element {
                         <form className="space-y-4 px-6 py-5" onSubmit={handleCreateSubmit}>
                             {renderFeedback('create')}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Tên sách
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.title}
-                                        onChange={(event) => updateCreateForm('title', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Giá
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        min="0"
-                                        type="number"
-                                        value={createForm.price}
-                                        onChange={(event) => updateCreateForm('price', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Tác giả
-                                    <select
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.authorId}
-                                        onChange={(event) => updateCreateForm('authorId', event.target.value)}
-                                    >
-                                        <option value="">Chọn tác giả</option>
-                                        {authors.map((author) => (
-                                            <option key={author.id} value={author.id}>{author.name}</option>
-                                        ))}
-                                    </select>
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Thể loại
-                                    <select
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.categoryId}
-                                        onChange={(event) => updateCreateForm('categoryId', event.target.value)}
-                                    >
-                                        <option value="">Chọn thể loại</option>
-                                        {categoryOptions.map((item) => (
-                                            <option key={item.id} value={item.id}>{item.name}</option>
-                                        ))}
-                                    </select>
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Phần trăm đọc thử
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        max="100"
-                                        min="0"
-                                        type="number"
-                                        value={createForm.previewPercentage}
-                                        onChange={(event) => updateCreateForm('previewPercentage', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Năm xuất bản
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        min="1000"
-                                        type="number"
-                                        value={createForm.publishYear}
-                                        onChange={(event) => updateCreateForm('publishYear', event.target.value)}
-                                    />
-                                </label>
-
-                                {renderUploadDropzone('Ảnh bìa', 'cover', 'create', 'coverImage', createForm.coverImage)}
-
-                                {renderUploadDropzone('File sách EPUB', 'book', 'create', 'fileUrl', createForm.fileUrl)}
-
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Mô tả
-                                    <textarea
-                                        className="min-h-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={createForm.description}
-                                        onChange={(event) => updateCreateForm('description', event.target.value)}
-                                    />
-                                </label>
-                            </div>
+                            <BookFormFields
+                                authors={authors}
+                                categories={categoryOptions}
+                                files={createFiles}
+                                form={createForm}
+                                mode="create"
+                                uploadingField={uploadingField}
+                                onChange={updateCreateForm}
+                                onFileSelect={handleFileSelect}
+                            />
 
                             <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
                                 <button
@@ -889,63 +641,14 @@ export default function BookInventory(): React.JSX.Element {
                         <form className="space-y-4 px-6 py-5" onSubmit={handleEditSubmit}>
                             {renderFeedback('edit')}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Tên sách
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={editForm.title}
-                                        onChange={(event) => updateEditForm('title', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Giá
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        min="0"
-                                        type="number"
-                                        value={editForm.price}
-                                        onChange={(event) => updateEditForm('price', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Phần trăm đọc thử
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        max="100"
-                                        min="0"
-                                        type="number"
-                                        value={editForm.previewPercentage}
-                                        onChange={(event) => updateEditForm('previewPercentage', event.target.value)}
-                                    />
-                                </label>
-
-                                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Năm xuất bản
-                                    <input
-                                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        min="1000"
-                                        type="number"
-                                        value={editForm.publishYear}
-                                        onChange={(event) => updateEditForm('publishYear', event.target.value)}
-                                    />
-                                </label>
-
-                                {renderUploadDropzone('Ảnh bìa', 'cover', 'edit', 'coverImage', editForm.coverImage)}
-
-                                {renderUploadDropzone('File sách EPUB', 'book', 'edit', 'fileUrl', editForm.fileUrl)}
-
-                                <label className="md:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">
-                                    Mô tả
-                                    <textarea
-                                        className="min-h-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                        value={editForm.description}
-                                        onChange={(event) => updateEditForm('description', event.target.value)}
-                                    />
-                                </label>
-                            </div>
+                            <BookFormFields
+                                files={editFiles}
+                                form={editForm}
+                                mode="edit"
+                                uploadingField={uploadingField}
+                                onChange={(field, value) => updateEditForm(field as keyof EditBookForm, value)}
+                                onFileSelect={handleFileSelect}
+                            />
 
                             <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
                                 <button
