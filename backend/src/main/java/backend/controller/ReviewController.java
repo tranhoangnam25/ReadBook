@@ -33,21 +33,17 @@ public class ReviewController {
 
 
         Page<ReviewResponse> response = reviews.map(r -> {
-
-    ReviewResponse res = new ReviewResponse();
-
-    res.id = r.getId();
-    res.rating = r.getRating();
-    res.comment = r.getComment();
-    res.adminReply = r.getAdminReply();
-
-    if (r.getUser() != null) {
-        res.userId = r.getUser().getId();
-        res.username = r.getUser().getUsername();
-    }
-
-    return res;
-});
+            ReviewResponse res = new ReviewResponse();
+            res.id = r.getId();
+            res.rating = r.getRating();
+            res.comment = r.getComment();
+            res.adminReply = r.getAdminReply();
+            if (r.getUser() != null) {
+                res.userId = r.getUser().getId();
+                res.username = r.getUser().getUsername();
+            }
+            return res;
+        });
 
         return ResponseEntity.ok(response);
     }
@@ -111,7 +107,7 @@ public ReviewResponse update(
 
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADM') or hasAuthority('GET_ALL_REVIEW')")
+    @PreAuthorize("hasRole('ADM') or hasAuthority('MANAGE_REVIEW')")
     public ResponseEntity<Page<ReviewAdminResponse>>
 getAdminReviews(
 
@@ -139,7 +135,7 @@ getAdminReviews(
 }
 
     @GetMapping("/admin/stats")
-    @PreAuthorize("hasRole('ADM') or hasAuthority('GET_ALL_REVIEW')")
+    @PreAuthorize("hasRole('ADM') or hasAuthority('MANAGE_REVIEW')")
 public ResponseEntity<ReviewStatsResponse>
 getStats() {
 

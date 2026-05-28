@@ -71,7 +71,7 @@ public class ChatService {
                 BookScore(Book book, double score) { this.book = book; this.score = score; }
             }
 
-            List<Book> recommendedBooks = allBooks.parallelStream()
+            List<BookScore> scoredBooks = allBooks.parallelStream()
                     .filter(b -> b.getEmbedding() != null && b.getEmbedding().length > 0)
                     .map(b -> {
                         double[] bookVector = VectorUtils.fromBytes(b.getEmbedding());
@@ -81,25 +81,26 @@ public class ChatService {
                     .filter(bs -> bs.score > 0.6)
                     .sorted((bs1, bs2) -> Double.compare(bs2.score, bs1.score))
                     .limit(4)
-                    .map(bs -> bs.book)
                     .toList();
 
-            if (recommendedBooks.isEmpty()) {
-                return ChatResponse.builder()
-                        .message("Xin lỗi, tôi không tìm thấy sách nào phù hợp.")
-                        .books(List.of())
-                        .build();
-            }
+            List<Book> recommendedBooks = scoredBooks.stream().map(bs -> bs.book).toList();
 
             StringBuilder prompt = new StringBuilder();
-            prompt.append("Bạn là chatbot tư vấn sách chuyên nghiệp. Dưới đây là danh sách các cuốn sách phù hợp nhất với yêu cầu của người dùng.\n");
-            prompt.append("Hãy phân tích giá cả và mô tả để đưa ra lời khuyên chính xác. Nếu người dùng hỏi về giá, hãy ưu tiên so sánh giá giữa các cuốn sách này.\n\n");
+            if (!recommendedBooks.isEmpty()) {
+                prompt.append("Dưới đây là danh sách các cuốn sách phù hợp nhất với yêu cầu của người dùng.\n");
+                prompt.append("Hãy phân tích giá cả và mô tả để đưa ra lời khuyên chính xác. Nếu người dùng hỏi về giá, hãy ưu tiên so sánh giá giữa các cuốn sách này.\n\n");
 
-            for(Book b : recommendedBooks){
-                prompt.append(String.format("ID: %d\nTên: %s\nGiá: %,.0f VNĐ\nMô tả: %s\n\n", 
-                    b.getId(), b.getTitle(), b.getPrice(), b.getDescription()));
+                for(Book b : recommendedBooks){
+                    prompt.append(String.format("ID: %d\nTên: %s\nGiá: %,.0f VNĐ\nMô tả: %s\n\n",
+                            b.getId(), b.getTitle(), b.getPrice(), b.getDescription()));
+                }
+            } else {
+                prompt.append("Người dùng đang hỏi về hệ thống hoặc tìm kiếm sách nhưng không có kết quả phù hợp trong kho dữ liệu.\n");
+                prompt.append("Nếu người dùng hỏi về cách sử dụng hệ thống (đăng ký, đăng nhập, đổi mật khẩu, v.v.), hãy sử dụng kiến thức trong system prompt để hướng dẫn.\n");
+                prompt.append("Nếu người dùng hỏi về sách, hãy lịch sự thông báo hiện tại không có sách phù hợp và gợi ý họ tìm kiếm theo chủ đề khác.\n\n");
             }
-            prompt.append("Yêu cầu của người dùng: " + userMessage);
+            
+            prompt.append("Câu hỏi của người dùng: " + userMessage);
 
             String aiMessage = geminiService.askGemini(prompt.toString());
 

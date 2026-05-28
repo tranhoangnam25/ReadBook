@@ -70,15 +70,13 @@ public class SecurityConfig {
                                 "/api/users/me/reading/progress",
                                 "/api/reader-settings/**",
                                 "/api/users/me/reading/progress",
-                                "/api/sales/**"
+                                "/api/sales/**",
+                                "/api/chat"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );
                 
-                // 💡 NẾU BẠN MUỐN TEST THOẢI MÁI KHÔNG CẦN TOKEN:
-                // Hãy tạm thời khóa (comment) dòng addFilterBefore dưới đây bằng dấu gạch chéo //
-                // Sau khi comment, request sẽ chạy thẳng vào hệ thống mà không đi qua bộ lọc JwtAuthenticationFilter nữa.
-                
+
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 http.exceptionHandling(exception -> exception

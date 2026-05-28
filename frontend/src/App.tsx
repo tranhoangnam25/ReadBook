@@ -26,6 +26,7 @@ import BookInventory from './pages/admin/BookInventory';
 import ChatBot from "./components/common/ChatBot";
 import ManageUser from './pages/admin/ManageUser';
 import UserDetail from './pages/admin/UserDetail';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 import ManageRole from './pages/admin/ManageRole';
 import ManagePermission from './pages/admin/ManagePermission';
@@ -90,7 +91,6 @@ function App() {
               />
             }
           >
-            {}
             <Route
               index
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
@@ -104,30 +104,38 @@ function App() {
             <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
             <Route path="/book-detail/all-comments/:id" element={<AllComments />} />
             <Route path="/library" element={<LibraryPage />} />
-            <Route path="/admin" element={<DashBoard />} />
-            <Route path="/admin/orders" element={<OrderManagement />} />
-            <Route path="/admin/reviews" element={<ReviewManager />} />
             <Route path="/sale" element={<SalePage />} />
+
+            <Route path="/admin" element={<DashBoard />} />
+
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_ORDER']} />}>
+                <Route path="/admin/orders" element={<OrderManagement />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_BOOK']} />}>
+                <Route path="/admin/books" element={<BookInventory />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_REVIEW']} />}>
+                <Route path="/admin/reviews" element={<ReviewManager />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={['ADM']} />}>
+                <Route path="/admin/users" element={<ManageUser />} />
+                <Route path="/admin/users/:id" element={<UserDetail />} />
+                <Route path="/admin/roles" element={<ManageRole />} />
+                <Route path="/admin/permissions" element={<ManagePermission />} />
+                <Route path="/admin/create-role" element={<CreateRole />} />
+                <Route path="/admin/update-role/:id" element={<UpdateRole />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_SALES']} />}>
+                <Route path="/admin/sale-manager" element={<SaleManager />} />
+            </Route>
+
           </Route>
 
-          <Route path="/admin/books" element={<BookInventory />} />
           <Route path="/reading/:bookId" element={<ReadingView />} />
-          <Route path="/admin/users" element={<ManageUser />} />
-          <Route path="/admin/users/:id" element={<UserDetail />} />
-
-          <Route path="/admin/roles" element={<ManageRole />} />
-          <Route path="/admin/permissions" element={<ManagePermission />} />
-          <Route path="/admin/create-role" element={<CreateRole />} />
-          <Route path="/admin/update-role/:id" element={<UpdateRole />} />
-
-          <Route path="/admin/sale-manager" element={<SaleManager />} />
-
-
-          {}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
-        {}
         {isRegisterOpen && (
           <RegisterPage
             onClose={() => setIsRegisterOpen(false)}

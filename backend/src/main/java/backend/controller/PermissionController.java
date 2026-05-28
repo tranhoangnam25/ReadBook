@@ -20,7 +20,7 @@ public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSIONS')")
     ApiResponse<PermissionResponse> create(@RequestBody PermissionRequest request){
         return ApiResponse.<PermissionResponse>builder()
                 .success(true)
@@ -30,7 +30,7 @@ public class PermissionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSIONS')")
     ApiResponse<List<PermissionResponse>> getAll(){
         return ApiResponse.<List<PermissionResponse>>builder()
                 .success(true)
@@ -40,7 +40,7 @@ public class PermissionController {
     }
 
     @DeleteMapping("/{permission}")
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSIONS')")
     ApiResponse<Void> delete(@PathVariable String permission){
         permissionService.delete(permission);
         return ApiResponse.<Void>builder()

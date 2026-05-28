@@ -21,5 +21,10 @@ public class Role {
     private String description;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "roles_permissions",
+            joinColumns = @JoinColumn(name = "role_name"),
+            inverseJoinColumns = @JoinColumn(name = "permissions_name")
+    )
     Set<Permissions> permissions;
 }

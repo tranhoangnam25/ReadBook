@@ -35,7 +35,15 @@ public class GeminiService {
         Map<String, Object> body = Map.of(
                 "model", "llama-3.3-70b-versatile",
                 "messages", List.of(
-                        Map.of("role", "system", "content", "Bạn là chatbot tư vấn sách chuyên nghiệp. Hãy trả lời bằng tiếng Việt thân thiện."),
+                        Map.of("role", "system", "content",
+                                "Bạn là chatbot hỗ trợ khách hàng của hệ thống ReadBook. " +
+                                "Nhiệm vụ của bạn là tư vấn sách và hướng dẫn người dùng sử dụng các chức năng của hệ thống. " +
+                                "Thông tin hướng dẫn: " +
+                                "1. Đăng ký: Nhấn nút 'Đăng ký' trên thanh Navbar, điền email, tên và mật khẩu. " +
+                                "2. Đăng nhập: Nhấn nút 'Đăng nhập', nhập tài khoản và mật khẩu đã đăng ký. " +
+                                "3. Đổi mật khẩu: Sau khi đăng nhập, vào trang cá nhân (Profile) hoặc nhấn vào Avatar, chọn 'Đổi mật khẩu'. " +
+                                "4. Mua sách: Chọn sách muốn mua, nhấn 'Mua ngay' hoặc 'Thanh toán' và làm theo hướng dẫn thanh toán QR. " +
+                                "Hãy trả lời bằng tiếng Việt thân thiện, ngắn gọn và hữu ích."),
                         Map.of("role", "user", "content", prompt)
                 ),
                 "temperature", 0.7

@@ -6,11 +6,13 @@ import backend.dto.response.HistoryResponse;
 import backend.dto.response.ReadingResponse;
 import backend.entity.Book;
 import backend.entity.ReadingProgress;
+import backend.entity.Role;
 import backend.entity.User;
 import backend.enums.StatusUser;
 import backend.exception.AppException;
 import backend.exception.ErrorCode;
 import backend.repository.ReadingProgressRepository;
+import backend.repository.RoleRepository;
 import backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +21,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -31,6 +36,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final backend.repository.BookRepository bookRepository;
     private final ReadingProgressRepository repo;
+    private final RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -181,6 +187,15 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
+    }
+    @Transactional
+    public User updateUserRoles(Long userId, Set<String> roleNames){
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USERNAME_NOT_EXISTED));
+
+        List<Role> roles = roleRepository.findAllById(roleNames);
+        user.setRoles(new HashSet<>(roles));
+
+        return userRepository.save(user);
     }
 }
 

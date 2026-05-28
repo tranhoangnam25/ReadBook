@@ -41,7 +41,7 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                         onClick={() => {
                             const user = JSON.parse(localStorage.getItem("user") || "{}");
                             const roles = user.roles || [];
-                            const isAdmin = roles.some((r: any) => r.name === "ADM");
+                            const isAdmin = roles.some((r: any) => r.name !== "USR");
                             if(isAdmin){
                                 navigate("/admin");
                             } else {

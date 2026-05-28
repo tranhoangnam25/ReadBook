@@ -59,6 +59,15 @@ WHERE o.user.id = :userId
            "FROM Order o WHERE o.id = :orderId")
     Optional<OrderAdminResponse> findAdminOrderDetailsById(@Param("orderId") Long orderId);
 
+    @Query("SELECT new backend.dto.response.OrderAdminResponse(" +
+           "CONCAT('#BK-', o.id), o.user.username, o.user.email, o.book.title, o.createdAt, o.price, 'paid') " +
+           "FROM Order o " +
+           "WHERE o.status = :status AND o.createdAt >= :since " +
+           "ORDER BY o.createdAt DESC")
+    List<OrderAdminResponse> findRecentOrders(
+            @Param("status") StatusOrder status, 
+            @Param("since") java.time.LocalDateTime since);
+
     @Query("""
     SELECT new backend.dto.response.OrderExportResponse(
         o.id,

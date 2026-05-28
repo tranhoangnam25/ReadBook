@@ -55,8 +55,8 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
 
                     const roles = (response.user as LoginUser).roles || [];
                     const isAdmin = Array.isArray(roles)
-                        ? roles.some((role) => (typeof role === 'string' ? role : role.name) === 'ADM')
-                        : roles === 'ADM';
+                        ? roles.some((role) => (typeof role === 'string' ? role : role.name) !== 'USR')
+                        : roles !== 'USR';
 
                     if (isAdmin) {
                         navigate("/admin");

@@ -12,17 +12,11 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
-
-    
-    
     
     @PostMapping("/create-payos")
     public Map<String, Object> createPayOS(@RequestParam Long orderId) {
         return paymentService.createPayOSPayment(orderId);
     }
-
-    
-    
     
     @PostMapping("/payos/webhook")
     public String webhook(@RequestBody Map<String, Object> body) {

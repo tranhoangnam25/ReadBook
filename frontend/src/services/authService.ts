@@ -62,3 +62,30 @@ export const changePassword = async (data: { currentPassword: string; password: 
         params: { id: userId }
     });
 };
+
+export const hasPermission = (permissionName : string): boolean => {
+    const userJson = localStorage.getItem('user');
+    if(!userJson) return false;
+    try {
+        const user  = JSON.parse(userJson);
+        const roles = user.roles || [];
+
+        const userPermissions = roles.flatMap((role: any) =>
+            role.permissions ? role.permissions.map((p:any) => p.name) : []
+        );
+        return userPermissions.includes(permissionName);
+    } catch{
+        return false;
+    }
+};
+
+export const hasRole = (roleName: string): boolean => {
+    const userJson = localStorage.getItem('user');
+    if(!userJson) return false;
+    try{
+        const user = JSON.parse(userJson);
+        return (user.roles || []).some((r:any) => r.name === roleName);
+    } catch {
+        return false;
+    }
+};

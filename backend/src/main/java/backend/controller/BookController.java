@@ -28,13 +28,13 @@ public class BookController {
 }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_BOOK')")
+    @PreAuthorize("hasAuthority('MANAGE_BOOK')")
     public BookResponse createBook(@RequestBody CreateBookRequest request) {
         return bookService.createBook(request);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADD_BOOK')")
+    @PreAuthorize("hasAuthority('MANAGE_BOOK')")
     public BookResponse updateBook(@PathVariable Long id, @RequestBody UpdateBookRequest request) {
         return bookService.updateBook(id, request);
     }
@@ -51,13 +51,20 @@ public class BookController {
         return ResponseEntity.ok(bookService.getBestSellers(limit));
     }
     @PostMapping("/embedding")
-    @PreAuthorize("hasAuthority('CREATE_BOOK')")
+    @PreAuthorize("hasAuthority('MANAGE_BOOK')")
     public String generateEmbeddings() {
 
         embeddingService.generateEmbeddings();
 
         return "Generated embeddings successfully";
     }
+    @PostMapping("/embedding/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_BOOK')")
+    public String generateEmbedding(@PathVariable Long id){
+        embeddingService.generateEmbedding(id);
+        return "Generated embedding for this book successfully";
+    }
+
     @GetMapping("/recommends")
     public List<BookResponse> getRecommend() {
     return bookService.getRecommend();

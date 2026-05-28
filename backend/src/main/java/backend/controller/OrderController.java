@@ -49,7 +49,7 @@ public String updateStatus(
 
     
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ORDER')")
     public ResponseEntity<Page<OrderAdminResponse>> getAdminOrders(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -61,7 +61,7 @@ public String updateStatus(
 
     
     @GetMapping("/admin/stats")
-    @PreAuthorize("hasAuthority('VIEW_ALL_ORDER')")
+    @PreAuthorize("hasAuthority('MANAGE_ORDER')")
     public ResponseEntity<OrderStatsResponse> getAdminStats() {
         OrderStatsResponse stats = orderService.getPaidOrdersStatsForAdmin();
         return ResponseEntity.ok(stats);
@@ -75,7 +75,7 @@ public String updateStatus(
     }
 
     @GetMapping("/export")
-    @PreAuthorize("hasAuthority('XUAT_EXCEL')")
+    @PreAuthorize("hasAuthority('MANAGE_ORDER')")
     public ResponseEntity<InputStreamResource> exportOrders() {
 
         String filename = "orders.xlsx";

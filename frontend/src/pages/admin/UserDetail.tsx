@@ -29,6 +29,8 @@ export default function UserDetail() {
   const [loading, setLoading] = useState(true);
 
   const [orders, setOrders] = useState<any[]>([]);
+  const [allRoles, setAllRoles] = useState<any[]>([]);
+  const [selectedRole, setSelectedRole] = useState("");
 
 
   const formatDate = (date: string) => {
@@ -51,15 +53,34 @@ const handleToggleStatus = async () => {
   }
 };
 
+const handleUpdateRole = async () => {
+    try {
+        await api.put(`/users/${userId}/roles`, {
+         roles:[selectedRole]
+        });
+    alert("Cập nhật quyền thành công!");
+
+    setUser((prev: any) => ({
+        ...prev,
+        roles: [{name : selectedRole}]
+        }));
+    } catch (err){
+        console.error(err);
+        alert("Lỗi khi cập nhật quyền!")
+        }
+};
+
   useEffect(() => {
     const fetchUserAndOrders = async () => {
       try {
-        const [userRes, orderRes] = await Promise.all([
+        const [userRes, orderRes, rolesRes] = await Promise.all([
           api.get(`/users/${id}`),
           api.get(`/users/${id}/orders`),
+          api.get("/roles"),
         ]);
 
-        setUser(userRes.data);
+        const userData = userRes.data;
+        setUser(userData);
 
         setOrders(
           orderRes.data.map((o: any) => ({
@@ -69,6 +90,16 @@ const handleToggleStatus = async () => {
             status: o.status,
           }))
         );
+
+        const rolesList = rolesRes.data.data || rolesRes.data;
+        setAllRoles(rolesList);
+
+        if (userData.roles && userData.roles.length > 0) {
+          setSelectedRole(userData.roles[0].name);
+        } else if (rolesList.length > 0) {
+          setSelectedRole(rolesList[0].name);
+        }
+
       } catch (err) {
         console.error("Lỗi load data:", err);
       } finally {
@@ -151,10 +182,26 @@ const handleToggleStatus = async () => {
                 </div>
               </div>
             </div>
-
+            <div className="flex items-center gap-3 mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <label className="text-sm font-semibold">Quyền truy cập:</label>
+                <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                    {allRoles.map((role) => (
+                        <option key={role.name} value={role.name}>
+                        {role.name} - {role.description}
+                        </option>
+                    ))}
+                 </select>
+                 <button
+                 onClick={handleUpdateRole}
+                 className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-all">
+                 Lưu quyền
+                </button>
+            </div>
             <div className="flex gap-3">
-
-
               <button
                 onClick={handleToggleStatus}
                 className={`px-4 py-2.5 rounded-xl text-white flex items-center gap-2

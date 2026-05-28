@@ -11,6 +11,7 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +32,6 @@ public class SaleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            // SỬA TẠI ĐÂY: Gọi qua saleService thay vì saleRepository
             Page<Sale> salesPage = saleService.getSalesPageForAdmin(keyword, status, page, size);
             return ResponseEntity.ok(salesPage);
         } catch (Exception e) {
@@ -41,11 +41,11 @@ public class SaleController {
 
     // 2. Endpoint lấy số liệu thống kê chân trang cho Admin
     @GetMapping("/admin/stats")
-public ResponseEntity<?> getSaleStats() {
+    @PreAuthorize("hasAuthority('MANAGE_SALES')")
+    public ResponseEntity<?> getSaleStats() {
     try {
         Map<String, Object> stats = new HashMap<>();
-        
-        // SỬA TẠI ĐÂY: Gọi qua saleService thay vì saleRepository
+
         stats.put("totalSales", saleService.countTotalSales());
         stats.put("activeSales", saleService.countActiveSales());
         stats.put("upcomingSales", saleService.countUpcomingSales());
@@ -58,6 +58,7 @@ public ResponseEntity<?> getSaleStats() {
 
     // Endpoint dành cho Admin khởi tạo sự kiện Flash Sale mới
     @PostMapping("/admin/create")
+    @PreAuthorize("hasAuthority('MANAGE_SALES')")
     public ResponseEntity<?> createSaleCampaign(@RequestBody SaleRequest saleRequest) {
         try {
             Sale createdSale = saleService.createSale(saleRequest);
@@ -75,6 +76,7 @@ public ResponseEntity<?> getSaleStats() {
     }
     // 5. API Chỉnh sửa đợt Sale (Update)
     @PutMapping("/admin/update/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_SALES')")
     public ResponseEntity<?> updateSaleCampaign(
             @PathVariable Long id, 
             @RequestBody SaleRequest saleRequest) {
@@ -86,8 +88,8 @@ public ResponseEntity<?> getSaleStats() {
         }
     }
 
-    // 6. API Xóa đợt Sale (Delete)
     @DeleteMapping("/admin/delete/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_SALES')")
     public ResponseEntity<?> deleteSaleCampaign(@PathVariable Long id) {
         try {
             saleService.deleteSale(id);
@@ -99,8 +101,6 @@ public ResponseEntity<?> getSaleStats() {
     @GetMapping("/admin/{saleId}/books")
     public ResponseEntity<?> getBooksBySaleId(@PathVariable Long saleId) {
         try {
-            // Bạn cần triển khai hàm getBooksBySaleId(saleId) này trong SaleService của bạn
-            // Hàm này thực hiện câu Query Jpa hoặc Native SQL kết hợp bảng sale_book (image_daf129.png) và bảng book để lấy thông tin sách
             List<?> books = saleService.getBooksBySaleId(saleId); 
             return ResponseEntity.ok(books);
         } catch (Exception e) {

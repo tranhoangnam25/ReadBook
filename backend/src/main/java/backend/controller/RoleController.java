@@ -20,7 +20,7 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     ApiResponse<RoleResponse> create(@RequestBody RoleRequest request){
         return ApiResponse.<RoleResponse>builder()
                 .success(true)
@@ -30,7 +30,7 @@ public class RoleController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     ApiResponse<List<RoleResponse>> getAll(){
         return ApiResponse.<List<RoleResponse>>builder()
                 .success(true)
@@ -40,7 +40,7 @@ public class RoleController {
     }
 
     @GetMapping("/{role}")
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     ApiResponse<RoleResponse> getById(@PathVariable String role){
         return ApiResponse.<RoleResponse>builder()
                 .success(true)
@@ -49,7 +49,7 @@ public class RoleController {
     }
 
     @PutMapping("/{role}")
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     ApiResponse<RoleResponse> update(@PathVariable String role, @RequestBody RoleRequest request){
         return ApiResponse.<RoleResponse>builder()
                 .success(true)
@@ -58,7 +58,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/{role}")
-    @PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasAuthority('MANAGE_ROLES')")
     ApiResponse<Void> delete(@PathVariable String role){
         roleService.delete(role);
         return ApiResponse.<Void>builder()

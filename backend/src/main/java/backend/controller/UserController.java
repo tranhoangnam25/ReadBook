@@ -1,6 +1,7 @@
 package backend.controller;
 
 import backend.dto.request.ChangePasswordRequest;
+import backend.dto.request.UserRoleUpdateResquest;
 import backend.dto.request.UserUpdateRequest;
 import backend.dto.response.BookResponse;
 import backend.dto.response.HistoryResponse;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import backend.entity.User;
@@ -94,8 +96,18 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/toggle-status")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADM')")
+    @PreAuthorize("hasRole('ADM')")
     public ResponseEntity<User> toggleStatus(@PathVariable Long id){
         return ResponseEntity.ok(userService.toggleLock(id));
     }
+    @PutMapping("/{id}/roles")
+    @PreAuthorize("hasRole('ADM')")
+    public ResponseEntity<User> updateRoles(
+            @PathVariable Long id,
+            @RequestBody UserRoleUpdateResquest resquest
+            ){
+        return ResponseEntity.ok(userService.updateUserRoles(id, resquest.getRoles()));
+    }
+
+
 }

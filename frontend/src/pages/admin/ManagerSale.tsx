@@ -3,6 +3,7 @@ import {
   Search, Bell, Settings, Tag, Calendar, Trash2, Eye, Edit3, ChevronLeft, ChevronRight, X, Plus, Percent, CheckSquare
 } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar'; 
+import api from '../../services/api';
 
 // --- Interface hứng dữ liệu chuẩn từ Spring Boot ---
 interface SpringPage<T> {
@@ -72,90 +73,74 @@ export default function SaleManagement(): React.JSX.Element {
   const [selectedBooks, setSelectedBooks] = useState<BookResponse[]>([]); 
   const [isSelectAllLoading, setIsSelectAllLoading] = useState<boolean>(false);
 
-  // URL Cấu hình API Backend
-  const API_BASE_URL = 'http://localhost:8080/api/sales';
-  const API_BOOK_URL = 'http://localhost:8080/api/books'; 
-
-  // Hàm gọi API đếm số lượng sách cho từng chiến dịch cụ thể
   const fetchBookCountForSale = useCallback(async (saleId: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/${saleId}/books`, { method: 'GET' });
-      if (response.ok) {
-        const booksData: BookResponse[] = await response.json();
-        // Cập nhật số lượng đếm được vào state bản đồ số lượng
-        setSaleBookCounts(prev => ({ ...prev, [saleId]: booksData.length }));
-        return booksData;
-      }
+      const response = await api.get(`/sales/admin/${saleId}/books`);
+      const booksData: BookResponse[] = response.data;
+      setSaleBookCounts(prev => ({ ...prev, [saleId]: booksData.length }));
+      return booksData;
     } catch (error) {
       console.error(`Lỗi lấy danh sách sách đếm số lượng cho sale #${saleId}:`, error);
     }
     return [];
   }, []);
 
-  // 1. Lấy danh sách đợt Sale và tự động kích hoạt đếm số sách kèm theo
   const fetchSales = useCallback(async (searchKey: string, status: string, page: number) => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin?keyword=${encodeURIComponent(searchKey)}&status=${status}&page=${page}&size=${pageSize}`,
-        { method: 'GET' }
-      );
-      if (response.ok) {
-        const data: SpringPage<SaleAdminResponse> = await response.json();
-        const salesList = data.content || [];
-        setSales(salesList);
-        setTotalPages(data.totalPages || 1);
-        setTotalElements(data.totalElements || 0);
+      const response = await api.get(`/sales/admin`, {
+        params: {
+          keyword: searchKey,
+          status: status,
+          page: page,
+          size: pageSize
+        }
+      });
+      const data: SpringPage<SaleAdminResponse> = response.data;
+      const salesList = data.content || [];
+      setSales(salesList);
+      setTotalPages(data.totalPages || 1);
+      setTotalElements(data.totalElements || 0);
 
-        // BẮT ĐẦU ĐẾM SÁCH: Chạy vòng lặp gọi API lấy số lượng sách của từng đợt sale vừa tải về
-        salesList.forEach(sale => {
-          fetchBookCountForSale(sale.id);
-        });
-
-      } else {
-        const errText = await response.text();
-        console.error("Lỗi tải danh sách Sale từ hệ thống:", errText);
-      }
-    } catch (error) {
-      console.error("Lỗi kết nối khi tải danh sách sales:", error);
+      salesList.forEach(sale => {
+        fetchBookCountForSale(sale.id);
+      });
+    } catch (error: any) {
+      console.error("Lỗi tải danh sách Sale từ hệ thống:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   }, [pageSize, fetchBookCountForSale]);
 
-  // 2. Lấy số liệu thống kê Widgets chân trang
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/stats`, { method: 'GET' });
-      if (response.ok) {
-        const data: SaleStatsResponse = await response.json();
-        setStats(data);
-      }
+      const response = await api.get(`/sales/admin/stats`);
+      setStats(response.data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu thống kê sale:", error);
     }
   }, []);
 
-  // 3. Tìm kiếm sách từ DB để hiển thị gợi ý trong Form
   const fetchBooksFromDB = useCallback(async (key: string) => {
     if (!key.trim()) {
       setDbBooks([]);
       return;
     }
     try {
-      const response = await fetch(`${API_BOOK_URL}?keyword=${encodeURIComponent(key)}&page=0&size=5`, {
-        method: 'GET'
+      const response = await api.get(`/books`, {
+        params: {
+          keyword: key,
+          page: 0,
+          size: 5
+        }
       });
-      if (response.ok) {
-        const data = await response.json();
-        setDbBooks(data.content || (Array.isArray(data) ? data : []));
-      }
+      const data = response.data;
+      setDbBooks(data.content || (Array.isArray(data) ? data : []));
     } catch (error) {
       console.error("Lỗi tải danh sách sách từ DB:", error);
     }
   }, []);
 
-  // Tự động tìm kiếm sách khi gõ từ khóa chọn sản phẩm (Debounce)
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       fetchBooksFromDB(bookSearchKey);
@@ -163,56 +148,48 @@ export default function SaleManagement(): React.JSX.Element {
     return () => clearTimeout(delayDebounce);
   }, [bookSearchKey, fetchBooksFromDB]);
 
-  // 4. Kích hoạt nút "Chọn tất cả sách trong DB" đưa vào form
   const handleSelectAllBooksInDB = async () => {
     setIsSelectAllLoading(true);
     try {
-      const response = await fetch(`${API_BOOK_URL}?page=0&size=9999`, { method: 'GET' });
-      if (response.ok) {
-        const data = await response.json();
-        const allBooks: BookResponse[] = data.content || (Array.isArray(data) ? data : []);
-        setSelectedBooks(allBooks);
-        alert(`Đã áp dụng chọn toàn bộ ${allBooks.length} cuốn sách trong hệ thống!`);
-      } else {
-        alert("Không thể tải toàn bộ danh mục sách.");
-      }
+      const response = await api.get(`/books`, {
+        params: {
+          page: 0,
+          size: 9999
+        }
+      });
+      const data = response.data;
+      const allBooks: BookResponse[] = data.content || (Array.isArray(data) ? data : []);
+      setSelectedBooks(allBooks);
+      alert(`Đã áp dụng chọn toàn bộ ${allBooks.length} cuốn sách trong hệ thống!`);
     } catch (error) {
       console.error("Lỗi khi kéo toàn bộ sách:", error);
-      alert("Lỗi đường truyền kết nối.");
+      alert("Lỗi đường truyền kết nối hoặc không có quyền truy cập.");
     } finally {
       setIsSelectAllLoading(false);
     }
   };
 
-  // 5. Xử lý xóa/hủy đợt sale
   const handleDeleteSale = async (id: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa chiến dịch Flash Sale này không? Hành động này không thể hoàn tác.")) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/delete/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        alert("Xóa chiến dịch ưu đãi thành công!");
-        refreshData();
-      } else {
-        const errText = await response.text();
-        alert(`Không thể xóa đợt sale: ${errText || "Lỗi hệ thống phía Server."}`);
-      }
-    } catch (error) {
+      await api.delete(`/sales/admin/delete/${id}`);
+      alert("Xóa chiến dịch ưu đãi thành công!");
+      refreshData();
+    } catch (error: any) {
       console.error("Lỗi kết nối khi xóa sale:", error);
+      alert(`Không thể xóa đợt sale: ${error.response?.data || "Lỗi hệ thống hoặc không có quyền."}`);
     }
   };
 
-  // 6. Mở Xem chi tiết (Detail Mode) - Gọi API /books để cập nhật danh sách và số lượng mới nhất
   const handleOpenDetailModal = async (sale: SaleAdminResponse) => {
     setSelectedSale(sale);
     setSelectedSaleBooks([]); // Reset tạm thời
     setModalType('detail');
-    
-    // Gọi API lấy sách trực tiếp để hiển thị số lượng chuẩn xác trên Modal
+
     const books = await fetchBookCountForSale(sale.id);
     setSelectedSaleBooks(books);
   };
 
-  // 7. Mở form chỉnh sửa (Edit Mode)
   const handleOpenEditModal = async (sale: SaleAdminResponse) => {
     resetForm();
     setEditingSaleId(sale.id);
@@ -227,7 +204,6 @@ export default function SaleManagement(): React.JSX.Element {
     setSelectedBooks(books);
   };
 
-  // 8. Xử lý Submit Form (Dùng chung cho cả Create và Update)
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle || !formStartDate || !formEndDate || formDiscount <= 0) {
@@ -252,27 +228,21 @@ export default function SaleManagement(): React.JSX.Element {
     };
 
     const isEdit = modalType === 'edit';
-    const url = isEdit ? `${API_BASE_URL}/admin/update/${editingSaleId}` : `${API_BASE_URL}/admin/create`;
-    const method = isEdit ? 'PUT' : 'POST';
 
     try {
-      const response = await fetch(url, { 
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyData)
-      });
-
-      if (response.ok) {
-        alert(isEdit ? "Cập nhật chương trình Flash Sale thành công!" : "Tạo chiến dịch Flash Sale mới thành công!");
-        setModalType(null);
-        resetForm();
-        refreshData(); 
+      if (isEdit) {
+        await api.put(`/sales/admin/update/${editingSaleId}`, bodyData);
       } else {
-        const errText = await response.text();
-        alert(`Thất bại: ${errText || "Vui lòng kiểm tra lại dữ liệu đầu vào."}`);
+        await api.post(`/sales/admin/create`, bodyData);
       }
-    } catch (error) {
+
+      alert(isEdit ? "Cập nhật chương trình Flash Sale thành công!" : "Tạo chiến dịch Flash Sale mới thành công!");
+      setModalType(null);
+      resetForm();
+      refreshData(); 
+    } catch (error: any) {
       console.error("Lỗi hệ thống khi gửi dữ liệu form:", error);
+      alert(`Thất bại: ${error.response?.data || "Vui lòng kiểm tra lại dữ liệu đầu vào hoặc quyền hạn."}`);
     }
   };
 
