@@ -16,6 +16,7 @@ public class ReaderHighlightResponse {
     private Long bookId;
     private String cfiRange;
     private String text;
+    private String note;
     private String color;
     private LocalDateTime createdAt;
 }

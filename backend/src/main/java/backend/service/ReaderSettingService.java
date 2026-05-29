@@ -6,11 +6,11 @@ import backend.entity.ReaderSetting;
 import backend.entity.User;
 import backend.enums.BackgroundColor;
 import backend.enums.FontFamily;
+import backend.enums.PageSpread;
 import backend.repository.ReaderSettingRepository;
 import backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +55,7 @@ public class ReaderSettingService {
             settings.setFontSize(request.getFontSize());
             settings.setLineHeight(request.getLineHeight());
             settings.setBackgroundColor(request.getBackgroundColor());
+            settings.setPageSpread(request.getPageSpread() != null ? request.getPageSpread() : PageSpread.NONE);
 
             return mapToResponse(readerSettingRepository.save(settings));
         } catch (Exception e) {
@@ -74,6 +75,7 @@ public class ReaderSettingService {
                 .fontSize(request.getFontSize())
                 .lineHeight(request.getLineHeight())
                 .backgroundColor(request.getBackgroundColor())
+                .pageSpread(request.getPageSpread() != null ? request.getPageSpread() : PageSpread.NONE)
                 .build();
         return mapToResponse(readerSettingRepository.save(fresh));
     }
@@ -87,6 +89,7 @@ public class ReaderSettingService {
                 .fontSize(18)
                 .lineHeight(1.8)
                 .backgroundColor(BackgroundColor.WHITE)
+                .pageSpread(PageSpread.NONE)
                 .build());
     }
 
@@ -96,6 +99,7 @@ public class ReaderSettingService {
                 .fontSize(entity.getFontSize())
                 .lineHeight(entity.getLineHeight())
                 .backgroundColor(entity.getBackgroundColor())
+                .pageSpread(entity.getPageSpread() != null ? entity.getPageSpread() : PageSpread.NONE)
                 .build();
     }
 }

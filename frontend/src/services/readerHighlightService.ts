@@ -1,5 +1,5 @@
 import api from "./api";
-import type { ReaderHighlightRequest, ReaderHighlightResponse } from "../types";
+import type { ReaderHighlightNoteRequest, ReaderHighlightRequest, ReaderHighlightResponse } from "../types";
 
 export const readerHighlightService = {
     async getHighlights(userId: number, bookId: number): Promise<ReaderHighlightResponse[]> {
@@ -9,6 +9,11 @@ export const readerHighlightService = {
 
     async createHighlight(request: ReaderHighlightRequest): Promise<ReaderHighlightResponse> {
         const res = await api.post<ReaderHighlightResponse>("/reader-highlights", request);
+        return res.data;
+    },
+
+    async updateNote(id: number, request: ReaderHighlightNoteRequest): Promise<ReaderHighlightResponse> {
+        const res = await api.patch<ReaderHighlightResponse>(`/reader-highlights/${id}/note`, request);
         return res.data;
     },
 

@@ -4,7 +4,7 @@ import { bookService } from "../services/bookService";
 import { getStoredUserId } from "../services/authService";
 import { readerSettingService } from "../services/readerSettingService";
 import { BG_COLORS, FONT_FAMILIES } from "../constants/readerConstants";
-import type { TocItem, BookResponse, FontFamilyId, BackgroundColorId } from "../types";
+import type { TocItem, BookResponse, FontFamilyId, BackgroundColorId, PageSpreadId } from "../types";
 
 export function useEpubReader(bookId: string | undefined, book: BookResponse | null) {
     const [location, setLocation] = useState<string | number>(0);
@@ -20,6 +20,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
     const [fontSize, setFontSize] = useState(18);
     const [lineHeight, setLineHeight] = useState(1.8);
     const [bgColor, setBgColor] = useState(BG_COLORS[0]);
+    const [pageSpread, setPageSpread] = useState<PageSpreadId>("NONE");
     const [isSavingSettings, setIsSavingSettings] = useState(false);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
@@ -29,6 +30,8 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
     const saveProgressInterval = useRef<NodeJS.Timeout | null>(null);
     const saveProgressDebounce = useRef<NodeJS.Timeout | null>(null);
     const locationsReadyRef = useRef(false);
+    const pageIndexByCfiRef = useRef(new Map<string, number>());
+    const totalPagesRef = useRef(0);
 
     const latestLocation = useRef<string | number>(location);
     const latestPercentage = useRef<number>(0);
@@ -48,6 +51,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
                         setFontFamilyId(settings.fontFamily);  
                         setFontSize(settings.fontSize);
                         setLineHeight(settings.lineHeight);
+                        setPageSpread(settings.pageSpread ?? "NONE");
                         const bg = BG_COLORS.find(c => c.id === settings.backgroundColor);
                         if (bg) setBgColor(bg);
                     }
@@ -58,6 +62,12 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
             setSettingsLoaded(true);
         }
     }, []);
+
+    useEffect(() => {
+        locationsReadyRef.current = false;
+        pageIndexByCfiRef.current = new Map();
+        totalPagesRef.current = 0;
+    }, [bookId]);
 
     useEffect(() => {
         const loadAccessAndProgress = async () => {
@@ -71,29 +81,21 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
                 const purchased = await bookService.checkPurchased(userId, Number(bookId));
                 setIsPurchased(purchased);
 
-                if (!purchased) {
+                const progressData = await bookService.getReadingProgress(userId, Number(bookId));
+                const savedLocation = progressData?.cfiLocation;
+                const savedPercent = Number(progressData?.progressPercentage ?? 0);
+
+                if (savedLocation && savedLocation !== "0") {
+                    setLocation(savedLocation);
+                    latestLocation.current = savedLocation;
+                } else {
                     setLocation(0);
-                    setProgressPercentage(0);
                     latestLocation.current = 0;
-                    latestPercentage.current = 0;
-                    initialLocationLoaded.current = true;
-                    setProgressLoaded(true);
-                    return;
                 }
 
-                const progressData = await bookService.getReadingProgress(userId, Number(bookId));
-                if (progressData) {
-                    if (progressData.cfiLocation) {
-                        setLocation(progressData.cfiLocation);
-                        latestLocation.current = progressData.cfiLocation;
-                        initialLocationLoaded.current = true;
-                    }
-                    if (progressData.progressPercentage != null) {
-                        const percent = Number(progressData.progressPercentage);
-                        setProgressPercentage(percent);
-                        latestPercentage.current = percent;
-                    }
-                }
+                setProgressPercentage(savedPercent);
+                latestPercentage.current = savedPercent;
+                initialLocationLoaded.current = true;
                 setProgressLoaded(true);
             } catch (err) {
                 console.error("Lỗi kiểm tra quyền đọc hoặc tải tiến độ:", err);
@@ -159,6 +161,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
                 fontSize,
                 lineHeight,
                 backgroundColor: bgColor.id as BackgroundColorId,
+                pageSpread,
             });
         } catch (err) {
             console.error("Lưu cài đặt thất bại:", err);
@@ -169,7 +172,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
 
  
     useEffect(() => {
-        if (!userId || !bookId || !isPurchased) return;
+        if (!userId || !bookId) return;
 
         const saveProgress = () => {
             if (!initialLocationLoaded.current) return;
@@ -189,7 +192,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
             if (saveProgressInterval.current) clearInterval(saveProgressInterval.current);
             window.removeEventListener('beforeunload', saveProgress);
         };
-    }, [userId, bookId, isPurchased]);
+    }, [userId, bookId]);
 
     const handleReadAgain = () => {
         sessionStorage.removeItem(paywallKey);
@@ -199,43 +202,61 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
 
     const ensureLocationsReady = useCallback(async (rend: Rendition): Promise<boolean> => {
         const bookLocations = (rend.book as any)?.locations;
-        if (!bookLocations || locationsReadyRef.current) return true;
+        if (!bookLocations) return false;
 
-        const hasLocations = typeof bookLocations.length === "function" && bookLocations.length() > 0;
-        if (hasLocations) {
-            locationsReadyRef.current = true;
-            return true;
+        const locationCount = typeof bookLocations.length === "function" ? bookLocations.length() : 0;
+        if (locationsReadyRef.current && locationCount > 0) return true;
+
+        if (typeof bookLocations.generate !== "function") {
+            locationsReadyRef.current = locationCount > 0;
+            return locationsReadyRef.current;
         }
 
-        if (typeof bookLocations.generate !== "function") return false;
-
         try {
-            await bookLocations.generate(1024);
-            locationsReadyRef.current = true;
-            return true;
+            if (locationCount === 0) {
+                await bookLocations.generate(150);
+            }
+            const generatedCount = typeof bookLocations.length === "function" ? bookLocations.length() : 0;
+            const generatedLocations = Array.isArray((bookLocations as any)._locations) ? (bookLocations as any)._locations : [];
+            pageIndexByCfiRef.current = new Map(generatedLocations.map((cfi: string, index: number) => [cfi, index]));
+            totalPagesRef.current = generatedLocations.length || generatedCount;
+            locationsReadyRef.current = totalPagesRef.current > 0;
+            return locationsReadyRef.current;
         } catch (err) {
             console.error("Không tạo được dữ liệu vị trí EPUB:", err);
             return false;
         }
     }, []);
 
+    const normalizePercent = useCallback((percent: number): number => {
+        return Math.min(Math.max(Math.round(percent * 10) / 10, 0), 100);
+    }, []);
+
     const calculatePositionPercent = useCallback((rend: Rendition, epubcfi: string): number => {
+        const totalPages = totalPagesRef.current;
+        if (totalPages > 1) {
+            const exactIndex = pageIndexByCfiRef.current.get(epubcfi);
+            if (exactIndex != null) {
+                return normalizePercent((exactIndex / (totalPages - 1)) * 100);
+            }
+        }
+
         const bookLocations = (rend.book as any)?.locations;
-        if (bookLocations && typeof bookLocations.percentageFromCfi === "function") {
-            const percent = bookLocations.percentageFromCfi(epubcfi);
-            if (Number.isFinite(percent)) {
-                return Math.min(Math.max(Math.round(percent * 1000) / 10, 0), 100);
+        if (bookLocations && typeof bookLocations.locationFromCfi === "function" && totalPages > 1) {
+            const pageIndex = bookLocations.locationFromCfi(epubcfi);
+            if (Number.isFinite(pageIndex)) {
+                return normalizePercent((pageIndex / (totalPages - 1)) * 100);
             }
         }
 
         return latestPercentage.current;
-    }, []);
+    }, [normalizePercent]);
 
     const updateProgressPercentage = useCallback((percent: number) => {
-        const safePercent = Math.min(Math.max(percent, 0), 100);
+        const safePercent = normalizePercent(percent);
         setProgressPercentage(safePercent);
         latestPercentage.current = safePercent;
-    }, []);
+    }, [normalizePercent]);
 
     const handleLocationChanged = useCallback((epubcfi: string) => {
         setLocation(epubcfi);
@@ -256,7 +277,7 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
                 }
             }
 
-            if (initialLocationLoaded.current && userId && bookId && isPurchased) {
+            if (initialLocationLoaded.current && userId && bookId) {
                 if (saveProgressDebounce.current) clearTimeout(saveProgressDebounce.current);
                 saveProgressDebounce.current = setTimeout(() => {
                     bookService.saveReadingProgress(userId, Number(bookId), epubcfi, percentValue)
@@ -286,6 +307,8 @@ export function useEpubReader(bookId: string | undefined, book: BookResponse | n
         setLineHeight,
         bgColor,
         setBgColor,
+        pageSpread,
+        setPageSpread,
         isSavingSettings,
         settingsLoaded,
         progressLoaded,

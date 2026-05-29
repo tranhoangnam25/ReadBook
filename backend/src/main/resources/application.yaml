@@ -10,11 +10,11 @@ jwt:
 
 gemini:
   api:
-    key: ${GEMINI_API_KEY}
+    key: ${GEMINI_API_KEY:}
 
 groq:
   api:
-    key: ${GROQ_API_KEY}
+    key: ${GROQ_API_KEY:}
 
 r2:
   endpoint: ${R2_ENDPOINT:http://localhost:9000}

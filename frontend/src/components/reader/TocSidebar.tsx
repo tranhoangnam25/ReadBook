@@ -48,12 +48,14 @@ const TocSidebar: React.FC<TocSidebarProps> = ({
 
     return (
         <>
-            <div className={`fixed inset-y-0 left-0 z-[60] w-[320px] shadow-2xl transform transition-transform duration-500 ease-in-out ${showTocSidebar ? "translate-x-0" : "-translate-x-full"}`}
+            <div className={`fixed inset-y-0 left-0 z-[60] w-[320px] shadow-2xl transform transition-transform duration-500 ease-in-out ${showTocSidebar ? "translate-x-0" : "-translate-x-full pointer-events-none"}`}
                  style={{ 
                      background: bgColor.value, 
                      color: bgColor.text,
                      borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` 
-                 }}>
+                 }}
+                 aria-hidden={!showTocSidebar}
+            >
                 <div className="h-14 px-6 flex justify-between items-center" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
                     <h2 className="font-bold text-[16px] tracking-tight opacity-90">Mục lục</h2>
                     <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center transition-colors">

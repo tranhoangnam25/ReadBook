@@ -33,6 +33,9 @@ public class ReaderHighlight {
     @Column(name = "text", columnDefinition = "NVARCHAR(MAX)")
     private String text;
 
+    @Column(name = "note", length = 1000)
+    private String note;
+
     @Column(name = "color", nullable = false, length = 30)
     @Builder.Default
     private String color = "#facc15";

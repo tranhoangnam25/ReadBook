@@ -2,6 +2,7 @@ package backend.dto.response;
 
 import backend.enums.BackgroundColor;
 import backend.enums.FontFamily;
+import backend.enums.PageSpread;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,4 +13,5 @@ public class ReaderSettingResponse {
     private Integer fontSize;
     private Double lineHeight;
     private BackgroundColor backgroundColor;
+    private PageSpread pageSpread;
 }

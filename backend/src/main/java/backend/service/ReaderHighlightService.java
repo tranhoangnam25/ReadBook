@@ -1,5 +1,6 @@
 package backend.service;
 
+import backend.dto.request.ReaderHighlightNoteRequest;
 import backend.dto.request.ReaderHighlightRequest;
 import backend.dto.response.ReaderHighlightResponse;
 import backend.entity.Book;
@@ -42,9 +43,18 @@ public class ReaderHighlightService {
                 .book(book)
                 .cfiRange(request.getCfiRange())
                 .text(request.getText())
+                .note(request.getNote())
                 .color(request.getColor() == null || request.getColor().isBlank() ? "#facc15" : request.getColor())
                 .build();
 
+        return mapToResponse(readerHighlightRepository.save(highlight));
+    }
+
+    @Transactional
+    public ReaderHighlightResponse updateNote(Long id, ReaderHighlightNoteRequest request) {
+        ReaderHighlight highlight = readerHighlightRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Highlight not found: " + id));
+        highlight.setNote(request.getNote());
         return mapToResponse(readerHighlightRepository.save(highlight));
     }
 
@@ -59,6 +69,7 @@ public class ReaderHighlightService {
                 .bookId(highlight.getBook().getId())
                 .cfiRange(highlight.getCfiRange())
                 .text(highlight.getText())
+                .note(highlight.getNote())
                 .color(highlight.getColor())
                 .createdAt(highlight.getCreatedAt())
                 .build();

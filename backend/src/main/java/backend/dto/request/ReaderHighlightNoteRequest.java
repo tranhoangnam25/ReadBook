@@ -9,11 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReaderHighlightRequest {
-    private Long userId;
-    private Long bookId;
-    private String cfiRange;
-    private String text;
+public class ReaderHighlightNoteRequest {
     private String note;
-    private String color;
 }

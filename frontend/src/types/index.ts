@@ -76,12 +76,14 @@ export interface TocItem {
 // Enum IDs matching Java backend BackgroundColor and FontFamily enums
 export type FontFamilyId = "DEFAULT" | "SERIF" | "SANS_SERIF" | "MONO" | "TIMES_NEW_ROMAN";
 export type BackgroundColorId = "WHITE" | "CREAM" | "LIGHT_BLUE" | "LIGHT_YELLOW" | "LIGHT_GRAY" | "DARK" | "BLACK";
+export type PageSpreadId = "NONE" | "AUTO";
 
 export interface ReaderSettingResponse {
     fontFamily: FontFamilyId;
     fontSize: number;
     lineHeight: number;
     backgroundColor: BackgroundColorId;
+    pageSpread: PageSpreadId;
 }
 
 export interface ReaderSettingRequest {
@@ -90,6 +92,7 @@ export interface ReaderSettingRequest {
     fontSize: number;
     lineHeight: number;
     backgroundColor: BackgroundColorId;
+    pageSpread: PageSpreadId;
 }
 
 export interface ReaderBookmarkResponse {
@@ -120,6 +123,7 @@ export interface ReaderHighlightResponse {
     bookId: number;
     cfiRange: string;
     text?: string;
+    note?: string;
     color: string;
     createdAt: string;
 }
@@ -129,7 +133,12 @@ export interface ReaderHighlightRequest {
     bookId: number;
     cfiRange: string;
     text?: string;
+    note?: string;
     color: string;
+}
+
+export interface ReaderHighlightNoteRequest {
+    note: string;
 }
 // types/api.ts
 export interface ApiResponse<T> {

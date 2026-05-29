@@ -8,6 +8,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 import backend.enums.BackgroundColor;
 import backend.enums.FontFamily;
+import backend.enums.PageSpread;
 
 @Entity
 @Table(name = "Reader_Setting")
@@ -39,6 +40,11 @@ public class ReaderSetting {
     @Enumerated(EnumType.STRING)
     @Column(name = "background_color", length = 20)
     private BackgroundColor backgroundColor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "page_spread", length = 20)
+    @Builder.Default
+    private PageSpread pageSpread = PageSpread.NONE;
 
     @Column(name = "updated_at")
     @Builder.Default

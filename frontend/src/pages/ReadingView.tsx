@@ -5,7 +5,7 @@ import type { Rendition } from "epubjs";
 import { bookService } from "../services/bookService";
 import { readerBookmarkService } from "../services/readerBookmarkService";
 import { readerHighlightService } from "../services/readerHighlightService";
-import type { BookResponse, ReaderBookmarkResponse, ReaderHighlightResponse } from "../types";
+import type { BookResponse, ReaderBookmarkResponse, ReaderHighlightResponse, PageSpreadId } from "../types";
 import { useEpubReader } from "../hooks/useEpubReader";
 import ReaderSettingsPanel from "../components/reader/ReaderSettingsPanel";
 import TocSidebar from "../components/reader/TocSidebar";
@@ -40,6 +40,8 @@ export default function ReadingView() {
         setLineHeight,
         bgColor,
         setBgColor,
+        pageSpread,
+        setPageSpread,
         isSavingSettings,
         settingsLoaded,
         progressLoaded,
@@ -59,13 +61,19 @@ export default function ReadingView() {
     const [pendingBookmarkLocation, setPendingBookmarkLocation] = useState<string | null>(null);
     const [bookmarkNoteDraft, setBookmarkNoteDraft] = useState("");
     const [highlights, setHighlights] = useState<ReaderHighlightResponse[]>([]);
+    const [highlightNotePopupMode, setHighlightNotePopupMode] = useState<"create" | "edit" | null>(null);
+    const [selectedHighlight, setSelectedHighlight] = useState<ReaderHighlightResponse | null>(null);
+    const [pendingHighlight, setPendingHighlight] = useState<{ cfiRange: string; text: string } | null>(null);
+    const [highlightNoteDraft, setHighlightNoteDraft] = useState("");
+    const [isSavingHighlight, setIsSavingHighlight] = useState(false);
     const [isHighlightMode, setIsHighlightMode] = useState(false);
     const [isFocusMode, setIsFocusMode] = useState(false);
 
     const highlightsRef = useRef<ReaderHighlightResponse[]>([]);
     const isHighlightModeRef = useRef(false);
-    const highlightEventsBoundRef = useRef(false);
+    const highlightEventsBoundRef = useRef<Rendition | null>(null);
     const reapplyHighlightsTimerRef = useRef<number | null>(null);
+    const lastDisplayedLocationRef = useRef<string | number | null>(null);
     const settingsPanelRef = useRef<HTMLDivElement>(null);
     const settingsBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -177,6 +185,42 @@ export default function ReadingView() {
         }, 120);
     }, [applyHighlight]);
 
+    const applyPageSpread = useCallback((spread: PageSpreadId) => {
+        const rend = renditionRef.current as any;
+        if (!rend) return;
+        try {
+            rend.spread?.(spread === "AUTO" ? "auto" : "none");
+            if (rend.manager && typeof rend.manager.resize === "function") {
+                rend.manager.resize();
+            } else if (typeof rend.resize === "function") {
+                rend.resize();
+            }
+            scheduleReapplyHighlights();
+        } catch (err) {
+            console.error("Không đổi được chế độ trang:", err);
+        }
+    }, [renditionRef, scheduleReapplyHighlights]);
+
+    const handlePageSpreadChange = (spread: PageSpreadId) => {
+        setPageSpread(spread);
+        applyPageSpread(spread);
+    };
+
+    useEffect(() => {
+        applyPageSpread(pageSpread);
+    }, [pageSpread, applyPageSpread]);
+
+    useEffect(() => {
+        if (!progressLoaded || !location || lastDisplayedLocationRef.current === location) return;
+        const rend = renditionRef.current as any;
+        if (!rend || typeof rend.display !== "function") return;
+
+        lastDisplayedLocationRef.current = location;
+        rend.display(location).then(scheduleReapplyHighlights).catch((err: unknown) => {
+            console.error("Không mở được trang đang đọc dở:", err);
+        });
+    }, [progressLoaded, location, renditionRef, scheduleReapplyHighlights]);
+
     useEffect(() => {
         highlights.forEach(applyHighlight);
     }, [highlights, applyHighlight]);
@@ -212,20 +256,54 @@ export default function ReadingView() {
         setShowHighlights(false);
     };
 
+    const closeHighlightNotePopup = () => {
+        setHighlightNotePopupMode(null);
+        setSelectedHighlight(null);
+        setPendingHighlight(null);
+        setHighlightNoteDraft("");
+    };
+
     const handleAddHighlight = useCallback(async (cfiRange: string, text: string) => {
         if (!userId || !book?.id || !cfiRange) return;
         if (highlightsRef.current.some((highlight) => highlight.cfiRange === cfiRange)) return;
 
-        const highlight = await readerHighlightService.createHighlight({
-            userId,
-            bookId: book.id,
-            cfiRange,
-            text: text.trim(),
-            color: "#facc15",
-        });
-        setHighlights((current) => [highlight, ...current]);
-        applyHighlight(highlight);
-    }, [userId, book?.id, applyHighlight]);
+        setPendingHighlight({ cfiRange, text: text.trim() });
+        setHighlightNoteDraft("");
+        setHighlightNotePopupMode("create");
+    }, [userId, book?.id]);
+
+    const handleStartEditHighlightNote = (highlight: ReaderHighlightResponse) => {
+        setSelectedHighlight(highlight);
+        setHighlightNoteDraft(highlight.note || "");
+        setHighlightNotePopupMode("edit");
+    };
+
+    const handleSaveHighlightNote = async () => {
+        if (!highlightNotePopupMode) return;
+        setIsSavingHighlight(true);
+        try {
+            if (highlightNotePopupMode === "create") {
+                if (!userId || !book?.id || !pendingHighlight) return;
+                const highlight = await readerHighlightService.createHighlight({
+                    userId,
+                    bookId: book.id,
+                    cfiRange: pendingHighlight.cfiRange,
+                    text: pendingHighlight.text,
+                    note: highlightNoteDraft.trim(),
+                    color: "#facc15",
+                });
+                setHighlights((current) => [highlight, ...current]);
+                applyHighlight(highlight);
+                setShowHighlights(true);
+            } else if (selectedHighlight) {
+                const updated = await readerHighlightService.updateNote(selectedHighlight.id, { note: highlightNoteDraft.trim() });
+                setHighlights((current) => current.map((highlight) => highlight.id === selectedHighlight.id ? updated : highlight));
+            }
+            closeHighlightNotePopup();
+        } finally {
+            setIsSavingHighlight(false);
+        }
+    };
 
     const handleDeleteHighlight = async (highlight: ReaderHighlightResponse) => {
         await readerHighlightService.deleteHighlight(highlight.id);
@@ -348,7 +426,7 @@ export default function ReadingView() {
                                 <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{isSavingBookmark ? "progress_activity" : "bookmark_add"}</span>
                             </button>
                             <button
-                                onClick={() => { setShowBookmarks(true); setShowTocSidebar(false); setShowPanel(false); }}
+                                onClick={() => { setShowBookmarks(true); setShowHighlights(false); setShowTocSidebar(false); setShowPanel(false); }}
                                 className={`w-9 h-9 rounded-full transition-colors flex items-center justify-center ${showBookmarks ? "bg-accent/10 text-accent" : "hover:bg-black/5 dark:hover:bg-white/10"}`}
                                 title="Danh sách bookmark"
                             >
@@ -402,12 +480,14 @@ export default function ReadingView() {
                 fontSize={fontSize}
                 lineHeight={lineHeight}
                 bgColor={bgColor}
+                pageSpread={pageSpread}
                 fontFamilies={FONT_FAMILIES}
                 bgColors={BG_COLORS}
                 onFontFamilyChange={(id) => { setFontFamilyId(id as any); }}
                 onFontSizeChange={(val) => { setFontSize(val); injectEpubStyles(fontFamilyCss, val, lineHeight, bgColor); }}
                 onLineHeightChange={(val) => { setLineHeight(val); injectEpubStyles(fontFamilyCss, fontSize, val, bgColor); }}
                 onBgColorChange={(val) => { setBgColor(val); injectEpubStyles(fontFamilyCss, fontSize, lineHeight, val); }}
+                onPageSpreadChange={handlePageSpreadChange}
                 onSaveSettings={handleSaveSettings}
                 isSaving={isSavingSettings}
             />
@@ -536,14 +616,64 @@ export default function ReadingView() {
                                         {new Date(highlight.createdAt).toLocaleString("vi-VN")}
                                     </div>
                                 </button>
-                                <button
-                                    onClick={() => handleDeleteHighlight(highlight)}
-                                    className="mt-2 text-xs opacity-0 group-hover:opacity-70 hover:opacity-100 text-red-500 transition-opacity"
-                                >
-                                    Xóa highlight
-                                </button>
+                                {highlight.note && <div className="mt-2 rounded-lg bg-yellow-400/10 p-2 text-sm opacity-85">{highlight.note}</div>}
+                                <div className="mt-2 flex gap-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleStartEditHighlightNote(highlight)} className="text-accent">{highlight.note ? "Sửa note" : "Thêm note"}</button>
+                                    <button onClick={() => handleDeleteHighlight(highlight)} className="text-red-500">Xóa highlight</button>
+                                </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {highlightNotePopupMode && (
+                <div className="fixed inset-0 z-80 flex items-center justify-center bg-black/45 px-4" onClick={closeHighlightNotePopup}>
+                    <div
+                        className="w-full max-w-md rounded-2xl p-5 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: isDark ? "#1a1a2e" : "#ffffff",
+                            color: bgColor.text,
+                            border: `1px solid ${isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`,
+                        }}
+                    >
+                        <div className="mb-4 flex items-center justify-between">
+                            <div className="font-bold text-lg">{highlightNotePopupMode === "create" ? "Thêm highlight" : "Sửa note highlight"}</div>
+                            <button onClick={closeHighlightNotePopup} className="w-9 h-9 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center">
+                                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+                            </button>
+                        </div>
+                        {pendingHighlight?.text && (
+                            <div className="mb-4 rounded-xl bg-yellow-400/15 p-3 text-sm line-clamp-4">
+                                {pendingHighlight.text}
+                            </div>
+                        )}
+                        {selectedHighlight?.text && highlightNotePopupMode === "edit" && (
+                            <div className="mb-4 rounded-xl bg-yellow-400/15 p-3 text-sm line-clamp-4">
+                                {selectedHighlight.text}
+                            </div>
+                        )}
+                        <label className="mb-2 block text-sm font-semibold opacity-80">Note</label>
+                        <textarea
+                            value={highlightNoteDraft}
+                            onChange={(e) => setHighlightNoteDraft(e.target.value)}
+                            className="w-full min-h-32 rounded-xl border border-black/10 bg-transparent p-3 text-sm outline-none focus:border-accent dark:border-white/10"
+                            placeholder="Nhập note cho highlight..."
+                            maxLength={1000}
+                            autoFocus
+                        />
+                        <div className="mt-2 text-right text-xs opacity-50">{highlightNoteDraft.length}/1000</div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button onClick={closeHighlightNotePopup} className="rounded-lg px-4 py-2 text-sm font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10">Hủy</button>
+                            <button
+                                onClick={handleSaveHighlightNote}
+                                disabled={isSavingHighlight}
+                                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                            >
+                                {isSavingHighlight ? "Đang lưu..." : "Lưu"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -560,12 +690,16 @@ export default function ReadingView() {
                     readerStyles={getReaderStyles(bgColor)}
                     getRendition={(rend: Rendition) => {
                         renditionRef.current = rend;
-                        highlightEventsBoundRef.current = false;
                         injectEpubStyles(fontFamilyCss, fontSize, lineHeight, bgColor);
+                        applyPageSpread(pageSpread);
+                        if (progressLoaded && location && lastDisplayedLocationRef.current !== location) {
+                            lastDisplayedLocationRef.current = location;
+                            (rend as any).display?.(location).catch((err: unknown) => console.error("Không mở được trang đang đọc dở:", err));
+                        }
                         scheduleReapplyHighlights();
 
-                        if (!highlightEventsBoundRef.current) {
-                            highlightEventsBoundRef.current = true;
+                        if (highlightEventsBoundRef.current !== rend) {
+                            highlightEventsBoundRef.current = rend;
                             (rend as any).on("rendered", scheduleReapplyHighlights);
                             (rend as any).on("relocated", scheduleReapplyHighlights);
                             (rend as any).on("selected", (cfiRange: string, contents: any) => {

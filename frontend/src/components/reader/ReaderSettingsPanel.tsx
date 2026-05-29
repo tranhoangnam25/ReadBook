@@ -20,12 +20,14 @@ interface ReaderSettingsPanelProps {
     fontSize: number;
     lineHeight: number;
     bgColor: BgColor;
+    pageSpread: "NONE" | "AUTO";
     fontFamilies: FontOption[];
     bgColors: BgColor[];
     onFontFamilyChange: (id: string) => void;
     onFontSizeChange: (value: number) => void;
     onLineHeightChange: (value: number) => void;
     onBgColorChange: (color: BgColor) => void;
+    onPageSpreadChange: (value: "NONE" | "AUTO") => void;
     onSaveSettings: () => void;
     isSaving: boolean;
 }
@@ -38,12 +40,14 @@ const ReaderSettingsPanel = React.forwardRef((props: ReaderSettingsPanelProps, r
         fontSize,
         lineHeight,
         bgColor,
+        pageSpread,
         fontFamilies,
         bgColors,
         onFontFamilyChange,
         onFontSizeChange,
         onLineHeightChange,
         onBgColorChange,
+        onPageSpreadChange,
         onSaveSettings,
         isSaving,
     } = props;
@@ -153,6 +157,32 @@ const ReaderSettingsPanel = React.forwardRef((props: ReaderSettingsPanelProps, r
                             )}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            <div className="mb-5">
+                <div style={labelStyle}>Chế độ trang</div>
+                <div className="grid grid-cols-2 gap-2">
+                    <button
+                        onClick={() => onPageSpreadChange("NONE")}
+                        className="rounded-xl px-3 py-2 text-sm font-semibold transition-colors"
+                        style={{
+                            background: pageSpread === "NONE" ? (isDark ? "#fff" : "#000") : (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"),
+                            color: pageSpread === "NONE" ? (isDark ? "#000" : "#fff") : (isDark ? "#ddd" : "#333"),
+                        }}
+                    >
+                        1 trang
+                    </button>
+                    <button
+                        onClick={() => onPageSpreadChange("AUTO")}
+                        className="rounded-xl px-3 py-2 text-sm font-semibold transition-colors"
+                        style={{
+                            background: pageSpread === "AUTO" ? (isDark ? "#fff" : "#000") : (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"),
+                            color: pageSpread === "AUTO" ? (isDark ? "#000" : "#fff") : (isDark ? "#ddd" : "#333"),
+                        }}
+                    >
+                        2 trang
+                    </button>
                 </div>
             </div>
 
