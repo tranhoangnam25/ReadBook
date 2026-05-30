@@ -3,6 +3,19 @@ import { useNavigate } from "react-router-dom";
 import type { User, Reading, HistoryItem, BookResponse } from "../types";
 import api from "../services/api";
 
+const StarRating = ({ rating }: { rating: number }) => {
+    const stars = Math.round(rating || 0);
+    return (
+        <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+                <span key={s} className={s <= stars ? "text-yellow-400" : "text-gray-300"}>
+                    ★
+                </span>
+            ))}
+            <span className="ml-1 text-xs text-gray-400">({rating.toFixed(1)})</span>
+        </div>
+    );
+};
 export default function HomePageUser() {
   const [user, setUser] = useState<User | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
@@ -150,15 +163,22 @@ useEffect(() => {
   };
 
   const fetchHistory = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
-      const res = await api.get("/users/me/history", { params: { userId } });
-      setHistory(res.data || []);
-    } catch (err) {
-      console.error("fetchHistory:", err);
-    }
-  };
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token"); // Kiểm tra lại key lưu token
+
+  if (!userId || !token) return;
+
+  try {
+    const res = await api.get(`/users/me/reading-history?userId=${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}` // Đảm bảo gửi token
+      }
+    });
+    setHistory(res.data || []);
+  } catch (err) {
+    console.error("Lỗi lấy lịch sử đọc:", err);
+  }
+};
 
   const fetchRecommend = async () => {
   try {
@@ -275,57 +295,40 @@ useEffect(() => {
       <div className="grid grid-cols-12 gap-10">
         {/* Left Column: Reading & History */}
         <div className="col-span-12 lg:col-span-5 space-y-8">
-          {/* Current Reading */}
-          {reading ? (
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-              <div>
-                <img 
-                  src={reading.coverImage || reading.coverUrl || "https://via.placeholder.com/200x300?text=No+Cover"} 
-                  alt={reading.title} 
-                  className="rounded-xl mb-4 w-full h-80 object-cover shadow-sm" 
-                />
-                <h2 className="text-xl font-bold text-gray-900 line-clamp-1">{reading.title}</h2>
-                <p className="text-gray-500 mb-4 text-sm">{reading.author}</p>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-2">
-                  <span>{reading.progress}% Completed</span>
-                  <span>{reading.currentPage} / {reading.totalPages} trang</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full mb-2 overflow-hidden">
-                  <div className="bg-[#e78f8f] h-2 rounded-full transition-all duration-300" style={{ width: `${reading.progress}%` }} />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white p-12 rounded-2xl shadow-sm border border-dashed border-gray-300 text-gray-400 italic text-center">
-              📖 Bạn chưa có cuốn sách nào đang đọc dở.
-            </div>
-          )}
+          
 
-          {/* Reading History */}
-          <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-            <h3 className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-widest">Reading History</h3>
-            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-              {history.length > 0 ? (
-                history.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-gray-200 transition-colors">
-                    <img 
-                      src={item.coverImage || "https://via.placeholder.com/50x70?text=Book"} 
-                      alt={item.title} 
-                      className="rounded w-12 h-16 object-cover bg-gray-100 shadow-sm" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
-                      <p className="text-xs text-gray-400 mt-1">🕒 Hoàn thành: {item.finishedAt}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-400 italic text-center py-4">Chưa có lịch sử đọc gần đây</p>
-              )}
-            </div>
+          {/* Reading History Section */}
+<div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+  <h3 className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-widest">
+    Reading History
+  </h3>
+  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+    {history.length > 0 ? (
+      history.map((item: any, i: number) => (
+        <div 
+          key={i} 
+          onClick={() => navigate(`/reading/${item.id}`)} 
+          className="flex items-center gap-4 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-[#e78f8f] transition-all cursor-pointer hover:shadow-md"
+        >
+          <img 
+            src={item.coverUrl || "https://via.placeholder.com/50x70"} 
+            alt={item.title} 
+            className="rounded w-12 h-16 object-cover bg-gray-100" 
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
+            {/* Sử dụng optional chaining (?.) để tránh crash nếu dữ liệu null */}
+            <p className="text-xs text-gray-400 mt-1">
+              Tiến độ: {item.progressPercentage ? `${item.progressPercentage}%` : "0%"}
+            </p>
           </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-sm text-gray-400 italic text-center py-4">Chưa có lịch sử đọc</p>
+    )}
+  </div>
+</div>
         </div>
 
         {/* Right Column: Recommendations */}
@@ -333,9 +336,44 @@ useEffect(() => {
           <h2 className="text-2xl font-bold mb-6 tracking-tight">
             Recommended <span className="text-[#e78f8f]">For You</span>
           </h2>
+          {/* Right Column: Recommendations */}
+<div className="col-span-12 lg:col-span-7">
+  <div className="flex justify-between items-center mb-6">
+    
+    {/* Nút View All */}
+    <button 
+      onClick={() => navigate("/shop")}
+      className="text-sm font-semibold text-[#e78f8f] hover:underline"
+    >
+      View All &rarr;
+    </button>
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    {books.length > 0 ? (
+      // Dùng .slice(0, 4) để chỉ lấy 4 cuốn đầu tiên
+      books.slice(0, 4).map((book) => (
+        <div
+          key={book.id}
+          className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
+          onClick={() => navigate(`/book-detail/${book.id}`)}
+        >
+          {/* ... giữ nguyên phần hiển thị card sách như cũ ... */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100">
+             {/* Nội dung card (Image, Title, Price...) của bạn */}
+          </div>
+        </div>
+      ))
+    ) : (
+      <p className="col-span-full text-center text-gray-400 py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+        Không tìm thấy sách gợi ý phù hợp.
+      </p>
+    )}
+  </div>
+</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {books.length > 0 ? (
-              books.map((book) => (
+              books.slice(0, 4).map((book) => (
                 <div
   key={book.id}
   className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
@@ -369,6 +407,9 @@ useEffect(() => {
       <p className="text-xs text-gray-500 mt-1">
         {book.authorName}
       </p>
+      <div className="mt-1">
+        <StarRating rating={book.averageRating || 0} />
+      </div>
 
       <div className="mt-3">
 
@@ -400,6 +441,7 @@ useEffect(() => {
     </div>
   </div>
 </div>
+
               ))
             ) : (
               <p className="col-span-full text-center text-gray-400 py-16 bg-white rounded-2xl border border-dashed border-gray-200">
@@ -411,4 +453,6 @@ useEffect(() => {
       </div>
     </main>
   );
+
+  
 }

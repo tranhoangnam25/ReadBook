@@ -6,7 +6,7 @@ import backend.dto.response.BookResponse;
 import backend.entity.Author;
 import backend.entity.Book;
 import backend.entity.Category;
-import backend.repository.AuthorRepository;
+import backend.repository.*;
 import backend.repository.BookRepository;
 import backend.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<BookResponse> getBestRating(int limit) {
@@ -129,8 +130,10 @@ public class BookService {
     }
 
     private BookResponse mapToResponse(Book b) {
-        double avg = 0.0;
-
+        Double avg = reviewRepository.getAverageRatingByBookId(b.getId());
+    
+    // Nếu avg là null (chưa có ai đánh giá), gán bằng 0.0
+        double finalAvg = (avg != null) ? avg : 0.0;
         return BookResponse.builder()
                 .id(b.getId())
                 .title(b.getTitle())

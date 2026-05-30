@@ -1,18 +1,81 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react"; // Thêm hook
+import { useNavigate } from "react-router-dom"; // Thêm hook
 import { bookService } from "../services/bookService";
+import api from "../services/api"; // Giả sử bạn import api ở đây
 import type { BookResponse } from "../types";
 import BookCard from "../components/common/BookCard";
 
 export default function HomePage() {
-    const {
-        data: bestSellers,
-        isLoading: loadingBestSellers
-    } = useQuery({
+   const navigate = useNavigate();
+    
+    // 1. State quản lý Flash Sale
+    const [hasActiveSale, setHasActiveSale] = useState(false);
+    const [countdown, setCountdown] = useState({ hours: "00", minutes: "00", seconds: "00" });
+    const [saleEndTime, setSaleEndTime] = useState<Date | null>(null);
+
+    const { data: bestSellers, isLoading: loadingBestSellers } = useQuery({
         queryKey: ["bestsellers"],
         queryFn: () => bookService.getBestSellers(4),
     });
+
+    // 2. Hàm kiểm tra trạng thái
+    const checkFlashSaleStatus = async () => {
+        try {
+            const res = await api.get("/sales/admin");
+            const salesList = res.data.content || [];
+            const activeSale = salesList.find((s: any) => s.status === "active");
+            if (activeSale) {
+                setHasActiveSale(true);
+                setSaleEndTime(new Date(activeSale.endDate));
+            }
+        } catch (err) { console.error("Lỗi lấy Flash Sale:", err); }
+    };
+
+    useEffect(() => {
+        checkFlashSaleStatus();
+    }, []);
+
+    // 3. Logic đếm ngược
+    useEffect(() => {
+        if (!hasActiveSale || !saleEndTime) return;
+        const timer = setInterval(() => {
+            const distance = saleEndTime.getTime() - new Date().getTime();
+            if (distance <= 0) {
+                clearInterval(timer);
+                setHasActiveSale(false);
+                return;
+            }
+            setCountdown({
+                hours: String(Math.floor(distance / 3600000)).padStart(2, "0"),
+                minutes: String(Math.floor((distance % 3600000) / 60000)).padStart(2, "0"),
+                seconds: String(Math.floor((distance % 60000) / 1000)).padStart(2, "0")
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [hasActiveSale, saleEndTime]);
     return (
         <main className="mx-auto w-full max-w-7xl px-6 lg:px-20">
+            {/* Flash Sale Banner - Hiển thị khi hasActiveSale là true */}
+{hasActiveSale && (
+    <div 
+        onClick={() => navigate("/sale")} 
+        className="mt-8 bg-gradient-to-r from-[#FF5722] to-[#EE4D2D] rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-center text-white cursor-pointer shadow-lg hover:shadow-xl transition-all"
+    >
+        <div className="flex items-center gap-4">
+            <span className="text-2xl font-black italic text-yellow-300 animate-pulse">⚡ FLASH SALE</span>
+            <div className="flex items-center gap-1.5 text-xs font-bold bg-black/20 px-3 py-1.5 rounded-full">
+                <span className="hidden md:inline text-white/90">KẾT THÚC TRONG</span>
+                <span className="bg-black px-2 py-0.5 rounded font-mono text-sm shadow">{countdown.hours}</span>:
+                <span className="bg-black px-2 py-0.5 rounded font-mono text-sm shadow">{countdown.minutes}</span>:
+                <span className="bg-black px-2 py-0.5 rounded font-mono text-sm shadow">{countdown.seconds}</span>
+            </div>
+        </div>
+        <div className="text-sm font-medium mt-3 sm:mt-0 flex items-center gap-2">
+            Vào xem ngay <span className="text-lg">&rarr;</span>
+        </div>
+    </div>
+)}
             <section className="py-16 lg:py-24">
                 <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                     <div className="flex flex-col gap-8">

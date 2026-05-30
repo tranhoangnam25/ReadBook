@@ -90,4 +90,7 @@ SELECT new backend.dto.response.ReviewStatsResponse(
 FROM Review r
 """)
 ReviewStatsResponse getReviewStats();
+
+@Query("SELECT AVG(r.rating) FROM Review r WHERE r.book.id = :bookId AND r.status = backend.enums.StatusReview.VISIBLE")
+Double getAverageRatingByBookId(@Param("bookId") Long bookId);
 }

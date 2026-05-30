@@ -2,11 +2,26 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import type { BookResponse } from "../types";
+
+const StarRating = ({ rating }: { rating: number }) => {
+    const stars = Math.round(rating || 0);
+    return (
+        <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+                <span key={s} className={s <= stars ? "text-yellow-400" : "text-gray-300"}>
+                    ★
+                </span>
+            ))}
+            <span className="ml-1 text-xs text-gray-400">({rating.toFixed(1)})</span>
+        </div>
+    );
+};
 export default function ShopPage() {
     type FlashSaleBook = BookResponse & {
     discountPercentage?: number;
     salePrice?: number;
 };
+
 
 const [books, setBooks] = useState<FlashSaleBook[]>([]);
     const [keyword, setKeyword] = useState("");
@@ -88,6 +103,8 @@ const [saleEndTime, setSaleEndTime] = useState<Date | null>(null);
         const data = res.data;
 
         const bookList: BookResponse[] = data.content || [];
+
+
 
 const extendedBooks: FlashSaleBook[] = await Promise.all(
     bookList.map(async (book) => {
@@ -340,6 +357,10 @@ useEffect(() => {
             <p className="text-xs text-gray-500 mt-1">
                 {b.authorName}
             </p>
+    {/* Thêm phần hiển thị đánh giá tại đây */}
+    <div className="mt-1">
+        <StarRating rating={b.averageRating || 0} />
+    </div>
 
             <div className="mt-3">
 
