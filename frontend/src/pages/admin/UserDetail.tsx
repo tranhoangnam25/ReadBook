@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/common/Sidebar.tsx";
-import Navbar from "../../components/layout/Navbar.tsx";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
 
@@ -116,41 +115,38 @@ const handleUpdateRole = async () => {
   const isActive = user.status === "ACTIVE";
 
   return (
-    <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-slate-100">
-      {/* Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar
-          onOpenRegister={() => {}}
-          onOpenLogin={() => {}}
-          isLoggedIn={true}
-        />
-      </div>
+    <div className="flex min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-slate-100">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main */}
-      <main className="ml-64 pt-20 min-h-screen">
+      <main className="flex-1 ml-64">
         {/* Topbar */}
-        <header className="sticky top-20 z-40 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-500">Người dùng</span>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-            <span className="font-semibold">Chi tiết người dùng</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-
-          </div>
-        </header>
-
-        {/* Content */}
         <div className="p-8 space-y-6">
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
+                <span>Người dùng</span>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <span className="font-bold text-slate-900 dark:text-white">Chi tiết người dùng</span>
+            </div>
+
           {/* Profile Header */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col lg:flex-row justify-between gap-6">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 rounded-full bg-[#1121d4]/10 flex items-center justify-center text-3xl font-bold text-[#1121d4]">
-                {user.username.charAt(0)}
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-50 shadow-md bg-[#1121d4]/10 flex items-center justify-center">
+                {user.avatarUrl ? (
+                    <img 
+                        src={user.avatarUrl} 
+                        alt="avatar" 
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <img 
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                        alt="avatar" 
+                        className="w-full h-full object-cover"
+                    />
+                )}
               </div>
 
               <div>

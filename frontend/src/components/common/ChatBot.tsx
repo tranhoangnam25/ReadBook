@@ -8,6 +8,8 @@ interface Book {
   title: string;
   author?: string;
   price?: number;
+  salePrice?: number;
+  discountPercentage?: number;
   previewPercentage?: number | null;
   description?: string;
   coverImage: string;
@@ -65,7 +67,7 @@ export default function ChatBot() {
         ...prev,
         {
           sender: "bot",
-          text: "Có lỗi xảy ra khi kết nối server.",
+          text: "Xin lỗi, hiện tại tôi không thể xử lý yêu cầu. Vui lòng thử lại sau.",
         },
       ]);
     }
@@ -145,7 +147,7 @@ export default function ChatBot() {
                       BP
                     </div>
 
-                    <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-sm max-w-[85%] text-sm text-zinc-800 shadow leading-relaxed">
+                    <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-sm max-w-[85%] text-sm text-zinc-800 shadow leading-relaxed whitespace-pre-wrap">
                       {msg.text}
                     </div>
                   </div>
@@ -159,8 +161,15 @@ export default function ChatBot() {
                           onClick={() =>
                             navigate(`/book-detail/${book.id}`)
                           }
-                          className="min-w-[190px] bg-white rounded-xl p-3 shadow border border-zinc-100 hover:border-pink-300 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                          className="min-w-[190px] max-w-[190px] bg-white rounded-xl p-3 shadow border border-zinc-100 hover:border-pink-300 transition-all duration-300 cursor-pointer hover:-translate-y-1 relative"
                         >
+                          {/* SALE TAG */}
+                          {book.discountPercentage && book.discountPercentage > 0 && (
+                            <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm animate-pulse">
+                              -{book.discountPercentage}%
+                            </div>
+                          )}
+
                           {/* IMAGE */}
                           <div className="aspect-[2/3] rounded-lg overflow-hidden mb-3 bg-zinc-100">
                             <img
@@ -176,15 +185,28 @@ export default function ChatBot() {
                           </p>
 
                           {/* PRICE */}
-                          {book.price && (
-                            <p className="text-pink-500 font-semibold text-sm mt-1">
-                              {book.price.toLocaleString("vi-VN")}đ
-                            </p>
-                          )}
+                          <div className="mt-1">
+                            {book.discountPercentage && book.discountPercentage > 0 ? (
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-zinc-400 line-through">
+                                        {(book.price || 0).toLocaleString("vi-VN")}đ
+                                    </span>
+                                    <span className="text-red-500 font-bold text-sm leading-tight">
+                                        {(book.salePrice || 0).toLocaleString("vi-VN")}đ
+                                    </span>
+                                </div>
+                            ) : (
+                                book.price && (
+                                    <p className="text-pink-500 font-semibold text-sm">
+                                      {book.price.toLocaleString("vi-VN")}đ
+                                    </p>
+                                  )
+                            )}
+                          </div>
 
                           {/* DESCRIPTION */}
                           {book.description && (
-                            <p className="text-xs text-zinc-500 mt-2 line-clamp-3 leading-relaxed">
+                            <p className="text-[10px] text-zinc-500 mt-2 line-clamp-2 leading-tight">
                               {book.description}
                             </p>
                           )}

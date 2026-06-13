@@ -103,10 +103,11 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                                         {user.username || 'Reader'}
                                     </span>
 
-                                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                                    <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/10">
                                         <img
-                                            src={user.avatarUrl || "https://picsum.photos/100"}
+                                            src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                                             className="w-full h-full object-cover"
+                                            alt="avatar"
                                         />
                                     </div>
                                 </button>

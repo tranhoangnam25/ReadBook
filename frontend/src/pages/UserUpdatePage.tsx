@@ -1,22 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, updateProfile } from '../services/authService';
+import { uploadFileToR2 } from '../services/uploadService';
 
 const ProfilePage: React.FC = () => {
     const navigate = useNavigate();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    
     const [formData, setFormData] = useState({
         username: '',
         phone: '',
-        email: ''
+        email: '',
+        avatarUrl: ''
     });
 
     const [loading, setLoading] = useState(false); 
     const [fetching, setFetching] = useState(true); 
+    const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState({ content: '', type: '' });
 
-    
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -24,7 +26,8 @@ const ProfilePage: React.FC = () => {
                 setFormData({
                     username: user.username || '',
                     phone: user.phone || '',
-                    email: user.email || ''
+                    email: user.email || '',
+                    avatarUrl: user.avatarUrl || ''
                 });
             } catch (err: any) {
                 console.error(err);
@@ -36,23 +39,45 @@ const ProfilePage: React.FC = () => {
         loadData();
     }, []);
 
-    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         if (message.content) setMessage({ content: '', type: '' });
     };
 
-    
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        setMessage({ content: '', type: '' });
+
+        try {
+            const response = await uploadFileToR2(file, 'avatar');
+            setFormData(prev => ({ ...prev, avatarUrl: response.url }));
+            setMessage({ content: 'Tải ảnh lên thành công!', type: 'success' });
+        } catch (err: any) {
+            console.error(err);
+            setMessage({ content: 'Lỗi khi tải ảnh lên!', type: 'error' });
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage({ content: '', type: '' });
 
         try {
-            
             await updateProfile(formData);
             setMessage({ content: 'Cập nhật hồ sơ thành công! 🎉', type: 'success' });
-            setTimeout(() => navigate('/profile'), 2000);
+            setTimeout(() => {
+                window.location.reload(); 
+            }, 1500);
         } catch (err: any) {
             const errorMsg = err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
             setMessage({ content: errorMsg, type: 'error' });
@@ -75,13 +100,28 @@ const ProfilePage: React.FC = () => {
 
                 {}
                 <div className="bg-[#2c3e50] p-8 text-center">
-                    <div className="relative inline-block">
+                    <div className="relative inline-block group cursor-pointer" onClick={handleAvatarClick}>
                         <img
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sunset"
+                            src={formData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.username}`}
                             alt="avatar"
-                            className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-sm"
+                            className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-sm object-cover"
                         />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="material-symbols-outlined text-white">photo_camera</span>
+                        </div>
+                        {uploading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
+                                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        )}
                     </div>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
                     <h2 className="text-white text-2xl font-bold mt-4">{formData.username}</h2>
                     <p className="text-gray-300 text-sm">Thành viên của Sunset Books</p>
                 </div>
@@ -150,7 +190,7 @@ const ProfilePage: React.FC = () => {
                     {}
                     <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                         <button
-                            onClick={() => navigate('/users/me/change-password')}
+                            onClick={() => navigate('/change-password')}
                             className="text-[#b57a7a] font-semibold text-sm hover:text-[#945d5d] transition-colors"
                         >
                             Bạn muốn thay đổi mật khẩu?

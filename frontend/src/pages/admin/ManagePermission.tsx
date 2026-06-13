@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import Navbar from "../../components/layout/Navbar";
 import Sidebar from "../../components/common/Sidebar";
 import api from "../../services/api";
 
@@ -91,50 +90,40 @@ const handleDeletePermission = async (name: string) => {
   }, [permissions, search]);
 
   return (
-    <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white font-sans">
-      {/* Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar
-          onOpenLogin={() => {}}
-          onOpenRegister={() => {}}
-          isLoggedIn={true}
-        />
-      </div>
+    <div className="flex min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white font-sans">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main */}
-      <main className="ml-64 pt-24 min-h-screen">
-        {/* Header */}
-        <header className="sticky top-20 z-40 h-20 px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="flex items-center gap-6">
-            <button
-              type="button"
-              onClick={() => window.history.back()}
-              className="flex items-center gap-2 text-[#1121d4] hover:gap-3 transition-all duration-200">
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
-
-            <div>
-              <div>
-                <h1 className="text-2xl font-bold">Danh sách quyền hạn</h1>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => setOpenModal(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#1121d4] text-white"
-          >
-            <div className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Thêm quyền mới
-            </div>
-          </button>
-        </header>
-
+      <main className="flex-1 ml-64">
         <div className="p-8 space-y-8">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                    <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    className="flex items-center gap-2 text-[#1121d4] hover:gap-3 transition-all duration-200">
+                    <ArrowLeft className="w-4 h-4" />
+                    </button>
+                    <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
+
+                    <div>
+                    <h1 className="text-3xl font-black tracking-tight text-slate-900">Danh sách quyền hạn</h1>
+                    <p className="text-slate-500">Quản lý các quyền truy cập trong hệ thống</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => setOpenModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-[#1121d4] text-white font-bold shadow-lg hover:shadow-xl transition-all active:scale-95"
+                >
+                    <div className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Thêm quyền mới
+                    </div>
+                </button>
+            </div>
+
           {/* Search */}
           <div className="flex flex-col lg:flex-row justify-between gap-4">
             <div className="relative w-full max-w-md">

@@ -44,7 +44,15 @@ public class FileUploadService {
         }
 
         String safeName = sanitizeFileName(stripExtension(originalFileName));
-        String key = String.format("books/%s/%s/%s-%s%s", normalizedType, LocalDate.now(), UUID.randomUUID(), safeName,
+        
+        String folderPrefix;
+        if ("avatar".equals(normalizedType)) {
+            folderPrefix = "users/avatars";
+        } else {
+            folderPrefix = "books/" + normalizedType;
+        }
+
+        String key = String.format("%s/%s/%s-%s%s", folderPrefix, LocalDate.now(), UUID.randomUUID(), safeName,
                 extension);
 
         PutObjectRequest request = PutObjectRequest.builder()
@@ -66,9 +74,9 @@ public class FileUploadService {
     }
 
     private void validateFile(String type, String contentType, String extension) {
-        if ("cover".equals(type)) {
+        if ("cover".equals(type) || "avatar".equals(type)) {
             if (!ALLOWED_IMAGE_TYPES.contains(contentType)) {
-                throw new IllegalArgumentException("Ảnh bìa chỉ hỗ trợ JPG, PNG, WEBP hoặc GIF.");
+                throw new IllegalArgumentException("Ảnh chỉ hỗ trợ JPG, PNG, WEBP hoặc GIF.");
             }
             return;
         }

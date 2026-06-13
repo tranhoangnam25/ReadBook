@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, Bell, Settings, MessageSquare, Eye, EyeOff, ChevronLeft, ChevronRight, Star, X, CheckCircle 
+  Search, MessageSquare, Eye, EyeOff, ChevronLeft, ChevronRight, Star, X, CheckCircle 
 } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar'; 
 import api from '../../services/api';
@@ -151,29 +151,11 @@ export default function ReviewManagement(): React.JSX.Element {
       <Sidebar />
 
       <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-100 sticky top-0 z-10 px-8 flex items-center justify-between">
-          <div className="relative w-96">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-slate-200 text-slate-700 placeholder-slate-400" 
-              placeholder="Tìm nhanh đánh giá..." 
-              type="text"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl"><Bell className="w-5 h-5" /></button>
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl"><Settings className="w-5 h-5" /></button>
-          </div>
-        </header>
-
         {/* Nội dung Workspace chính */}
         <main className="flex-1 p-8 flex flex-col gap-6">
           
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Quản lý Đánh giá & Phản hồi</h1>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">Quản lý Đánh giá & Phản hồi</h1>
             <p className="text-sm text-slate-400 mt-0.5">Kiểm duyệt các bình luận, chấm điểm của độc giả và tương tác phản hồi trực tiếp.</p>
           </div>
 

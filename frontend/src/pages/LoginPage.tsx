@@ -1,7 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
-import { login } from '../services/authService';
+import React, { useState, useEffect } from 'react';
+import { login, socialLogin } from '../services/authService';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
+import FacebookLogin from '@greatsumini/react-facebook-login';
 
 interface LoginProps {
     onClose: () => void;
@@ -16,7 +18,7 @@ interface LoginUser {
     roles?: string | Array<{ name?: string } | string>;
 }
 
-const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSuccess }) => {
+const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister, onLoginSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -29,6 +31,48 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleSuccessAction = (response: any) => {
+        if (response && response.token) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
+
+            if (response.user.id) {
+                localStorage.setItem('userId', response.user.id.toString());
+            }
+
+            const roles = (response.user as LoginUser).roles || [];
+            const isAdmin = Array.isArray(roles)
+                ? roles.some((role) => (typeof role === 'string' ? role : role.name) !== 'USR')
+                : roles !== 'USR';
+
+            if (isAdmin) {
+                navigate("/admin");
+            } else {
+                navigate("/");
+            }
+            alert("Đăng nhập thành công");
+            onLoginSuccess();
+            onClose();
+        }
+    }
+
+    const handleSocialLogin = async (provider: string, token: string) => {
+        setLoading(true);
+        setError('');
+        try {
+            const response = await socialLogin({ provider, token });
+            handleSuccessAction(response);
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || `Đăng nhập ${provider} thất bại`);
+            } else {
+                setError("Đã xảy ra lỗi không xác định");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
@@ -39,40 +83,7 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                 email: formData.email,
                 password: formData.password
             });
-            console.log(response);
-            if (response) {
-                
-                if (response.token) {
-                    localStorage.setItem('token', response.token);
-                }
-
-                if (response.user) {
-                    localStorage.setItem('user', JSON.stringify(response.user));
-
-                    if (response.user.id) {
-                        localStorage.setItem('userId', response.user.id.toString());
-                    }
-
-                    const roles = (response.user as LoginUser).roles || [];
-                    const isAdmin = Array.isArray(roles)
-                        ? roles.some((role) => (typeof role === 'string' ? role : role.name) !== 'USR')
-                        : roles !== 'USR';
-
-                    if (isAdmin) {
-                        navigate("/admin");
-                    } else{
-                        navigate("/");
-                    }
-
-
-                }
-            }
-
-            alert("Đăng nhập thành công");
-
-            onLoginSuccess();
-            onClose();
-
+            handleSuccessAction(response);
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Email hoặc mật khẩu khong chính xác");
@@ -93,7 +104,6 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
     }, [onClose]);
 
     return (
-        
         <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
             onClick={onClose}
@@ -113,7 +123,6 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                             </button>
 
                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
-                                {}
                                 <span className="material-symbols-outlined">lock</span>
                             </div>
                             <h2 className="text-2xl font-bold text-primary dark:text-slate-100">Welcome Back!</h2>
@@ -155,6 +164,57 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
                             </button>
                         </form>
 
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-slate-200 dark:border-zinc-700"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white dark:bg-zinc-900 text-slate-500">Hoặc đăng nhập bằng</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-6 space-y-3 flex flex-col items-center">
+                                <GoogleLogin
+                                    onSuccess={credentialResponse => {
+                                        if (credentialResponse.credential) {
+                                            handleSocialLogin('GOOGLE', credentialResponse.credential);
+                                        }
+                                    }}
+                                    onError={() => {
+                                        setError("Đăng nhập Google thất bại");
+                                    }}
+                                    useOneTap
+                                />
+                                
+                                <div className="w-full overflow-hidden rounded shadow-sm">
+                                    <FacebookLogin
+                                        appId={import.meta.env.VITE_FACEBOOK_APP_ID || '1332988295675760'}
+                                        onSuccess={(response) => {
+                                            handleSocialLogin('FACEBOOK', response.accessToken);
+                                        }}
+                                        onFail={() => {
+                                            setError("Đăng nhập Facebook thất bại");
+                                        }}
+                                        scope="public_profile,email"
+                                        style={{
+                                            backgroundColor: '#1877f2',
+                                            color: 'white',
+                                            fontSize: '14px',
+                                            padding: '10px 24px',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontWeight: 'bold',
+                                            width: '100%',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Đăng nhập với Facebook
+                                    </FacebookLogin>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="mt-6 text-center border-t border-slate-100 dark:border-zinc-800 pt-4">
                             <p className="text-sm text-slate-500 dark:text-slate-400">
                                 Don't have an account?{' '}
@@ -176,5 +236,4 @@ const LoginPage: React.FC<LoginProps> = ({ onClose, onOpenRegister,onLoginSucces
     );
 };
 
-export default LoginPage; 
-
+export default LoginPage;

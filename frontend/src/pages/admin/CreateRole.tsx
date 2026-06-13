@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Navbar from "../../components/layout/Navbar";
 import Sidebar from "../../components/common/Sidebar";
 
 import api from "../../services/api";
@@ -122,54 +121,45 @@ export default function CreateRole() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white">
-      {/* Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar
-          onOpenLogin={() => {}}
-          onOpenRegister={() => {}}
-          isLoggedIn={true}
-        />
-      </div>
+    <div className="flex min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main */}
-      <main className="ml-64 pt-24 min-h-screen">
+      <main className="flex-1 ml-64">
         {/* Header */}
-        <header className="sticky top-20 z-40 h-16 px-8 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-[#1121d4] hover:gap-3 transition-all"
-            >
-              <ArrowLeft className="w-4 h-4" />
+        <div className="p-8 space-y-8">
+            <div className="flex items-center gap-5">
+                <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-[#1121d4] hover:gap-3 transition-all"
+                >
+                <ArrowLeft className="w-4 h-4" />
 
-              <span className="text-sm font-medium">
+                <span className="text-sm font-bold">
+                    Quay lại
+                </span>
+                </button>
 
-              </span>
-            </button>
+                <div className="w-px h-6 bg-slate-300 dark:bg-slate-700" />
 
-            <div className="w-px h-6 bg-slate-300 dark:bg-slate-700" />
+                <div>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                    Thêm vai trò mới
+                </h1>
 
-            <div>
-              <h1 className="text-2xl font-bold">
-                Thêm vai trò mới
-              </h1>
-
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Tạo vai trò và gán quyền truy cập
-              </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Tạo vai trò và gán quyền truy cập
+                </p>
+                </div>
             </div>
-          </div>
-        </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-8 space-y-8"
-        >
+            <form
+            onSubmit={handleSubmit}
+            className="space-y-8"
+            >
           {/* Basic info */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm p-8">
             <div className="flex items-center gap-3 mb-8">
@@ -364,7 +354,8 @@ export default function CreateRole() {
             </p>
           </div>
         </form>
-      </main>
-    </div>
-  );
-}
+        </div>
+        </main>
+        </div>
+        );
+        }
