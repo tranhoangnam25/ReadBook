@@ -44,7 +44,7 @@ const ChangePasswordPage: React.FC = () => {
                 password: data.password
             });
 
-            setStatus({ message: 'Đổi mật khẩu thành công! 🎉', type: 'success' });
+            setStatus({ message: 'Đổi mật khẩu thành công!', type: 'success' });
             setData({ currentPassword: '', password: '', confirmPassword: '' });
 
             setTimeout(() => navigate('/profile'), 1000);

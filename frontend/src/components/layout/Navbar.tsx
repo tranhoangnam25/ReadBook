@@ -55,13 +55,12 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                     </div>
 
 
-                    {user.roles?.some((r: any) => r.name === "USR") && (
+                    
                     <nav className="hidden md:flex items-center gap-8">
                         <a onClick={() => navigate("/")} className="text-sm font-medium hover:text-accent cursor-pointer">Explore</a>
                         <a onClick={() => navigate("/library")} className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>
                         <a onClick={() => navigate("/shop")} className="text-sm font-medium hover:text-accent cursor-pointer">Shop</a>
                     </nav>
-                    )}
                 </div>
 
                 {}

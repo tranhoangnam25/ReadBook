@@ -51,7 +51,7 @@ export default function Sidebar() {
 
         {hasPermission('MANAGE_SALES') && (
         <NavLink to="/admin/sale-manager" className={navClass}>
-          <span className="material-symbols-outlined">star</span>
+          <span className="material-symbols-outlined">Bolt</span>
           FlashSale
         </NavLink>
         )}

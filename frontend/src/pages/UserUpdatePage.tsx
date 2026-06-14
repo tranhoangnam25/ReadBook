@@ -74,7 +74,7 @@ const ProfilePage: React.FC = () => {
 
         try {
             await updateProfile(formData);
-            setMessage({ content: 'Cập nhật hồ sơ thành công! 🎉', type: 'success' });
+            setMessage({ content: 'Cập nhật hồ sơ thành công!', type: 'success' });
             setTimeout(() => {
                 window.location.reload(); 
             }, 1500);
