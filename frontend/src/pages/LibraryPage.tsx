@@ -13,6 +13,7 @@ interface LibraryResponse {
   coverImage: string;
   status: 'reading' | 'completed' | 'to_read';
   progress: number;
+  owned: boolean;
 }
 
 interface Collection {
@@ -140,7 +141,16 @@ const LibraryPage: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
 
-                {}
+                {/* Ownership Badge */}
+                {!book.owned && (
+                  <div className="absolute top-3 left-3">
+                    <span className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm border border-white/20">
+                      BẠN CHƯA SỞ HỮU
+                    </span>
+                  </div>
+                )}
+
+                {/* Status Badge */}
                 <div className="absolute top-3 right-3">
                   <span className={`flex items-center gap-1 px-2 py-1 text-xs rounded text-white ${
                     book.status === 'reading'

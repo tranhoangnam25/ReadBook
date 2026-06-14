@@ -18,5 +18,6 @@ public class LibraryResponse {
     private String coverImage;
     private String status;        
     private Integer progress;  
-    private String fiLocation;  
+    private String fiLocation;
+    private boolean owned;
 }

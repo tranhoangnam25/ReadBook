@@ -16,10 +16,20 @@ public class ReadingProgressService {
     @Autowired
     private ReadingProgressRepository readingProgressRepository;
 
+    @Autowired
+    private backend.repository.OrderRepository orderRepository;
+
     public List<LibraryResponse> getLibrary(Long userId){
         List<ReadingProgress> list = readingProgressRepository.findAllByUserIdWithBook(userId);
 
-        return list.stream().map(rp -> LibraryResponse.builder()
+        return list.stream().map(rp -> {
+            boolean isOwned = orderRepository.existsByUser_IdAndBook_IdAndStatus(
+                    userId, 
+                    rp.getBook().getId(), 
+                    backend.enums.StatusOrder.PAID
+            );
+
+            return LibraryResponse.builder()
                 .progressId(rp.getId())
                 .bookId(rp.getBook().getId())
                 .title(rp.getBook().getTitle())
@@ -32,8 +42,9 @@ public class ReadingProgressService {
                                 : 0
                 )
                 .fiLocation(rp.getFiLocation())
-                .build()
-        ).collect(Collectors.toList());
+                .owned(isOwned)
+                .build();
+        }).collect(Collectors.toList());
     }
 
     public List<ReadingResponse> getHistory(Long userId) {
