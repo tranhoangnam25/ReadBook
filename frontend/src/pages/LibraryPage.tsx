@@ -143,7 +143,7 @@ const LibraryPage: React.FC = () => {
 
                 {/* Ownership Badge */}
                 {!book.owned && (
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute bottom-4 left-3 z-10">
                     <span className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm border border-white/20">
                       BẠN CHƯA SỞ HỮU
                     </span>
