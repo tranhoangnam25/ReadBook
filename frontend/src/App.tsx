@@ -95,42 +95,43 @@ function App() {
               index
               element={isLoggedIn ? <HomePageUser /> : <HomePage />}
             />
-            <Route path="/collection/:id" element={<CollectionPage />} />
-            <Route path="/update" element={<UserUpdatePage />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-            <Route path="/book-detail/:id" element={<BookDetail />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/hompage2" element={<HomePage2 />} />
-            <Route path="/payment/:orderId/:bookId" element={<PaymentPage />} />
-            <Route path="/book-detail/all-comments/:id" element={<AllComments />} />
-            <Route path="/library" element={<LibraryPage />} />
-            <Route path="/sale" element={<SalePage />} />
+            <Route path="collection/:id" element={<CollectionPage />} />
+            <Route path="update" element={<UserUpdatePage />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="book-detail/:id" element={<BookDetail />} />
+            <Route path="shop" element={<ShopPage />} />
+            <Route path="hompage2" element={<HomePage2 />} />
+            <Route path="payment/:orderId/:bookId" element={<PaymentPage />} />
+            <Route path="book-detail/all-comments/:id" element={<AllComments />} />
+            <Route path="library" element={<LibraryPage />} />
+            <Route path="sale" element={<SalePage />} />
 
+            {/* Admin Routes inside Layout */}
+            <Route path="admin" element={<DashBoard />} />
+
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_ORDER']} />}>
+              <Route path="admin/orders" element={<OrderManagement />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_BOOK']} />}>
+              <Route path="admin/books" element={<BookInventory />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_REVIEW']} />}>
+              <Route path="admin/reviews" element={<ReviewManager />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={['ADM']} />}>
+              <Route path="admin/users" element={<ManageUser />} />
+              <Route path="admin/users/:id" element={<UserDetail />} />
+              <Route path="admin/roles" element={<ManageRole />} />
+              <Route path="admin/permissions" element={<ManagePermission />} />
+              <Route path="admin/create-role" element={<CreateRole />} />
+              <Route path="admin/update-role/:id" element={<UpdateRole />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_SALES']} />}>
+              <Route path="admin/sale-manager" element={<SaleManager />} />
+            </Route>
           </Route>
 
-          <Route path="/admin" element={<DashBoard />} />
-
-          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_ORDER']} />}>
-            <Route path="/admin/orders" element={<OrderManagement />} />
-          </Route>
-
-          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_BOOK']} />}>
-            <Route path="/admin/books" element={<BookInventory />} />
-          </Route>
-          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_REVIEW']} />}>
-            <Route path="/admin/reviews" element={<ReviewManager />} />
-          </Route>
-          <Route element={<ProtectedRoute allowedRoles={['ADM']} />}>
-            <Route path="/admin/users" element={<ManageUser />} />
-            <Route path="/admin/users/:id" element={<UserDetail />} />
-            <Route path="/admin/roles" element={<ManageRole />} />
-            <Route path="/admin/permissions" element={<ManagePermission />} />
-            <Route path="/admin/create-role" element={<CreateRole />} />
-            <Route path="/admin/update-role/:id" element={<UpdateRole />} />
-          </Route>
-          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_SALES']} />}>
-            <Route path="/admin/sale-manager" element={<SaleManager />} />
-          </Route>
           <Route path="/reading/:bookId" element={<ReadingView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
