@@ -165,6 +165,10 @@ public class UserService {
             user.setEmail(request.getEmail());
         }
 
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
+
         return userRepository.save(user);
     }
 

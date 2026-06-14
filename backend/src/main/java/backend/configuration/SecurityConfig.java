@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 "/api/reader-highlights/**",
                                 "/api/users/me/reading/progress",
                                 "/api/sales/**",
+                                "/api/users/me/reading-history?{userId}",
                                 "/api/chat"
                         ).permitAll()
                         .anyRequest().authenticated()

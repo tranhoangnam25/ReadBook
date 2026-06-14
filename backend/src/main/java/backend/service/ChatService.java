@@ -4,12 +4,16 @@ import backend.dto.response.BookResponse;
 import backend.dto.response.ChatResponse;
 import backend.entity.Book;
 import backend.entity.ChatCache;
+import backend.entity.Sale;
 import backend.repository.BookRepository;
 import backend.repository.ChatCacheRepository;
+import backend.repository.SaleRepository;
 import backend.utils.VectorUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +26,7 @@ public class ChatService {
     private final GeminiService geminiService;
     private final BookRepository bookRepository;
     private final ChatCacheRepository chatCacheRepository;
+    private final SaleRepository saleRepository;
 
     public ChatResponse chat(String userMessage){
         try{
@@ -37,12 +42,12 @@ public class ChatService {
                         double score = VectorUtils.cosineSimilarity(userVector, VectorUtils.fromBytes(c.getEmbedding()));
                         return new Object[]{c, score};
                     })
-                    .filter(obj -> (double)obj[1] > 0.90)
+                    .filter(obj -> (double)obj[1] > 0.95) // Tăng độ chính xác cache để ưu tiên dữ liệu mới
                     .map(obj -> (ChatCache)obj[0])
                     .findFirst();
 
             if (cachedResult.isPresent()) {
-                System.out.println("--- SEMANTIC CACHE HIT! ---");
+                System.out.println("--- [DEBUG] SEMANTIC CACHE HIT! ---");
                 ChatCache cache = cachedResult.get();
                 List<BookResponse> books = List.of();
                 
@@ -50,10 +55,16 @@ public class ChatService {
                     List<Long> ids = Arrays.stream(cache.getBookIds().split(","))
                             .map(Long::parseLong).toList();
                     books = bookRepository.findAllById(ids).stream()
-                            .map(b -> BookResponse.builder()
-                                    .id(b.getId()).title(b.getTitle()).price(b.getPrice())
-                                    .coverImage(b.getCoverImage()).description(b.getDescription())
-                                    .build()).toList();
+                            .map(b -> {
+                                Integer discount = saleRepository.findCurrentDiscountByBookId(b.getId(), LocalDateTime.now()).orElse(0);
+                                BigDecimal salePrice = b.getPrice().multiply(BigDecimal.valueOf(100 - discount)).divide(BigDecimal.valueOf(100));
+                                return BookResponse.builder()
+                                        .id(b.getId()).title(b.getTitle()).price(b.getPrice())
+                                        .coverImage(b.getCoverImage()).description(b.getDescription())
+                                        .discountPercentage(discount)
+                                        .salePrice(salePrice)
+                                        .build();
+                            }).toList();
                 }
 
                 return ChatResponse.builder()
@@ -85,22 +96,52 @@ public class ChatService {
 
             List<Book> recommendedBooks = scoredBooks.stream().map(bs -> bs.book).toList();
 
+            // Lấy thông tin các đợt giảm giá đang diễn ra
+            List<Sale> activeSales = saleRepository.findAllActiveSales(LocalDateTime.now());
+            System.out.println("--- [DEBUG] Found " + activeSales.size() + " active sales ---");
+
+            StringBuilder saleInfo = new StringBuilder();
+            if (!activeSales.isEmpty()) {
+                saleInfo.append("THÔNG TIN KHUYẾN MÃI HIỆN TẠI (HÃY ƯU TIÊN GIỚI THIỆU):\n");
+                for (Sale s : activeSales) {
+                    saleInfo.append(String.format("- Chiến dịch: %s, Giảm giá: %d%%, Ngày kết thúc: %s\n", 
+                            s.getTitle(), s.getDiscountPercentage(), s.getEndDate().toString()));
+                }
+                saleInfo.append("\n");
+            } else {
+                saleInfo.append("Hiện tại không có chương trình giảm giá lớn nào.\n\n");
+            }
+
             StringBuilder prompt = new StringBuilder();
+            prompt.append(saleInfo);
+
             if (!recommendedBooks.isEmpty()) {
                 prompt.append("Dưới đây là danh sách các cuốn sách phù hợp nhất với yêu cầu của người dùng.\n");
-                prompt.append("Hãy phân tích giá cả và mô tả để đưa ra lời khuyên chính xác. Nếu người dùng hỏi về giá, hãy ưu tiên so sánh giá giữa các cuốn sách này.\n\n");
+                prompt.append("HÃY PHÂN TÍCH GIÁ CẢ THẬT KỸ: Nếu sách có khuyến mãi, hãy giới thiệu cả giá gốc và giá sau giảm để thu hút khách hàng. So sánh ưu đãi giữa các sách nếu cần.\n\n");
 
                 for(Book b : recommendedBooks){
-                    prompt.append(String.format("ID: %d\nTên: %s\nGiá: %,.0f VNĐ\nMô tả: %s\n\n",
-                            b.getId(), b.getTitle(), b.getPrice(), b.getDescription()));
+                    Integer discount = saleRepository.findCurrentDiscountByBookId(b.getId(), LocalDateTime.now()).orElse(0);
+                    double originalPrice = b.getPrice().doubleValue();
+                    double finalPrice = originalPrice * (100 - discount) / 100.0;
+                    
+                    if (discount > 0) {
+                        prompt.append(String.format("ID: %d\nTên: %s\nGiá gốc: %,.0f VNĐ\nƯU ĐÃI: GIẢM %d%%\nGiá hiện tại: %,.0f VNĐ\nMô tả: %s\n\n",
+                                b.getId(), b.getTitle(), originalPrice, discount, finalPrice, b.getDescription()));
+                    } else {
+                        prompt.append(String.format("ID: %d\nTên: %s\nGiá: %,.0f VNĐ\nMô tả: %s\n\n",
+                                b.getId(), b.getTitle(), originalPrice, b.getDescription()));
+                    }
                 }
             } else {
-                prompt.append("Người dùng đang hỏi về hệ thống hoặc tìm kiếm sách nhưng không có kết quả phù hợp trong kho dữ liệu.\n");
-                prompt.append("Nếu người dùng hỏi về cách sử dụng hệ thống (đăng ký, đăng nhập, đổi mật khẩu, v.v.), hãy sử dụng kiến thức trong system prompt để hướng dẫn.\n");
-                prompt.append("Nếu người dùng hỏi về sách, hãy lịch sự thông báo hiện tại không có sách phù hợp và gợi ý họ tìm kiếm theo chủ đề khác.\n\n");
+                prompt.append("Người dùng đang hỏi về hệ thống hoặc tìm kiếm sách nhưng không có kết quả phù hợp.\n");
+                prompt.append("Nếu người dùng hỏi về khuyến mãi, hãy dựa vào danh sách khuyến mãi ở trên để trả lời.\n\n");
             }
             
-            prompt.append("Câu hỏi của người dùng: " + userMessage);
+            prompt.append("CÂU HỎI NGƯỜI DÙNG: " + userMessage + "\n\n");
+            prompt.append("HƯỚNG DẪN TRẢ LỜI: Hãy trả lời thân thiện, nhiệt tình. Nếu có khuyến mãi, hãy nhắc đến nó như một tin vui cho người dùng.");
+
+            System.out.println("--- [DEBUG] FINAL PROMPT TO AI ---\n" + prompt.toString());
+            System.out.println("-----------------------------------");
 
             String aiMessage = geminiService.askGemini(prompt.toString());
 
@@ -120,13 +161,19 @@ public class ChatService {
             return ChatResponse.builder()
                     .message(aiMessage)
                     .books(recommendedBooks.stream()
-                            .map(b -> BookResponse.builder()
-                                    .id(b.getId())
-                                    .title(b.getTitle())
-                                    .price(b.getPrice())
-                                    .coverImage(b.getCoverImage())
-                                    .description(b.getDescription())
-                                    .build())
+                            .map(b -> {
+                                Integer discount = saleRepository.findCurrentDiscountByBookId(b.getId(), LocalDateTime.now()).orElse(0);
+                                BigDecimal salePrice = b.getPrice().multiply(BigDecimal.valueOf(100 - discount)).divide(BigDecimal.valueOf(100));
+                                return BookResponse.builder()
+                                        .id(b.getId())
+                                        .title(b.getTitle())
+                                        .price(b.getPrice())
+                                        .salePrice(salePrice)
+                                        .discountPercentage(discount)
+                                        .coverImage(b.getCoverImage())
+                                        .description(b.getDescription())
+                                        .build();
+                            })
                             .toList())
                     .build();
 

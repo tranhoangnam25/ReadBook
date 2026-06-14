@@ -55,13 +55,12 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                     </div>
 
 
-                    {user.roles?.some((r: any) => r.name === "USR") && (
+                    
                     <nav className="hidden md:flex items-center gap-8">
                         <a onClick={() => navigate("/")} className="text-sm font-medium hover:text-accent cursor-pointer">Explore</a>
                         <a onClick={() => navigate("/library")} className="text-sm font-medium hover:text-accent cursor-pointer">My Library</a>
                         <a onClick={() => navigate("/shop")} className="text-sm font-medium hover:text-accent cursor-pointer">Shop</a>
                     </nav>
-                    )}
                 </div>
 
                 {}
@@ -103,10 +102,11 @@ export default function Navbar({ onOpenRegister, onOpenLogin, isLoggedIn }: Navb
                                         {user.username || 'Reader'}
                                     </span>
 
-                                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                                    <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/10">
                                         <img
-                                            src={user.avatarUrl || "https://picsum.photos/100"}
+                                            src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                                             className="w-full h-full object-cover"
+                                            alt="avatar"
                                         />
                                     </div>
                                 </button>

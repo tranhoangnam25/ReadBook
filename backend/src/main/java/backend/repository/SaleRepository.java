@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 
@@ -38,4 +39,6 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     @Query(value = "INSERT INTO Sale_Books (sale_id, book_id) VALUES (:saleId, :bookId)", nativeQuery = true)
     void insertBookLink(@Param("saleId") Long saleId, @Param("bookId") Long bookId);
 
+    @Query("SELECT s FROM Sale s WHERE s.status = 'active' AND :now BETWEEN s.startDate AND s.endDate")
+    List<Sale> findAllActiveSales(@Param("now") LocalDateTime now);
 }

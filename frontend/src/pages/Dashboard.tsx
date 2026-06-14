@@ -66,30 +66,6 @@ export default function Dashboard() {
       <main className="flex-1 ml-64">
         {hasRole('ADM') ? (
           <>
-            {/* Header */}
-            <header className="h-16 border-b border-slate-200 bg-white sticky top-0 z-10 px-8 flex items-center justify-between">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="relative w-96">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                    search
-                  </span>
-                  <input
-                    className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder="Tìm kiếm sách, người dùng hoặc đơn hàng..."
-                    type="text"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-                  <span className="material-symbols-outlined">notifications</span>
-                </button>
-                <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-                  <span className="material-symbols-outlined">settings</span>
-                </button>
-              </div>
-            </header>
-
             {/* Content */}
             <div className="p-8 max-w-7xl mx-auto space-y-8">
               {/* Welcome */}

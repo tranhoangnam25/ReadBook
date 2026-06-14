@@ -26,4 +26,6 @@ public class BookResponse {
     private String authorName;
     private String category;
     private Double averageRating;
+    private Integer discountPercentage;
+    private BigDecimal salePrice;
 }

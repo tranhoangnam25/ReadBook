@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../components/common/Sidebar";
-import Navbar from "../../components/layout/Navbar";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +27,7 @@ interface User {
   email: string;
   phone: string;
   status: string;
+  avatarUrl: string;
   createdAt: string;
   updatedAt: string;
   roles: Role[];
@@ -112,40 +112,24 @@ const filteredBaseUsers = useMemo(() => {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white">
-
-      {/* Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar
-          onOpenRegister={() => {}}
-          onOpenLogin={() => {}}
-          isLoggedIn={true}
-        />
-      </div>
+    <div className="flex min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main */}
-      <main className="ml-64 pt-24">
-
-        {/* Header */}
-        <header className="sticky top-20 z-40 h-16 px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
-
-          <div>
-            <h1 className="text-2xl font-bold">
-              Quản lý người dùng
-            </h1>
-
-            <p className="text-sm text-slate-500 mt-1">
-              Quản lý tài khoản và trạng thái người dùng
-            </p>
-          </div>
-
-
-        </header>
+      <main className="flex-1 ml-64">
 
         <div className="p-8 space-y-8">
+          {/* Header Info */}
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">
+              Quản lý người dùng
+            </h1>
+            <p className="text-slate-500">
+              Quản lý tài khoản và trạng thái người dùng trong hệ thống
+            </p>
+          </div>
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -263,8 +247,20 @@ const filteredBaseUsers = useMemo(() => {
 
                             <div className="flex items-center gap-3">
 
-                              <div className="w-11 h-11 rounded-full bg-[#1121d4]/10 text-[#1121d4] flex items-center justify-center font-bold">
-                                {user.username.charAt(0)}
+                              <div className="w-11 h-11 rounded-full overflow-hidden border border-slate-200 shadow-sm bg-[#1121d4]/10 flex items-center justify-center">
+                                {user.avatarUrl ? (
+                                    <img 
+                                        src={user.avatarUrl} 
+                                        alt="avatar" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <img 
+                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                                        alt="avatar" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
                               </div>
 
                               <div>

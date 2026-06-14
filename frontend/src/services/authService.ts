@@ -14,13 +14,22 @@ export const getStoredUserId = () => {
 };
 
 
-export const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
-    
-    const response = await api.post<AuthResponse>('/auth/register', userData);
+export const register = async (userData: RegisterRequest): Promise<{success: boolean, message: string}> => {
+    const response = await api.post<any>('/auth/register', userData);
     return response.data;
 };
+
+export const verifyEmail = async (data: { email: string, otp: string }): Promise<{success: boolean, message: string}> => {
+    const response = await api.post<any>('/auth/verify-email', data);
+    return response.data;
+};
+
+export const socialLogin = async (data: { provider: string, token: string }): Promise<AuthResponse> => {
+    const response = await api.post<any>('/auth/social-login', data);
+    return response.data.data;
+};
+
 export const login = async (userData: LoginRequest): Promise<AuthResponse> => {
-    
     const response = await api.post<any>('/auth/login', userData);
     return response.data.data;
 };

@@ -1,6 +1,7 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import Footer from './Footer'
 import Navbar from './Navbar'
+import AdminNavbar from './AdminNavbar'
 
 interface LayoutProps {
     onOpenRegister: () => void;
@@ -9,17 +10,24 @@ interface LayoutProps {
 }
 
 export function Layout({onOpenRegister, onOpenLogin, isLoggedIn}: LayoutProps) {
+    const location = useLocation();
+    const isAdminPage = location.pathname.startsWith('/admin');
+
     return (
         <div className="min-h-screen bg-parchment flex flex-col font-body">
-            <Navbar
-                onOpenRegister={onOpenRegister}
-                onOpenLogin={onOpenLogin}
-                isLoggedIn={isLoggedIn}
-            />
+            {isAdminPage ? (
+                <AdminNavbar />
+            ) : (
+                <Navbar
+                    onOpenRegister={onOpenRegister}
+                    onOpenLogin={onOpenLogin}
+                    isLoggedIn={isLoggedIn}
+                />
+            )}
             <main className="flex-1">
                 <Outlet context={{ onOpenLogin, onOpenRegister }} />
             </main>
-            <Footer/>
+            {!isAdminPage && <Footer/>}
         </div>
     )
 }

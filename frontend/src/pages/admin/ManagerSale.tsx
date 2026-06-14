@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, Bell, Settings, Tag, Calendar, Trash2, Eye, Edit3, ChevronLeft, ChevronRight, X, Plus, CheckSquare
+  Search, Tag, Calendar, Trash2, Eye, Edit3, ChevronLeft, ChevronRight, X, Plus, CheckSquare
 } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar'; 
 import api from '../../services/api';
@@ -325,34 +325,16 @@ export default function SaleManagement(): React.JSX.Element {
       <Sidebar />
 
       <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-100 sticky top-0 z-10 px-8 flex items-center justify-between">
-          <div className="relative w-96">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-slate-200 text-slate-700 placeholder-slate-400" 
-              placeholder="Tìm nhanh chiến dịch..." 
-              type="text"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl"><Bell className="w-5 h-5" /></button>
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl"><Settings className="w-5 h-5" /></button>
-          </div>
-        </header>
-
         {/* Workspace Content */}
         <main className="flex-1 p-8 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Quản lý Chương trình Ưu đãi</h1>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">Quản lý Chương trình Ưu đãi</h1>
               <p className="text-sm text-slate-400 mt-0.5">Thiết lập các đợt giảm giá Flash Sale, quản lý mức chiết khấu và theo dõi thời gian diễn ra.</p>
             </div>
             <button 
               onClick={() => { resetForm(); setModalType('create'); }}
-              className="flex items-center gap-2 bg-[#1121d4] hover:bg-blue-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all active:scale-[0.98]"
+              className="flex items-center gap-2 bg-[#1121d4] hover:bg-blue-800 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" /> Tạo đợt sale mới
             </button>

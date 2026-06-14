@@ -3,8 +3,6 @@ import api from '../../services/api';
 
 import {
   Search,
-  Bell,
-  Settings,
   Download,
   Eye,
   ChevronLeft,
@@ -233,40 +231,6 @@ const [showModal, setShowModal] =
 
       <div className="flex-1 ml-64 flex flex-col min-h-screen">
 
-        {/* HEADER */}
-
-        <header className="h-16 bg-white border-b border-slate-100 sticky top-0 z-10 px-8 flex items-center justify-between">
-
-          <div className="relative w-96">
-
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-
-            <input
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-slate-200 text-slate-700 placeholder-slate-400"
-              placeholder="Tìm mã đơn hàng, khách hàng..."
-              type="text"
-              value={keyword}
-              onChange={(e) =>
-                setKeyword(e.target.value)
-              }
-            />
-
-          </div>
-
-          <div className="flex items-center gap-2">
-
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl">
-              <Bell className="w-5 h-5" />
-            </button>
-
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl">
-              <Settings className="w-5 h-5" />
-            </button>
-
-          </div>
-
-        </header>
-
         {/* MAIN */}
 
         <main className="flex-1 p-8 flex flex-col gap-6">
@@ -277,7 +241,7 @@ const [showModal, setShowModal] =
 
             <div>
 
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">
                 Quản lý Đơn hàng Ebook
               </h1>
 
@@ -289,7 +253,7 @@ const [showModal, setShowModal] =
 
             <button
               onClick={exportExcel}
-              className="bg-[#1121d4] text-white px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 hover:bg-blue-800 transition-colors"
+              className="bg-[#1121d4] text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 hover:bg-blue-800 transition-all active:scale-95"
             >
 
               <Download className="w-4 h-4" />
@@ -310,7 +274,7 @@ const [showModal, setShowModal] =
 
                 Tất cả đơn thành công
 
-                <span className="bg-white/20 px-1.5 py-0.5 rounded-lg text-xs">
+                <span className="bg-white/20 px-1.5 py-0.5 rounded-lg text-xs font-bold">
 
                   {stats.totalOrdersCount}
 

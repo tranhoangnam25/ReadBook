@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { register } from '../services/authService';
+import { register, verifyEmail } from '../services/authService';
 import axios from 'axios';
 
 interface RegisterProps {
@@ -9,27 +9,47 @@ interface RegisterProps {
 
 const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
 
-
-    
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
+    const [isOtpMode, setIsOtpMode] = useState(false);
+    const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-
-    
-    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setOtp(e.target.value);
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
+
+        if (isOtpMode) {
+            setLoading(true);
+            try {
+                await verifyEmail({ email: formData.email, otp });
+                alert("Xác thực thành công! Vui lòng đăng nhập.");
+                onClose();
+                onOpenLogin();
+            } catch (err: unknown) {
+                if (axios.isAxiosError(err)) {
+                    setError(err.response?.data?.message || "Xác thực thất bại");
+                } else {
+                    setError("Đã xảy ra lỗi không xác định");
+                }
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
 
         if (formData.password !== formData.confirmPassword) {
             setError("Mật khẩu xác nhận không khớp!");
@@ -43,9 +63,8 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
                 email: formData.email,
                 password: formData.password
             });
-            alert("Đăng ký thành công!");
-            onClose();
-            onOpenLogin();
+            setIsOtpMode(true);
+            alert("Đăng ký thành công! Vui lòng kiểm tra email để nhận mã OTP.");
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(err.response?.data?.message || "Đăng ký thất bại");
@@ -57,7 +76,6 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
         }
     };
 
-    
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -67,9 +85,8 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
     }, [onClose]);
 
     return (
-        
         <div
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden"
             onClick={onClose}
         >
             <main
@@ -79,7 +96,6 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
                 <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800">
                     <div className="px-8 pt-8 pb-6">
                         <div className="text-center mb-8 relative">
-                            {}
                             <button
                                 onClick={onClose}
                                 className="absolute -top-2 -right-2 text-slate-400 hover:text-primary transition-colors"
@@ -88,83 +104,107 @@ const RegisterPage: React.FC<RegisterProps> = ({ onClose, onOpenLogin }) => {
                             </button>
 
                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent mb-4">
-                                <span className="material-symbols-outlined">menu_book</span>
+                                <span className="material-symbols-outlined">{isOtpMode ? 'mark_email_read' : 'menu_book'}</span>
                             </div>
-                            <h2 className="text-2xl font-bold text-primary dark:text-slate-100">Create Your Account</h2>
+                            <h2 className="text-2xl font-bold text-primary dark:text-slate-100">
+                                {isOtpMode ? 'Xác thực Email' : 'Tạo Tài Khoản Mới'}
+                            </h2>
                             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
                         </div>
 
                         <form className="space-y-4" onSubmit={handleSubmit}>
-                            <div>
-                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
-                                <input
-                                    name="fullName"
-                                    className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                    placeholder="Jane Doe"
-                                    type="text"
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email Address</label>
-                                <input
-                                    name="email"
-                                    className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                    placeholder="jane@example.com"
-                                    type="email"
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {!isOtpMode ? (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Họ và tên</label>
+                                        <input
+                                            name="fullName"
+                                            className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
+                                            placeholder="Nguyễn Văn A"
+                                            type="text"
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email</label>
+                                        <input
+                                            name="email"
+                                            className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
+                                            placeholder="email@example.com"
+                                            type="email"
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Mật khẩu</label>
+                                            <input
+                                                name="password"
+                                                className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
+                                                placeholder="••••••••"
+                                                type="password"
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Xác nhận</label>
+                                            <input
+                                                name="confirmPassword"
+                                                className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
+                                                placeholder="••••••••"
+                                                type="password"
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
                                 <div>
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 text-center">
+                                        Nhập mã OTP (6 số) gửi về email
+                                    </label>
                                     <input
-                                        name="password"
-                                        className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                        placeholder="••••••••"
-                                        type="password"
-                                        onChange={handleChange}
+                                        name="otp"
+                                        className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-center text-2xl tracking-[0.5em] focus:ring-2 focus:ring-accent/50"
+                                        placeholder="000000"
+                                        type="text"
+                                        maxLength={6}
+                                        value={otp}
+                                        onChange={handleOtpChange}
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Confirm</label>
-                                    <input
-                                        name="confirmPassword"
-                                        className="w-full px-4 py-3 rounded border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 outline-none transition-all text-sm focus:ring-2 focus:ring-accent/50"
-                                        placeholder="••••••••"
-                                        type="password"
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            )}
+
                             <button
                                 disabled={loading}
                                 className="w-full py-3.5 bg-accent hover:bg-opacity-90 text-white font-bold rounded shadow-lg transition-all flex items-center justify-center gap-2 mt-2"
                                 type="submit"
                             >
-                                <span>{loading ? 'Processing...' : 'Get Started'}</span>
-
+                                <span>{loading ? 'Đang xử lý...' : (isOtpMode ? 'Xác Thực' : 'Đăng Ký')}</span>
                                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
                         </form>
-                        <div className="mt-6 text-center">
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Already have an account?{' '}
-                                <button
-                                    onClick={() => {
-                                        onClose();
-                                        onOpenLogin();
-                                    }}
-                                    className="text-accent font-bold hover:underline transition-all"
-                                >
-                                    Login here
-                                </button>
-                            </p>
-                        </div>
+                        {!isOtpMode && (
+                            <div className="mt-6 text-center">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Đã có tài khoản?{' '}
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            onOpenLogin();
+                                        }}
+                                        className="text-accent font-bold hover:underline transition-all"
+                                    >
+                                        Đăng nhập
+                                    </button>
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

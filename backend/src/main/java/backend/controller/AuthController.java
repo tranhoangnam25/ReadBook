@@ -2,71 +2,57 @@ package backend.controller;
 
 import backend.dto.request.RegisterRequest;
 import backend.dto.request.LoginRequest;
+import backend.dto.request.SocialLoginRequest;
+import backend.dto.request.VerifyEmailRequest;
 import backend.dto.response.ApiResponse;
 import backend.dto.response.AuthResponse;
-import backend.dto.response.UserResponseDTO;
-import backend.entity.User;
-import backend.enums.Role;
-import backend.enums.StatusUser;
-import backend.repository.UserRepository;
 import backend.service.AuthService;
-import backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private backend.repository.RoleRepository roleRepository;
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Tên đăng nhập đã tồn tại"));
+        try {
+            authService.register(request);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email đã được sử dụng"));
-        }
-        
-        var userRole = roleRepository.findById("USR")
-                .orElseThrow(() -> new RuntimeException("Default role USR not found"));
-
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone("N/A")
-                .roles(java.util.Set.of(userRole))
-                .status(StatusUser.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        userRepository.save(user);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Đăng ký thành công!"));
     }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody @Valid VerifyEmailRequest request) {
+        try {
+            authService.verifyEmail(request);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Xác thực email thành công!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/login")
-    ApiResponse<AuthResponse> authenticate(@RequestBody LoginRequest request){
+    public ApiResponse<AuthResponse> authenticate(@RequestBody LoginRequest request){
         var result = authService.authenticate(request);
+        return ApiResponse.<AuthResponse>builder()
+                .data(result)
+                .success(true)
+                .build();
+    }
+
+    @PostMapping("/social-login")
+    public ApiResponse<AuthResponse> socialLogin(@RequestBody @Valid SocialLoginRequest request) {
+        var result = authService.socialLogin(request);
         return ApiResponse.<AuthResponse>builder()
                 .data(result)
                 .success(true)

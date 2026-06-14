@@ -1,11 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { User, Reading, HistoryItem, BookResponse } from "../types";
+import type { User, HistoryItem, BookResponse } from "../types";
 import api from "../services/api";
 
+const StarRating = ({ rating }: { rating: number }) => {
+    const stars = Math.round(rating || 0);
+    return (
+        <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+                <span key={s} className={s <= stars ? "text-yellow-400" : "text-gray-300"}>
+                    ★
+                </span>
+            ))}
+            <span className="ml-1 text-xs text-gray-400">({rating.toFixed(1)})</span>
+        </div>
+    );
+};
 export default function HomePageUser() {
   const [user, setUser] = useState<User | null>(null);
-  const [reading, setReading] = useState<Reading | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   type FlashSaleBook = BookResponse & {
   discountPercentage?: number;
@@ -30,7 +42,6 @@ const [books, setBooks] = useState<FlashSaleBook[]>([]);
 
     // 2. Kích hoạt gọi đồng bộ các API lấy dữ liệu từ hệ thống backend
     fetchUser();
-    fetchReading();
     fetchHistory();
     fetchRecommend();
     checkFlashSaleStatus();
@@ -38,34 +49,32 @@ const [books, setBooks] = useState<FlashSaleBook[]>([]);
 
   // Bộ đếm thời gian lùi (Countdown Timer) chuẩn Shopee Flash Sale - Kết thúc vào lúc 23:59:59 đêm nay
   useEffect(() => {
-    if (!hasActiveSale) return;
-
-    const target = new Date();
-    target.setHours(23, 59, 59, 999);
+    if (!hasActiveSale || !saleEndTime) return;
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const distance = target.getTime() - now;
+      const end = saleEndTime.getTime();
+      const distance = end - now;
 
-      if (distance < 0) {
+      if (distance <= 0) {
         clearInterval(timer);
         setHasActiveSale(false);
         return;
       }
 
-      const hrs = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hrs = Math.floor(distance / (1000 * 60 * 60));
       const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((distance % (1000 * 60)) / 1000);
 
       setCountdown({
-        hours: hrs < 10 ? `0${hrs}` : `${hrs}`,
-        minutes: mins < 10 ? `0${mins}` : `${mins}`,
-        seconds: secs < 10 ? `0${secs}` : `${secs}`
+        hours: String(hrs).padStart(2, '0'),
+        minutes: String(mins).padStart(2, '0'),
+        seconds: String(secs).padStart(2, '0')
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [hasActiveSale]);
+  }, [hasActiveSale, saleEndTime]);
 
   // Kiểm tra nhanh xem hệ thống có đang mở đợt sale nào không dựa trên Book ID = 1
   // 1. Cập nhật hàm kiểm tra trạng thái
@@ -97,36 +106,6 @@ const checkFlashSaleStatus = async () => {
   }
 };
 
-// 2. Cập nhật useEffect theo dõi Timer
-useEffect(() => {
-  // Điều kiện để chạy timer: phải có sale và còn thời gian
-  if (!hasActiveSale || !saleEndTime) return;
-
-  const timer = setInterval(() => {
-    const now = new Date().getTime();
-    const end = saleEndTime.getTime();
-    const distance = end - now;
-
-    if (distance <= 0) {
-      clearInterval(timer);
-      setHasActiveSale(false); // Tắt banner khi hết giờ
-      return;
-    }
-
-    const hrs = Math.floor(distance / (1000 * 60 * 60));
-    const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const secs = Math.floor((distance % (1000 * 60)) / 1000);
-
-    setCountdown({
-      hours: String(hrs).padStart(2, '0'),
-      minutes: String(mins).padStart(2, '0'),
-      seconds: String(secs).padStart(2, '0')
-    });
-  }, 1000);
-
-  return () => clearInterval(timer);
-}, [hasActiveSale, saleEndTime]);
-
   const fetchUser = async () => {
     try {
       const userId = localStorage.getItem("userId");
@@ -138,27 +117,23 @@ useEffect(() => {
     }
   };
 
-  const fetchReading = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
-      const res = await api.get("/users/me/reading", { params: { id: userId } });
-      setReading(res.data);
-    } catch (err) {
-      console.error("fetchReading:", err);
-    }
-  };
-
   const fetchHistory = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
-      const res = await api.get("/users/me/history", { params: { userId } });
-      setHistory(res.data || []);
-    } catch (err) {
-      console.error("fetchHistory:", err);
-    }
-  };
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token"); // Kiểm tra lại key lưu token
+
+  if (!userId || !token) return;
+
+  try {
+    const res = await api.get(`/users/me/reading-history?userId=${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}` // Đảm bảo gửi token
+      }
+    });
+    setHistory(res.data || []);
+  } catch (err) {
+    console.error("Lỗi lấy lịch sử đọc:", err);
+  }
+};
 
   const fetchRecommend = async () => {
   try {
@@ -275,57 +250,40 @@ useEffect(() => {
       <div className="grid grid-cols-12 gap-10">
         {/* Left Column: Reading & History */}
         <div className="col-span-12 lg:col-span-5 space-y-8">
-          {/* Current Reading */}
-          {reading ? (
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-              <div>
-                <img 
-                  src={reading.coverImage || reading.coverUrl || "https://via.placeholder.com/200x300?text=No+Cover"} 
-                  alt={reading.title} 
-                  className="rounded-xl mb-4 w-full h-80 object-cover shadow-sm" 
-                />
-                <h2 className="text-xl font-bold text-gray-900 line-clamp-1">{reading.title}</h2>
-                <p className="text-gray-500 mb-4 text-sm">{reading.author}</p>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-2">
-                  <span>{reading.progress}% Completed</span>
-                  <span>{reading.currentPage} / {reading.totalPages} trang</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full mb-2 overflow-hidden">
-                  <div className="bg-[#e78f8f] h-2 rounded-full transition-all duration-300" style={{ width: `${reading.progress}%` }} />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white p-12 rounded-2xl shadow-sm border border-dashed border-gray-300 text-gray-400 italic text-center">
-              📖 Bạn chưa có cuốn sách nào đang đọc dở.
-            </div>
-          )}
+          
 
-          {/* Reading History */}
-          <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-            <h3 className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-widest">Reading History</h3>
-            <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-              {history.length > 0 ? (
-                history.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-gray-200 transition-colors">
-                    <img 
-                      src={item.coverImage || "https://via.placeholder.com/50x70?text=Book"} 
-                      alt={item.title} 
-                      className="rounded w-12 h-16 object-cover bg-gray-100 shadow-sm" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
-                      <p className="text-xs text-gray-400 mt-1">🕒 Hoàn thành: {item.finishedAt}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-400 italic text-center py-4">Chưa có lịch sử đọc gần đây</p>
-              )}
-            </div>
+          {/* Reading History Section */}
+<div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+  <h3 className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-widest">
+    Reading History
+  </h3>
+  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+    {history.length > 0 ? (
+      history.map((item: any, i: number) => (
+        <div 
+          key={i} 
+          onClick={() => navigate(`/reading/${item.id}`)} 
+          className="flex items-center gap-4 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100 hover:border-[#e78f8f] transition-all cursor-pointer hover:shadow-md"
+        >
+          <img 
+            src={item.coverUrl || "https://via.placeholder.com/50x70"} 
+            alt={item.title} 
+            className="rounded w-12 h-16 object-cover bg-gray-100" 
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
+            {/* Sử dụng optional chaining (?.) để tránh crash nếu dữ liệu null */}
+            <p className="text-xs text-gray-400 mt-1">
+              Tiến độ: {item.progressPercentage ? `${item.progressPercentage}%` : "0%"}
+            </p>
           </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-sm text-gray-400 italic text-center py-4">Chưa có lịch sử đọc</p>
+    )}
+  </div>
+</div>
         </div>
 
         {/* Right Column: Recommendations */}
@@ -333,80 +291,76 @@ useEffect(() => {
           <h2 className="text-2xl font-bold mb-6 tracking-tight">
             Recommended <span className="text-[#e78f8f]">For You</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {books.length > 0 ? (
-              books.map((book) => (
-                <div
-  key={book.id}
-  className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
-  onClick={() => navigate(`/book-detail/${book.id}`)}
->
-  <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100">
+          {/* Right Column: Recommendations */}
+<div className="col-span-12 lg:col-span-7">
+  <div className="flex justify-between items-center mb-6">
+    
+    {/* Nút View All */}
+    <button 
+      onClick={() => navigate("/shop")}
+      className="text-sm font-semibold text-[#e78f8f] hover:underline"
+    >
+      View All &rarr;
+    </button>
+  </div>
 
-    <div className="relative aspect-2/3 overflow-hidden bg-gray-100">
-
-      <img
-        src={
-          book.coverImage ||
-          "https://via.placeholder.com/300x450"
-        }
-        alt={book.title}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-      />
-
-      {book.discountPercentage! > 0 && (
-        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
-          -{book.discountPercentage}%
-        </div>
-      )}
-    </div>
-
-    <div className="p-4">
-      <h3 className="font-bold text-sm line-clamp-2 min-h-10 text-gray-800">
-        {book.title}
-      </h3>
-
-      <p className="text-xs text-gray-500 mt-1">
-        {book.authorName}
-      </p>
-
-      <div className="mt-3">
-
-        {book.discountPercentage! > 0 ? (
-          <>
-            <div className="text-xs line-through text-gray-400">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND"
-              }).format(book.price)}
-            </div>
-
-            <div className="text-lg font-bold text-red-500">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND"
-              }).format(book.salePrice || book.price)}
-            </div>
-          </>
-        ) : (
-          <div className="text-lg font-bold text-[#e78f8f]">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND"
-            }).format(book.price)}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    {books.length > 0 ? (
+      // Dùng .slice(0, 4) để chỉ lấy 4 cuốn đầu tiên
+      books.slice(0, 4).map((book) => (
+        <div
+          key={book.id}
+          className="hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
+          onClick={() => navigate(`/book-detail/${book.id}`)}
+        >
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100">
+             <div className="relative aspect-2/3 overflow-hidden bg-gray-100">
+                <img
+                    src={book.coverImage || "https://via.placeholder.com/300x450"}
+                    alt={book.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                {book.discountPercentage! > 0 && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
+                    -{book.discountPercentage}%
+                    </div>
+                )}
+             </div>
+             <div className="p-4">
+                <h3 className="font-bold text-sm line-clamp-2 min-h-10 text-gray-800">
+                    {book.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">{book.authorName}</p>
+                <div className="mt-1">
+                    <StarRating rating={book.averageRating || 0} />
+                </div>
+                <div className="mt-3">
+                    {book.discountPercentage! > 0 ? (
+                    <>
+                        <div className="text-xs line-through text-gray-400">
+                        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(book.price)}
+                        </div>
+                        <div className="text-lg font-bold text-red-500">
+                        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(book.salePrice || book.price)}
+                        </div>
+                    </>
+                    ) : (
+                    <div className="text-lg font-bold text-[#e78f8f]">
+                        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(book.price)}
+                    </div>
+                    )}
+                </div>
+             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      ))
+    ) : (
+      <p className="col-span-full text-center text-gray-400 py-16 bg-white rounded-2xl border border-dashed border-gray-200">
+        Không tìm thấy sách gợi ý phù hợp.
+      </p>
+    )}
   </div>
 </div>
-              ))
-            ) : (
-              <p className="col-span-full text-center text-gray-400 py-16 bg-white rounded-2xl border border-dashed border-gray-200">
-                Không tìm thấy sách gợi ý phù hợp cho bạn lúc này.
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </main>

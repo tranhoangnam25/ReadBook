@@ -1,6 +1,6 @@
 import api from './api';
 
-export type UploadType = 'cover' | 'book';
+export type UploadType = 'cover' | 'book' | 'avatar';
 
 export interface FileUploadResponse {
     url: string;
