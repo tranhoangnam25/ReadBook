@@ -99,14 +99,7 @@ const handleDeleteRole = async (roleName: string) => {
 
   return (
     <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#101222] text-slate-900 dark:text-white">
-      {/* Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar
-          onOpenLogin={() => {}}
-          onOpenRegister={() => {}}
-          isLoggedIn={true}
-        />
-      </div>
+
 
       {/* Sidebar */}
       <Sidebar />

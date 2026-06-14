@@ -20,7 +20,7 @@ import ReadingView from './pages/ReadingView';
 import LibraryPage from './pages/LibraryPage';
 import CollectionPage from './pages/CollectionPage';
 import DashBoard from './pages/Dashboard';
-import OrderManagement  from './pages/admin/OrderManager';
+import OrderManagement from './pages/admin/OrderManager';
 import ReviewManager from './pages/admin/ReviewManager';
 import BookInventory from './pages/admin/BookInventory';
 import ChatBot from "./components/common/ChatBot";
@@ -49,7 +49,7 @@ function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem('token'));
 
   useEffect(() => {
@@ -57,25 +57,25 @@ function App() {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
     };
-    
+
     window.addEventListener('storage', checkToken);
     return () => window.removeEventListener('storage', checkToken);
   }, []);
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setIsLoginOpen(false); 
+    setIsLoginOpen(false);
   };
-    useEffect(() => {
-      const handleLogout = () => {
-        setIsLoggedIn(false);
-        setIsLoginOpen(true); 
-      };
+  useEffect(() => {
+    const handleLogout = () => {
+      setIsLoggedIn(false);
+      setIsLoginOpen(true);
+    };
 
-      window.addEventListener("logout", handleLogout);
+    window.addEventListener("logout", handleLogout);
 
-      return () => window.removeEventListener("logout", handleLogout);
-    }, []);
+    return () => window.removeEventListener("logout", handleLogout);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -85,7 +85,7 @@ function App() {
             path="/"
             element={
               <Layout
-                isLoggedIn={isLoggedIn} 
+                isLoggedIn={isLoggedIn}
                 onOpenRegister={() => setIsRegisterOpen(true)}
                 onOpenLogin={() => setIsLoginOpen(true)}
               />
@@ -106,32 +106,31 @@ function App() {
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/sale" element={<SalePage />} />
 
-            <Route path="/admin" element={<DashBoard />} />
-
-            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_ORDER']} />}>
-                <Route path="/admin/orders" element={<OrderManagement />} />
-            </Route>
-
-            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_BOOK']} />}>
-                <Route path="/admin/books" element={<BookInventory />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_REVIEW']} />}>
-                <Route path="/admin/reviews" element={<ReviewManager />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedRoles={['ADM']} />}>
-                <Route path="/admin/users" element={<ManageUser />} />
-                <Route path="/admin/users/:id" element={<UserDetail />} />
-                <Route path="/admin/roles" element={<ManageRole />} />
-                <Route path="/admin/permissions" element={<ManagePermission />} />
-                <Route path="/admin/create-role" element={<CreateRole />} />
-                <Route path="/admin/update-role/:id" element={<UpdateRole />} />
-            </Route>
-            <Route element={<ProtectedRoute allowedPermissions={['MANAGE_SALES']} />}>
-                <Route path="/admin/sale-manager" element={<SaleManager />} />
-            </Route>
-
           </Route>
 
+          <Route path="/admin" element={<DashBoard />} />
+
+          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_ORDER']} />}>
+            <Route path="/admin/orders" element={<OrderManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_BOOK']} />}>
+            <Route path="/admin/books" element={<BookInventory />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_REVIEW']} />}>
+            <Route path="/admin/reviews" element={<ReviewManager />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedRoles={['ADM']} />}>
+            <Route path="/admin/users" element={<ManageUser />} />
+            <Route path="/admin/users/:id" element={<UserDetail />} />
+            <Route path="/admin/roles" element={<ManageRole />} />
+            <Route path="/admin/permissions" element={<ManagePermission />} />
+            <Route path="/admin/create-role" element={<CreateRole />} />
+            <Route path="/admin/update-role/:id" element={<UpdateRole />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedPermissions={['MANAGE_SALES']} />}>
+            <Route path="/admin/sale-manager" element={<SaleManager />} />
+          </Route>
           <Route path="/reading/:bookId" element={<ReadingView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
